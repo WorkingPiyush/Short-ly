@@ -1,18 +1,27 @@
 import 'dotenv/config';
-import { Client } from 'pg';
+import { PrismaClient } from '@prisma/client';
 
-export const client = new Client({
-    host: 'localhost',
-    database: process.env.DB,
-    user: process.env.USER,
-    password: process.env.PASSWORD,
-    port: process.env.DB_PORT,
+const globalForPrisma = global;
+
+export const client = globalForPrisma.prisma || new PrismaClient({
+    // log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    log: []
 });
 
-client.connect((err) => {
-    if (err) {
-        console.log("New Error: ", err)
-    } else {
-        console.log("Database Connected !!")
-    }
-})
+
+if (process.env.NODE_ENV !== 'production') {
+    globalForPrisma.prisma = client;
+}
+
+process.on('SIGINT', async () => {
+    await client.$disconnect();
+    process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+    await client.$disconnect();
+    process.exit(0);
+});
+
+// await client.$queryRaw`SELECT 1`;
+// console.log('DB connected');
