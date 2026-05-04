@@ -1,11 +1,19 @@
+import { Route, Routes } from 'react-router-dom'
 import './App.css'
+import Home from './Pages/Home/Home'
+import Layout from './Layout/Layout'
+
 
 function App() {
   return (
     <>
-      <h1 className="font-bold text-3xl text-center">
-        Welcome to Home Page of ShortLy
-      </h1>
+      <div className="min-h-screen p-5 bg-black text-white">
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Home />} />
+          </Route>
+        </Routes>
+      </div>
     </>
   )
 }

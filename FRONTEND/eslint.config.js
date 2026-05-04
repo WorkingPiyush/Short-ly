@@ -30,7 +30,7 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
     rules: {
-      'prettier/prettier': 'warn',
+      'prettier/prettier': 'off',
       'no-unused-vars': 'warn',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       eqeqeq: ['error', 'always'],
