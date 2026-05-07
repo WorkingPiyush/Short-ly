@@ -5,6 +5,7 @@ import WhyShortly from '../../components/WhyShortly'
 import Features from '../../components/Features'
 import HowItWorks from '../../components/HowItWorks'
 import PricingSection from '../../components/PricingSection'
+import ActionPoster from '../../components/ActionPoster'
 
 function Home() {
     return (
@@ -15,6 +16,7 @@ function Home() {
             <Features />
             <HowItWorks />
             <PricingSection />
+            <ActionPoster />
         </div>
     )
 }

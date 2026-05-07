@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom'
+import Logo from './Logo';
 
 
 function Header() {
@@ -27,12 +28,7 @@ function Header() {
                 <div className="flex items-center md:justify-between sm:justify-between gap-13">
 
                     {/* Logo */}
-                    <div className="flex items-center gap-2 cursor-pointer">
-                        <span className="w-2 h-2 rounded-full bg-emerald-300 shadow-[0_0_8px_#6ee7b7aa]" />
-                        <Link onClick={() => setIsOpen(false)} to="/" className="font-extrabold text-[22px] text-white tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>
-                            Short-ly
-                        </Link>
-                    </div>
+                    <Logo setIsOpen={setIsOpen} homeRoute="/" />
 
                     {/* Nav Links */}
                     <nav className="hidden md:flex gap-0.5">
