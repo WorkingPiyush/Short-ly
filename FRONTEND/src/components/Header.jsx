@@ -25,7 +25,7 @@ function Header() {
     return (
         <header className='flex justify-center items-center px-4 fixed top-0 left-0 right-0 z-50 pt-4'>
             <div className={`bg-black ${isScrolled ? "md:w-5xl" : "md:w-6xl"} px-7 py-5 border border-white/65 rounded-2xl backdrop-blur-md transition-all duration-250 ease-in-out`}>
-                <div className="flex items-center md:justify-between sm:justify-between gap-13">
+                <div className="flex items-center md:justify-between sm:justify-between gap-30">
 
                     {/* Logo */}
                     <Logo setIsOpen={setIsOpen} homeRoute="/" />
