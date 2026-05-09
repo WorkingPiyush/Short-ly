@@ -2,7 +2,7 @@ import React from 'react'
 
 function ActionPoster() {
     return (
-        <div className='flex justify-center mt-15'>
+        <div className='flex justify-center m-15'>
             <div className='w-full max-w-6xl rounded-3xl border border-emerald-500/20 bg-[#0f1a17] px-6 py-15 md:py-10 text-center'>
                 <h1 className='text-4xl md:text-6xl font-bold text-white leading-tight'>Start shortening for free today</h1>
                 <p className='max-w-3xl mx-auto mt-6 text-lg text-zinc-400 leading-relaxed'>  Join over 50,000 users who trust Short-ly to make their links

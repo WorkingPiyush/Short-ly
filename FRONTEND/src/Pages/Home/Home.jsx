@@ -6,17 +6,28 @@ import Features from '../../components/Features'
 import HowItWorks from '../../components/HowItWorks'
 import PricingSection from '../../components/PricingSection'
 import ActionPoster from '../../components/ActionPoster'
+import FadeUp from '../../animation/framer-motion'
 
 function Home() {
     return (
         <div className='h-full text-white'>
             <Hero />
             <Stats />
-            <WhyShortly />
-            <Features />
-            <HowItWorks />
-            <PricingSection />
-            <ActionPoster />
+            <FadeUp>
+                <WhyShortly />
+            </FadeUp>
+            <FadeUp>
+                <Features />
+            </FadeUp>
+            <FadeUp>
+                <HowItWorks />
+            </FadeUp>
+            <FadeUp>
+                <PricingSection />
+            </FadeUp>
+            <FadeUp>
+                <ActionPoster />
+            </FadeUp>
         </div>
     )
 }

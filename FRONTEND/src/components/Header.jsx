@@ -28,7 +28,7 @@ function Header() {
                 <div className="flex items-center md:justify-between sm:justify-between gap-30">
 
                     {/* Logo */}
-                    <Logo setIsOpen={setIsOpen} homeRoute="/" />
+                    <Logo setIsOpen={setIsOpen} />
 
                     {/* Nav Links */}
                     <nav className="hidden md:flex gap-0.5">
