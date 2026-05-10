@@ -1,14 +1,22 @@
 import React from 'react'
-import Urlbox from './Urlbox'
+import UrlShotenBox from './UrlShotenBox'
 
 function Hero() {
     return (
-        <div>
-            <div className='text-4xl text-center font-bold'>
-                <h1 className='font-extrabold'>Build stronger digital connections</h1>
-                <span className='text-2xl p-8 tracking-tight'>Use our URL shortener, QR Codes, and landing pages to engage your audience and connect them to the right information. Build,edit, and track everything inside the Bitly Connections Platform.</span>
+        <div className='flex flex-col items-center justify-center mt-40'>
+            <div className='inline-flex items-center gap-2 px-5 py-2 rounded-full bg-linear-to-r from-emerald-500/10 to-emerald-400/5 border border-emerald-400/20 text-emerald-300 text-xs font-medium shadow-[0_0_20px_rgba(16,185,129,0,0.15)] md:text-sm'>
+                <span className="w-2 h-2 rounded-full bg-emerald-300 shadow-[0_0_8px_#6ee7b7aa]" />
+                <span>Trusted by 50,000+ users worldwide</span>
             </div>
-            <Urlbox />
+            <div className='flex flex-col items-center mt-8 font-gravitas text-3xl md:text-4xl'>
+                <span className='text-white'>Make every link</span>
+                <span className='text-emerald-300 text-center'>unforgettably short</span>
+            </div>
+            <div className='flex flex-1 flex-col justify-center items-center  text-white/50 mt-7 font-roboto text-center text-xs md:text-2xl'>
+                <span>Shorten, brand and track your URLs in seconds. Powerful</span>
+                <span>analytics, custom slugs and zero clutter.</span>
+            </div>
+            <UrlShotenBox />
         </div>
     )
 }

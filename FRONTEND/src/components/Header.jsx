@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom'
+import Logo from './Logo';
 
 
 function Header() {
@@ -22,17 +23,12 @@ function Header() {
     ];
 
     return (
-        <header className='flex justify-center px-4 fixed top-0 left-0 right-0 z-50 pt-4'>
-            <div className={`bg-black w-full ${isScrolled ? "max-w-4xl" : "max-w-5xl"} px-7 py-5 border border-white/65 rounded-2xl backdrop-blur-md transition-all duration-250 ease-in-out`}>
-                <div className="flex items-center justify-between">
+        <header className='flex justify-center items-center px-4 fixed top-0 left-0 right-0 z-50 pt-4'>
+            <div className={`bg-black ${isScrolled ? "md:w-5xl" : "md:w-6xl"} px-7 py-5 border border-white/65 rounded-2xl backdrop-blur-md transition-all duration-250 ease-in-out`}>
+                <div className="flex items-center md:justify-between sm:justify-between gap-30">
 
                     {/* Logo */}
-                    <div className="flex items-center gap-2 cursor-pointer">
-                        <span className="w-2 h-2 rounded-full bg-emerald-300 shadow-[0_0_8px_#6ee7b7aa]" />
-                        <Link onClick={() => setIsOpen(false)} to="/" className="font-extrabold text-[22px] text-white tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>
-                            Short-ly
-                        </Link>
-                    </div>
+                    <Logo setIsOpen={setIsOpen} />
 
                     {/* Nav Links */}
                     <nav className="hidden md:flex gap-0.5">
@@ -54,8 +50,8 @@ function Header() {
                     {/* Actions */}
                     <div className="hidden md:flex items-center gap-2.5">
                         <Link to="/login"
-                            className="text-sm font-medium cursor-pointer text-white/70 px-4 py-2 rounded-lg
-                                    hover:text-white hover:bg-white/[0.07] transition-all duration-200">
+                            className="text-sm font-medium cursor-pointer text-white/70 bg-black border px-4 py-2 rounded-lg
+                                    hover:text-white hover:bg-white/[0.07] transition-all duration-150">
                             Login
                         </Link>
 
