@@ -1,14 +1,53 @@
+import dotenv from "dotenv";
+dotenv.config();
+import { client } from "../config/db.js";
+import authRoutes from './modules/Auth/routes.js'
+import session from 'express-session';
 import express from 'express';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+
+const authRatelimit = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 5,
+})
+
 const app = express();
 app.use(express.json());
-import { client } from "../config/db.js";
+app.use(helmet());
+
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+}))
+
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+
+    cookie: {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60 * 24,
+    },
+}))
 
 
 app.get('/', (req, res) => { res.send('Server is Working'); })
 
-// Authentication routes
-import authRoutes from './modules/Auth/routes.js'
-app.use("/api/auth", authRoutes);
+
+
+
+
+
+
+
+
+// Authentication route
+app.use("/api/auth", authRatelimit, authRoutes);
 
 
 

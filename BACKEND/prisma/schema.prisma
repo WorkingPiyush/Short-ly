@@ -8,9 +8,28 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String?  @default("user")
-  email     String   @unique
-  password  String?
-  createdAt DateTime @default(now())
+  id           String       @id @default(uuid())
+  name         String?      @default("user")
+  email        String       @unique
+  password     String?
+  profileImage String?
+  role         Role         @default(USER)
+  isVerified   Boolean      @default(false)
+  isBlocked    Boolean      @default(false)
+  lastLoginAt  DateTime?
+  provider     AuthProvider @default(CREDENTIALS)
+  providerId   String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AuthProvider {
+  CREDENTIALS
+  GOOGLE
+  GITHUB
 }
