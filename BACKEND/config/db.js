@@ -13,12 +13,7 @@ if (process.env.NODE_ENV !== 'production') {
     globalForPrisma.prisma = client;
 }
 
-process.on('SIGINT', async () => {
-    await client.$disconnect();
-    process.exit(0);
-});
-
-process.on('SIGTERM', async () => {
+process.on('beforeExit', async () => {
     await client.$disconnect();
     process.exit(0);
 });
