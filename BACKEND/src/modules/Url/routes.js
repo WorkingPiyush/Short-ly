@@ -1,8 +1,9 @@
 import express from 'express';
-import { shortUrl } from './controller.js';
+import { redirectUrl, shortUrl } from './controller.js';
 const router = express();
 
 router.post('/short', shortUrl)
+router.get('/:shortCode', redirectUrl)
 
 
 export default router;

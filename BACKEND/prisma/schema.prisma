@@ -39,9 +39,10 @@ model Url {
   id             String    @id @default(uuid())
   originalUrl    String
   normalizedUrl  String
-  urlHash        String    @unique
-  shortcode      String    @unique
+  urlHash        String   
+  shortCode      String    @unique
   clicks         Int       @default(0)
+  tempId         String?
   expirationDate DateTime?
   password       String?
   QrCode         String?
@@ -49,4 +50,7 @@ model Url {
   updatedAt      DateTime  @updatedAt
   userId         String?
   user           User?     @relation(fields: [userId], references: [id])
+
+  @@index([tempId])
+  @@index([shortCode])
 }

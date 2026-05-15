@@ -18,12 +18,13 @@ export const register = async (req, res) => {
                     message: "Session save error",
                 });
             }
+            res.clearCookie("tempId");
+            return res.status(200).json({
+                success: true,
+                message: "Signup successfully",
+                user: req.session.user,
+            });
         })
-        return res.status(200).json({
-            success: true,
-            message: "Signup successfully",
-            user: req.session.user,
-        });
     } catch (err) {
         console.log(err.message)
         if (err instanceof ZodError) {
@@ -39,7 +40,6 @@ export const login = async (req, res) => {
     const validatedBody = loginSchema.parse(req.body);
     try {
         const user = await authService.loginUser(validatedBody);
-
         req.session.regenerate((err) => {
             if (err) {
                 return res.status(500).json({
@@ -49,9 +49,8 @@ export const login = async (req, res) => {
             }
             req.session.user = {
                 id: user.id,
-                name: user.name,
+                user: user.user,
             };
-
             req.session.save((err) => {
                 if (err) {
                     return res.status(500).json({
@@ -59,12 +58,11 @@ export const login = async (req, res) => {
                         message: "Session save error",
                     });
                 }
+                return res.status(200).json({
+                    success: true,
+                });
             })
-            return res.status(200).json({
-                success: true,
-                message: "User logged successfully",
-                user: req.session.user,
-            });
+            res.clearCookie("tempId");
         })
     } catch (err) {
         console.log(err.message)

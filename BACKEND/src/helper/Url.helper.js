@@ -1,4 +1,6 @@
+import dotenv from "dotenv/config";
 import { nanoid } from "nanoid";
+import qrcode from 'qrcode';
 import crypto from 'crypto';
 
 export const isValidUrl = (url) => {
@@ -33,3 +35,7 @@ export const hashUrl = (url) => {
 export const generateShortCode = () => {
     return nanoid(7);
 };
+
+export const generateQRCode = async (input) => {
+    return await qrcode.toDataURL(`${process.env.BACKEND_URL}/${input.shortCode}`);
+}

@@ -47,10 +47,9 @@ export const loginUser = async ({ email, password }) => {
         if (!isMatch) {
             throw new Error('Invalid Email or Password');
         }
-        
         return { id: user.id, user: user.name, email: user.email };
     } catch (err) {
-        console.log(err.message)
+        console.log(err)
         throw new Error('Login failed');
     }
 }
