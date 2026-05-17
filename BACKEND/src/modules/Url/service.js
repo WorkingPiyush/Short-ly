@@ -1,6 +1,7 @@
 import dotenv from "dotenv/config";
 import { client } from '../../../config/db.js';
-import { generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl } from '../../helper/Url.helper.js';
+import { generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, urlKey } from '../../helper/Url.helper.js';
+import { redisClient } from "../../../config/redisClient.js";
 const MAX_TEMP_URLS = 3;
 
 export const urlShort = async ({ originalUrl, userId, tempId }) => {
@@ -49,6 +50,8 @@ export const urlShort = async ({ originalUrl, userId, tempId }) => {
                 tempId,
             }
         }
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 30);
 
         const tempNewUrl = await client.url.create({
             data: {
@@ -57,6 +60,7 @@ export const urlShort = async ({ originalUrl, userId, tempId }) => {
                 urlHash,
                 shortCode: generateShortCode(),
                 tempId,
+                expirationDate,
             }
         })
         return {
@@ -96,6 +100,8 @@ export const urlShort = async ({ originalUrl, userId, tempId }) => {
             where: { shortCode, },
         })
     }
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 60);
 
     const newUrl = await client.url.create({
         data: {
@@ -103,7 +109,8 @@ export const urlShort = async ({ originalUrl, userId, tempId }) => {
             normalizedUrl,
             urlHash,
             shortCode,
-            userId
+            userId,
+            expirationDate
         }
     })
 
@@ -117,16 +124,38 @@ export const urlShort = async ({ originalUrl, userId, tempId }) => {
         QrCode: qrCodeImg,
     }
     return responseUrl;
-}
+};
 
-export const urlRedirect = async ({shortCode}) => {
+export const urlRedirect = async ({ shortCode }) => {
+
     if (!shortCode) {
         throw new Error("Invalid Url");
+    }
+
+    const cached = await redisClient.get(urlKey(shortCode));
+    const result = JSON.parse(cached);
+
+    if (result && Object.keys(result).length > 0) {
+        if (result.expirationDate && new Date(result.expirationDate) < new Date()) {
+            throw new Error("Url Expired !!");
+        }
+
+        client.url.update({
+            where: { shortCode },
+            data: {
+                clicks: {
+                    increment: 1,
+                }
+            }
+        }).catch(console.error)
+
+        return result.originalUrl;
     }
 
     const url = await client.url.findUnique({
         where: { shortCode }
     })
+
     if (!url) {
         throw new Error("Invalid Url");
     }
@@ -135,14 +164,75 @@ export const urlRedirect = async ({shortCode}) => {
         throw new Error("Url Expired !!");
     }
 
-    await client.url.update({
+    await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, expirationDate: url.expirationDate?.toISOString() || "", }), { EX: 3600, });
+    client.url.update({
         where: { shortCode },
         data: {
             clicks: {
                 increment: 1,
             }
         }
-    })
+    }).catch(console.error);
 
     return url.originalUrl;
+};
+
+export const getMyUrl = async ({ userId }) => {
+    let fetchedUrl;
+    fetchedUrl = await client.url.findMany({
+        where: { userId },
+        select: {
+            shortCode: true,
+            originalUrl: true,
+            clicks: true,
+            expirationDate: true,
+            createdAt: true,
+            updatedAt: true,
+        }
+    })
+
+    if (!fetchedUrl) {
+        throw new Error("No Url Found !!");
+    }
+    return fetchedUrl.map(u => ({
+        "short_url": `${process.env.BACKEND_URL}/${u.shortCode}`,
+        "original_url": u.originalUrl,
+        "clicks": u.clicks,
+        "expiry_date": u.expirationDate,
+        "creation_date": u.createdAt,
+        "last_update_date": u.updatedAt
+    }));
+};
+
+export const UrlDetails = async ({ userId, shortcode }) => {
+
+    const Url = await client.url.findUnique({
+        where: { userId, shortCode: shortcode },
+        select: {
+            originalUrl: true,
+            shortCode: true,
+            clicks: true,
+            expirationDate: true,
+            createdAt: true,
+            updatedAt: true,
+        }
+    });
+    if (!Url) {
+        throw new Error("No Url Found");
+    }
+    return {
+        "short_url": `${process.env.BACKEND_URL}/${Url.shortCode}`,
+        "original_url": Url.originalUrl,
+        "clicks": Url.clicks,
+        "expiry_date": Url.expirationDate,
+        "creation_date": Url.createdAt,
+        "last_update_date": Url.updatedAt
+    }
+}
+
+export const UrlDelete = async ({ userId, shortcode }) => {
+    const result = await client.url.delete({
+        where: { userId, shortCode: shortcode },
+    })
+    console.log(result)
 }

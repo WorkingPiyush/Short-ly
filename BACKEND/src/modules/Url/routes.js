@@ -1,9 +1,11 @@
 import express from 'express';
-import { redirectUrl, shortUrl } from './controller.js';
+import { shortUrl, getAllUrls, getUrl, deleteUrl } from './controller.js';
 const router = express();
 
-router.post('/short', shortUrl)
-router.get('/:shortCode', redirectUrl)
+router.post('/short', shortUrl);
+router.get('/myUrl', getAllUrls);
+router.get('/:shortCode', getUrl);
+router.delete('/:shortCode', deleteUrl);
 
 
 export default router;

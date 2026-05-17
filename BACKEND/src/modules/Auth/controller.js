@@ -28,7 +28,7 @@ export const register = async (req, res) => {
             return res.status(200).json({
                 success: true,
                 message: "Signup successfully",
-                user: req.session.user,
+                user: req.session.name,
             });
         })
     } catch (err) {
@@ -92,7 +92,7 @@ export const logout = async (req, res) => {
                 })
             }
         })
-        res.clearCookie("connect.sid");
+        res.clearCookie("sid");
         res.json({
             message: "Logout successfully",
         })

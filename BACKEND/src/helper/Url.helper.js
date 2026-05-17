@@ -39,3 +39,6 @@ export const generateShortCode = () => {
 export const generateQRCode = async (input) => {
     return await qrcode.toDataURL(`${process.env.BACKEND_URL}/${input.shortCode}`);
 }
+export const urlKey = (shortCode) => {
+    return `ShortCode:${shortCode}`
+}

@@ -12,6 +12,7 @@ import { RedisStore } from 'connect-redis';
 import { redisClient } from "../config/redisClient.js";
 import { guestUserInfo } from "./Middleware/guest.Middleware.js";
 import { authMiddleware } from "./Middleware/user.Middleware.js";
+import { redirectUrl } from "./modules/Url/controller.js";
 
 
 
@@ -33,10 +34,11 @@ app.use(session({
     store: new RedisStore({
         client: redisClient,
     }),
+    name: "sid",
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-
+    rolling: true,
     cookie: {
         secure: false,
         httpOnly: true,
@@ -47,6 +49,11 @@ app.use(session({
 
 app.use(guestUserInfo);
 app.use(authMiddleware);
+
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
 
 app.get('/', (req, res) => { res.send('Server is Working'); })
 
@@ -62,7 +69,8 @@ app.get('/', (req, res) => { res.send('Server is Working'); })
 app.use("/api/auth", authRatelimit, authRoutes);
 // Url route
 app.use("/api/url", urlRoutes);
-app.use("/", urlRoutes);
+// Url redirection route
+app.get("/:shortCode", redirectUrl);
 
 
 
