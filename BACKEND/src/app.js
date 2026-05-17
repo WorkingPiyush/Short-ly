@@ -8,8 +8,11 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser'
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
+import { RedisStore } from 'connect-redis';
+import { redisClient } from "../config/redisClient.js";
 import { guestUserInfo } from "./Middleware/guest.Middleware.js";
 import { authMiddleware } from "./Middleware/user.Middleware.js";
+
 
 
 const authRatelimit = rateLimit({
@@ -27,13 +30,16 @@ app.use(cors({
 }))
 
 app.use(session({
+    store: new RedisStore({
+        client: redisClient,
+    }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
 
     cookie: {
-        httpOnly: true,
         secure: false,
+        httpOnly: true,
         sameSite: "lax",
         maxAge: 1000 * 60 * 60 * 24,
     },

@@ -3,12 +3,18 @@ import { loginSchema, signupSchema } from "../../validator/auth.validator.js";
 import * as authService from "./service.js";
 
 export const register = async (req, res) => {
-    const validatedBody = signupSchema.parse(req.body);
+    const validatedBody = signupSchema.safeParse(req.body);
+
+    if (!validatedBody.success) {
+        return res.status(400).json({
+            errors: validatedBody.error.flatten(),
+        });
+    }
     try {
-        const user = await authService.registerUser(validatedBody);
+        const user = await authService.registerUser(validatedBody.data);
         req.session.user = {
             id: user.id,
-            name: user.user,
+            username: user.name,
         }
 
         req.session.save((err) => {
@@ -36,10 +42,17 @@ export const register = async (req, res) => {
         return res.status(500).json({ success: false, message: err.message });
     }
 }
+
 export const login = async (req, res) => {
-    const validatedBody = loginSchema.parse(req.body);
+    const validatedBody = loginSchema.safeParse(req.body);
+    if (!validatedBody.success) {
+        return res.status(400).json({
+            errors: validatedBody.error.flatten(),
+        });
+    }
+
     try {
-        const user = await authService.loginUser(validatedBody);
+        const user = await authService.loginUser(validatedBody.data);
         req.session.regenerate((err) => {
             if (err) {
                 return res.status(500).json({
@@ -49,7 +62,7 @@ export const login = async (req, res) => {
             }
             req.session.user = {
                 id: user.id,
-                user: user.user,
+                username: user.name,
             };
             req.session.save((err) => {
                 if (err) {
@@ -69,6 +82,7 @@ export const login = async (req, res) => {
         res.status(400).json({ message: err.message });
     }
 }
+
 export const logout = async (req, res) => {
     try {
         req.session.destroy((err) => {

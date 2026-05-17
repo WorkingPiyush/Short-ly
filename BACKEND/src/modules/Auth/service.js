@@ -26,9 +26,10 @@ export const registerUser = async ({ name, email, password }) => {
                 password: hashedPassword
             }
         })
-        return { id: user.id, user: user.name, email: user.email };
+        return { id: user.id, name: user.name, email: user.email };
 
     } catch (err) {
+        console.log(err)
         if (err instanceof Prisma.PrismaClientKnownRequestError) {
             if (err.code === 'P2002') {
                 throw new Error('Email already exists');
@@ -47,7 +48,7 @@ export const loginUser = async ({ email, password }) => {
         if (!isMatch) {
             throw new Error('Invalid Email or Password');
         }
-        return { id: user.id, user: user.name, email: user.email };
+        return { id: user.id, name: user.name, email: user.email };
     } catch (err) {
         console.log(err)
         throw new Error('Login failed');
