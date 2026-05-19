@@ -70,7 +70,7 @@ app.use("/api/auth", authRatelimit, authRoutes);
 // Url route
 app.use("/api/url", urlRoutes);
 // Url redirection route
-app.get("/:shortCode", redirectUrl);
+app.get("/:shortCode", redirectUrl); // redirecting the short url to orgional url
 
 
 

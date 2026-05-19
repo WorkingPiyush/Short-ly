@@ -42,3 +42,31 @@ export const generateQRCode = async (input) => {
 export const urlKey = (shortCode) => {
     return `ShortCode:${shortCode}`
 }
+
+export const formatBrowser = (result) => {
+    return result.map(b => ({
+        browser: b.browser,
+        clicks: b._count.browser,
+    }))
+};
+
+export const formatOperating = (result) => {
+    return result.map(b => ({
+        os: b.os,
+        clicks: b._count.os,
+    }))
+};
+
+export const formatDevice = (result) => {
+    return result.map(b => ({
+        device: b.device,
+        clicks: b._count.device,
+    }))
+};
+
+export const formatCountry = (result) => {
+    return result.map(b => ({
+        country: b.country,
+        clicks: b._count.country,
+    }))
+};

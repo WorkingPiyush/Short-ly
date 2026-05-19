@@ -1,7 +1,12 @@
 import dotenv from "dotenv/config";
 import { client } from '../../../config/db.js';
-import { generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, urlKey } from '../../helper/Url.helper.js';
+import { formatBrowser, formatCountry, formatDevice, formatOperating, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, urlKey } from '../../helper/Url.helper.js';
 import { redisClient } from "../../../config/redisClient.js";
+import DeviceDetector from 'device-detector-js';
+import geoip from 'geoip-lite';
+import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry } from "../../helper/Db.query.js";
+
+const deviceDetector = new DeviceDetector();
 const MAX_TEMP_URLS = 3;
 
 export const urlShort = async ({ originalUrl, userId, tempId }) => {
@@ -38,7 +43,8 @@ export const urlShort = async ({ originalUrl, userId, tempId }) => {
                 urlHash,
                 userId: null,
             }
-        })
+        });
+
         if (existingTempUrl) {
             return {
                 url: {
@@ -126,35 +132,38 @@ export const urlShort = async ({ originalUrl, userId, tempId }) => {
     return responseUrl;
 };
 
-export const urlRedirect = async ({ shortCode }) => {
-
+export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
+    const isBot = /(googlebot|crawler|spider|slackbot|discordbot|twitterbot|facebookexternalhit|curl|wget|bingbot|linkedinbot)/i.test(userAgent);
     if (!shortCode) {
         throw new Error("Invalid Url");
     }
+    const userInfo = deviceDetector.parse(userAgent);
 
+    const browser = userInfo.client.name || "Unknown";;
+    const os = userInfo.os?.name || "Third Client Agent";
+    const device = userInfo.device?.type || "desktop";
+
+    const ipLocation = geoip.lookup(ipAdd);
+    const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+    const country = ipLocation?.country ? regionNames.of(ipLocation.country) : "Unknown";
+    const city = ipLocation?.city || "Unknown";
+
+    let result = null;
     const cached = await redisClient.get(urlKey(shortCode));
-    const result = JSON.parse(cached);
-
+    if (cached) {
+        result = JSON.parse(cached);
+    }
     if (result && Object.keys(result).length > 0) {
         if (result.expirationDate && new Date(result.expirationDate) < new Date()) {
             throw new Error("Url Expired !!");
         }
-
-        client.url.update({
-            where: { shortCode },
-            data: {
-                clicks: {
-                    increment: 1,
-                }
-            }
-        }).catch(console.error)
-
+        if (!isBot) {
+            void analyticsUpdates(url.id, browser, os, device, country, city).catch(console.error);
+        }
         return result.originalUrl;
     }
 
-    const url = await client.url.findUnique({
-        where: { shortCode }
-    })
+    const url = await findFirstUrl(shortCode);
 
     if (!url) {
         throw new Error("Invalid Url");
@@ -164,15 +173,11 @@ export const urlRedirect = async ({ shortCode }) => {
         throw new Error("Url Expired !!");
     }
 
-    await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, expirationDate: url.expirationDate?.toISOString() || "", }), { EX: 3600, });
-    client.url.update({
-        where: { shortCode },
-        data: {
-            clicks: {
-                increment: 1,
-            }
-        }
-    }).catch(console.error);
+    await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, id: url.id, expirationDate: url.expirationDate?.toISOString() || "", }), { EX: 3600, });
+
+    if (!isBot) {
+        void analyticsUpdates(url.id, browser, os, device, country, city).catch(console.error);
+    }
 
     return url.originalUrl;
 };
@@ -180,7 +185,7 @@ export const urlRedirect = async ({ shortCode }) => {
 export const getMyUrl = async ({ userId }) => {
     let fetchedUrl;
     fetchedUrl = await client.url.findMany({
-        where: { userId },
+        where: { userId, isActive: true, isDeleted: false },
         select: {
             shortCode: true,
             originalUrl: true,
@@ -206,8 +211,102 @@ export const getMyUrl = async ({ userId }) => {
 
 export const UrlDetails = async ({ userId, shortcode }) => {
 
-    const Url = await client.url.findUnique({
-        where: { userId, shortCode: shortcode },
+    const Url = await client.url.findFirst({
+        where: { userId, shortCode: shortcode, isActive: true, isDeleted: false },
+        select: {
+            originalUrl: true,
+            shortCode: true,
+            clicks: true,
+            expirationDate: true,
+            createdAt: true,
+            updatedAt: true,
+            lastVisitedAt: true,
+            isActive: true
+        }
+    });
+    
+    const [topBrowsers, topOsys, topDevices, topCountries] = await Promise.all([
+        topBrowser(Url.id), topOs(Url.id), topDevice(Url.id), topCountry(Url.id)
+    ])
+
+    if (!Url) {
+        throw new Error("No Url Found");
+    }
+    return {
+        "short_url": `${process.env.BACKEND_URL}/${Url.shortCode}`,
+        "original_url": Url.originalUrl,
+        "clicks": Url.clicks,
+        "topBrowsers": formatBrowser(topBrowsers),
+        "topOperatingSystems": formatOperating(topOsys),
+        "topDevices": formatDevice(topDevices),
+        "topCountries": formatCountry(topCountries),
+        "expiry_date": Url.expirationDate,
+        "creation_date": Url.createdAt,
+        "last_update_date": Url.updatedAt
+    }
+}
+
+export const UrlDelete = async ({ userId, shortcode }) => {
+    const result = await client.url.update({
+        where: { userId, shortCode: shortcode, isActive: true, isDeleted: false },
+        data: {
+            isDeleted: true,
+            deletedAt: new Date(),
+        }
+    })
+    if (!result) {
+        throw new Error("Error happend !!");
+    };
+    return true;
+}
+
+export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive, shortcode }) => {
+
+    let updatedData = {};
+
+    if (originalUrl) {
+        if (!isValidUrl(originalUrl)) {
+            throw new Error("Invalid Url");
+        }
+
+        const normalizedUrl = normalizeUrl(originalUrl);
+
+        const urlHash = hashUrl(normalizedUrl);
+
+        updatedData.originalUrl = originalUrl;
+        updatedData.normalizedUrl = normalizedUrl;
+        updatedData.urlHash = urlHash;
+        updatedData.clicks = 0;
+    }
+
+    if (expirationDate !== undefined) {
+        if (expirationDate && new Date(expirationDate) < new Date()) {
+            throw new Error("Invalid Expiry Date");
+        }
+
+        updatedData.expirationDate = expirationDate;
+    }
+
+    if (isActive !== undefined) {
+        updatedData.isActive = isActive;
+    }
+
+    if (Object.entries(updatedData).length === 0) {
+        throw new Error("No fields to update");
+    }
+
+    const existing = await client.url.findFirst({
+        where: { userId, shortCode: shortcode, isDeleted: false }
+    })
+
+    if (!existing) {
+        throw new Error("Invalid Url");
+    }
+
+
+    const updatedUrl = await client.url.update({
+        where: { id: existing.id },
+        data: updatedData,
         select: {
             originalUrl: true,
             shortCode: true,
@@ -217,22 +316,16 @@ export const UrlDetails = async ({ userId, shortcode }) => {
             updatedAt: true,
         }
     });
-    if (!Url) {
-        throw new Error("No Url Found");
-    }
-    return {
-        "short_url": `${process.env.BACKEND_URL}/${Url.shortCode}`,
-        "original_url": Url.originalUrl,
-        "clicks": Url.clicks,
-        "expiry_date": Url.expirationDate,
-        "creation_date": Url.createdAt,
-        "last_update_date": Url.updatedAt
-    }
-}
 
-export const UrlDelete = async ({ userId, shortcode }) => {
-    const result = await client.url.delete({
-        where: { userId, shortCode: shortcode },
-    })
-    console.log(result)
+    await redisClient.del(
+        urlKey(shortcode)
+    );
+    return {
+        "short_url": `${process.env.BACKEND_URL}/${updatedUrl.shortCode}`,
+        "original_url": updatedUrl.originalUrl,
+        "clicks": updatedUrl.clicks,
+        "expiry_date": updatedUrl.expirationDate,
+        "creation_date": updatedUrl.createdAt,
+        "last_update_date": updatedUrl.updatedAt
+    }
 }
