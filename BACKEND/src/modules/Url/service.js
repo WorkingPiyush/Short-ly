@@ -1,10 +1,12 @@
 import dotenv from "dotenv/config";
 import { client } from '../../../config/db.js';
 import { formatBrowser, formatCountry, formatDevice, formatOperating, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, urlKey } from '../../helper/Url.helper.js';
+import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick } from "../../helper/Db.query.js";
 import { redisClient } from "../../../config/redisClient.js";
 import DeviceDetector from 'device-detector-js';
 import geoip from 'geoip-lite';
-import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry } from "../../helper/Db.query.js";
+import { AppError } from "../../utils/AppError.js";
+import logger from "../../../config/logger.js";
 
 const deviceDetector = new DeviceDetector();
 const MAX_TEMP_URLS = 3;
@@ -12,11 +14,11 @@ const MAX_TEMP_URLS = 3;
 export const urlShort = async ({ originalUrl, userId, tempId }) => {
 
     if (!originalUrl) {
-        throw new Error('Invalid Url');
+        throw new AppError('Invalid Url', 400);
     }
 
     if (!isValidUrl(originalUrl)) {
-        throw new Error('Invalid Url');
+        throw new AppError('Invalid Url', 400);
     }
 
     const normalizedUrl = normalizeUrl(originalUrl);
@@ -30,12 +32,10 @@ export const urlShort = async ({ originalUrl, userId, tempId }) => {
             newtempId = crypto.randomUUID();
             tempId = newtempId;
         }
-        const tempUrlCount = await client.url.count({
-            where: { tempId },
-        })
+        const tempUrlCount = countUrl(tempId);
 
         if (tempUrlCount >= MAX_TEMP_URLS) {
-            throw new Error("Signup required");
+            throw new AppError('Signup required', 400);
         }
 
         const existingTempUrl = await client.url.findFirst({
@@ -135,7 +135,7 @@ export const urlShort = async ({ originalUrl, userId, tempId }) => {
 export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
     const isBot = /(googlebot|crawler|spider|slackbot|discordbot|twitterbot|facebookexternalhit|curl|wget|bingbot|linkedinbot)/i.test(userAgent);
     if (!shortCode) {
-        throw new Error("Invalid Url");
+        throw new AppError('Invalid Url', 400);
     }
     const userInfo = deviceDetector.parse(userAgent);
 
@@ -155,10 +155,10 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
     }
     if (result && Object.keys(result).length > 0) {
         if (result.expirationDate && new Date(result.expirationDate) < new Date()) {
-            throw new Error("Url Expired !!");
+            throw new AppError('Url Expired !!', 404);
         }
         if (!isBot) {
-            void analyticsUpdates(url.id, browser, os, device, country, city).catch(console.error);
+            void analyticsUpdates(result.id, browser, os, device, country, city).catch(console.error);
         }
         return result.originalUrl;
     }
@@ -166,11 +166,11 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
     const url = await findFirstUrl(shortCode);
 
     if (!url) {
-        throw new Error("Invalid Url");
+        throw new AppError('Invalid Url', 400);
     }
 
     if (url.expirationDate && url.expirationDate < new Date()) {
-        throw new Error("Url Expired !!");
+        throw new AppError('Url Expired !!', 404);
     }
 
     await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, id: url.id, expirationDate: url.expirationDate?.toISOString() || "", }), { EX: 3600, });
@@ -205,18 +205,18 @@ export const getMyUrl = async ({ userId }) => {
         "clicks": u.clicks,
         "expiry_date": u.expirationDate,
         "creation_date": u.createdAt,
-        "last_update_date": u.updatedAt
+        "last_update_date": u.updatedAt,
+        "userId": u.userId
     }));
 };
 
 export const UrlDetails = async ({ userId, shortcode }) => {
-
     const Url = await client.url.findFirst({
         where: { userId, shortCode: shortcode, isActive: true, isDeleted: false },
         select: {
+            id: true,
             originalUrl: true,
             shortCode: true,
-            clicks: true,
             expirationDate: true,
             createdAt: true,
             updatedAt: true,
@@ -224,9 +224,12 @@ export const UrlDetails = async ({ userId, shortcode }) => {
             isActive: true
         }
     });
-    
-    const [topBrowsers, topOsys, topDevices, topCountries] = await Promise.all([
-        topBrowser(Url.id), topOs(Url.id), topDevice(Url.id), topCountry(Url.id)
+    if (!Url) {
+        logger.error("Url not found");
+        throw new AppError('Url not found', 404);
+    }
+    const [topBrowsers, topOsys, topDevices, topCountries, totalClicks] = await Promise.all([
+        topBrowser(Url.id), topOs(Url.id), topDevice(Url.id), topCountry(Url.id), totalClick(Url.id)
     ])
 
     if (!Url) {
@@ -235,7 +238,7 @@ export const UrlDetails = async ({ userId, shortcode }) => {
     return {
         "short_url": `${process.env.BACKEND_URL}/${Url.shortCode}`,
         "original_url": Url.originalUrl,
-        "clicks": Url.clicks,
+        "totalClicks": totalClicks,
         "topBrowsers": formatBrowser(topBrowsers),
         "topOperatingSystems": formatOperating(topOsys),
         "topDevices": formatDevice(topDevices),
@@ -244,7 +247,7 @@ export const UrlDetails = async ({ userId, shortcode }) => {
         "creation_date": Url.createdAt,
         "last_update_date": Url.updatedAt
     }
-}
+};
 
 export const UrlDelete = async ({ userId, shortcode }) => {
     const result = await client.url.update({
@@ -258,7 +261,7 @@ export const UrlDelete = async ({ userId, shortcode }) => {
         throw new Error("Error happend !!");
     };
     return true;
-}
+};
 
 export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive, shortcode }) => {
 
@@ -328,4 +331,4 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
         "creation_date": updatedUrl.createdAt,
         "last_update_date": updatedUrl.updatedAt
     }
-}
+};

@@ -13,6 +13,8 @@ import { redisClient } from "../config/redisClient.js";
 import { guestUserInfo } from "./Middleware/guest.Middleware.js";
 import { authMiddleware } from "./Middleware/user.Middleware.js";
 import { redirectUrl } from "./modules/Url/controller.js";
+import errorHandler from "./Middleware/errorHandler.js";
+import logger from "../config/logger.js";
 
 
 
@@ -55,7 +57,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/', (req, res) => { res.send('Server is Working'); })
+app.get('/', (req, res) => { logger.info('Server is Working')});
 
 
 
@@ -71,7 +73,7 @@ app.use("/api/auth", authRatelimit, authRoutes);
 app.use("/api/url", urlRoutes);
 // Url redirection route
 app.get("/:shortCode", redirectUrl); // redirecting the short url to orgional url
-
+app.use(errorHandler);
 
 
 

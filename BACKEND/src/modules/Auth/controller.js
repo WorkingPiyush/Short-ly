@@ -1,49 +1,39 @@
 import { ZodError } from "zod";
 import { loginSchema, signupSchema } from "../../validator/auth.validator.js";
 import * as authService from "./service.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { AppError } from "../../utils/AppError.js";
+import logger from "../../../config/logger.js";
 
-export const register = async (req, res) => {
+export const register = asyncHandler(async (req, res) => {
     const validatedBody = signupSchema.safeParse(req.body);
-
     if (!validatedBody.success) {
-        return res.status(400).json({
-            errors: validatedBody.error.flatten(),
+        let { message } = JSON.parse(validatedBody.error.message)[0];
+        throw new AppError(message, 400);
+    }
+
+    const user = await authService.registerUser(validatedBody.data);
+    req.session.user = {
+        id: user.id,
+        username: user.name,
+    }
+
+    req.session.save((err) => {
+        if (err) {
+            throw new AppError("Session save error", 500);
+        }
+
+        res.clearCookie("tempId");
+
+        return res.status(200).json({
+            success: true,
+            message: "Signup successfully",
+            user: req.session.username,
         });
-    }
-    try {
-        const user = await authService.registerUser(validatedBody.data);
-        req.session.user = {
-            id: user.id,
-            username: user.name,
-        }
+    });
+});
 
-        req.session.save((err) => {
-            if (err) {
-                return res.status(500).json({
-                    success: false,
-                    message: "Session save error",
-                });
-            }
-            res.clearCookie("tempId");
-            return res.status(200).json({
-                success: true,
-                message: "Signup successfully",
-                user: req.session.name,
-            });
-        })
-    } catch (err) {
-        console.log(err.message)
-        if (err instanceof ZodError) {
-            return res.status(400).json({
-                success: false,
-                errors: err.errors,
-            });
-        }
-        return res.status(500).json({ success: false, message: err.message });
-    }
-}
-
-export const login = async (req, res) => {
+export const login = asyncHandler(async (req, res) => {
     const validatedBody = loginSchema.safeParse(req.body);
     if (!validatedBody.success) {
         return res.status(400).json({
@@ -53,6 +43,9 @@ export const login = async (req, res) => {
 
     try {
         const user = await authService.loginUser(validatedBody.data);
+        if (!user) {
+            throw new AppError("User Not Found", 404);
+        }
         req.session.regenerate((err) => {
             if (err) {
                 return res.status(500).json({
@@ -78,26 +71,21 @@ export const login = async (req, res) => {
             res.clearCookie("tempId");
         })
     } catch (err) {
-        console.log(err.message)
+        logger.error(err.message);
         res.status(400).json({ message: err.message });
     }
-}
+});
 
-export const logout = async (req, res) => {
-    try {
-        req.session.destroy((err) => {
-            if (err) {
-                return res.status(500).json({
-                    message: "Logout failed",
-                })
-            }
-        })
-        res.clearCookie("sid");
-        res.json({
-            message: "Logout successfully",
-        })
-    } catch (error) {
-        console.log(err.message)
-        res.status(400).json({ message: err.message });
-    }
-}
+export const logout = asyncHandler(async (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({
+                message: "Logout failed",
+            })
+        }
+    })
+    res.clearCookie("sid");
+    res.json({
+        message: "Logout successfully",
+    })
+});

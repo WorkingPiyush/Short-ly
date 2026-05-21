@@ -11,9 +11,6 @@ export const analyticsUpdates = async (id, browser, os, device, country, city) =
         client.url.update({
             where: { id },
             data: {
-                clicks: {
-                    increment: 1,
-                },
                 lastVisitedAt: new Date()
             }
         }),
@@ -32,7 +29,7 @@ export const analyticsUpdates = async (id, browser, os, device, country, city) =
 }
 
 export const topBrowser = (id) => {
-   return client.urlRecord.groupBy({
+    return client.urlRecord.groupBy({
         by: ["browser"],
         where: {
             urlId: id
@@ -85,7 +82,7 @@ export const topDevice = (id) => {
     })
 }
 export const topCountry = (id) => {
-   return client.urlRecord.groupBy({
+    return client.urlRecord.groupBy({
         by: ["country"],
         where: {
             urlId: id
@@ -101,3 +98,14 @@ export const topCountry = (id) => {
         take: 5,
     })
 }
+export const totalClick = (id) => {
+    return client.urlRecord.count({
+        where: { urlId: id },
+    })
+}
+
+export const countUrl = async (tempId) => {
+    await client.url.count({
+        where: { tempId },
+    })
+};
