@@ -21,6 +21,7 @@ model User {
   providerId   String?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+  urls         Url[]
 }
 
 enum Role {
@@ -32,4 +33,41 @@ enum AuthProvider {
   CREDENTIALS
   GOOGLE
   GITHUB
+}
+
+model Url {
+  id             String      @id @default(uuid())
+  originalUrl    String
+  normalizedUrl  String
+  urlHash        String
+  shortCode      String      @unique
+  clicks         Int         @default(0)
+  tempId         String?
+  expirationDate DateTime?
+  password       String?
+  QrCode         String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  userId         String?
+  lastVisitedAt  DateTime?
+  isActive       Boolean?    @default(true)
+  isDeleted      Boolean     @default(false)
+  deletedAt      DateTime?
+  user           User?       @relation(fields: [userId], references: [id])
+  urlRecords     UrlRecord[]
+
+  @@index([tempId])
+  @@index([shortCode])
+}
+
+model UrlRecord {
+  id        String   @id @default(uuid())
+  urlId     String
+  url       Url      @relation(fields: [urlId], references: [id])
+  browser   String?
+  os        String?
+  device    String?
+  country   String?
+  city      String?
+  visitedAt DateTime @default(now())
 }
