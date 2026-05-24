@@ -48,6 +48,8 @@ model Url {
   QrCode         String?
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
+  liveTime       DateTime?
+  singleUse      Boolean     @default(false)
   userId         String?
   lastVisitedAt  DateTime?
   isActive       Boolean?    @default(true)
