@@ -2,10 +2,9 @@ import { client } from '../../config/db.js';
 
 export const findFirstUrl = async (shortCode) => {
     return await client.url.findFirst({
-        where: { shortCode, isActive: true, isDeleted: false }
+        where: { shortCode, isDeleted: false }
     })
-}
-
+};
 export const analyticsUpdates = async (id, browser, os, device, country, city) => {
     await Promise.all([
         client.url.update({
@@ -26,8 +25,16 @@ export const analyticsUpdates = async (id, browser, os, device, country, city) =
             }
         }),
     ]);
-}
-
+};
+export const urlCountUpdate = async (id) => {
+    return client.url.update({
+        where: { id },
+        data: {
+            clicks: { increment: 1 },
+            lastVisitedAt: new Date()
+        }
+    })
+};
 export const topBrowser = (id) => {
     return client.urlRecord.groupBy({
         by: ["browser"],
@@ -44,8 +51,7 @@ export const topBrowser = (id) => {
         },
         take: 5
     })
-}
-
+};
 export const topOs = (id) => {
     return client.urlRecord.groupBy({
         by: ["os"],
@@ -62,8 +68,7 @@ export const topOs = (id) => {
         },
         take: 5,
     })
-}
-
+};
 export const topDevice = (id) => {
     return client.urlRecord.groupBy({
         by: ["device"],
@@ -80,7 +85,7 @@ export const topDevice = (id) => {
         },
         take: 5,
     })
-}
+};
 export const topCountry = (id) => {
     return client.urlRecord.groupBy({
         by: ["country"],
@@ -97,13 +102,12 @@ export const topCountry = (id) => {
         },
         take: 5,
     })
-}
+};
 export const totalClick = (id) => {
     return client.urlRecord.count({
         where: { urlId: id },
     })
-}
-
+};
 export const countUrl = async (tempId) => {
     await client.url.count({
         where: { tempId },

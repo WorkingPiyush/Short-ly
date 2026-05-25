@@ -2,6 +2,7 @@ import dotenv from "dotenv/config";
 import { nanoid } from "nanoid";
 import qrcode from 'qrcode';
 import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 
 export const isValidUrl = (url) => {
     try {
@@ -70,3 +71,9 @@ export const formatCountry = (result) => {
         clicks: b._count.country,
     }))
 };
+export const passwordHashing = async (password, salt) => {
+    return await bcrypt.hash(password, salt);
+}
+export const passwordCompare = async (password, userPassword) => {
+    return await bcrypt.compare(password, userPassword);
+}

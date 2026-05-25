@@ -6,11 +6,12 @@ import { client } from '../../../config/db.js';
 import { Prisma } from '@prisma/client';
 import { AppError } from '../../utils/AppError.js';
 import logger from '../../../config/logger.js';
+import { passwordCompare, passwordHashing } from '../../helper/Url.helper.js';
 
 
 export const registerUser = async ({ name, email, password }) => {
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await passwordHashing(password, 10)
         const user = await client.user.create({
             data: {
                 name: name,
@@ -38,7 +39,7 @@ export const loginUser = async ({ email, password }) => {
         if (!user) {
             throw new AppError("Invalid Email", 401);
         }
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await passwordCompare(password, user.password)
         if (!isMatch) {
             throw new AppError("Invalid Email or Password", 401);
         }
