@@ -19,7 +19,7 @@ function HowItWorks() {
         },
     ]
     return (
-        <section className="bg-[#0f0f0f] mx-auto text-white w-fit p-10 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all duration-150 ease-in-out">
+        <section className="dark:bg-[#0f0f0f]  mx-auto w-fit p-10 rounded-2xl border border-zinc-800 dark:text-white text-black hover:border-zinc-700 transition-all duration-150 ease-in-out">
             {/* Top heading */}
             <div className="text-center mb-20">
                 <p className="text-emerald-400 tracking-widest text-sm mb-4">HOW IT WORKS</p>

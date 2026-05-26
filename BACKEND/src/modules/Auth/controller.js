@@ -70,6 +70,7 @@ export const login = asyncHandler(async (req, res) => {
             })
             res.clearCookie("tempId");
         })
+        logger.info(user, "User logged success !!")
     } catch (err) {
         logger.error(err.message);
         res.status(400).json({ message: err.message });

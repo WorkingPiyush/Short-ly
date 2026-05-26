@@ -10,7 +10,7 @@ import FadeUp from '../../animation/framer-motion'
 
 function Home() {
     return (
-        <div className='h-full text-white'>
+        <div className='h-full'>
             <Hero />
             <Stats />
             <FadeUp>

@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast';
 import './App.css'
 import Home from './Pages/Home/Home'
 import Layout from './Layout/Layout'
@@ -9,7 +10,7 @@ import Login from './Pages/Auth/Login'
 function App() {
   return (
     <>
-      <div className="min-h-screen p-5 bg-black text-white">
+      <div className="min-h-screen p-5 bg-white text-white dark:bg-black dark:text-white">
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
@@ -17,6 +18,7 @@ function App() {
             <Route path="/login" element={<Login />} />
           </Route>
         </Routes>
+        <Toaster position="top-center" reverseOrder={false} />
       </div>
     </>
   )

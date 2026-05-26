@@ -13,3 +13,5 @@
 .font-roboto {
     font-family: 'Roboto', sans-serif;
 }
+
+@custom-variant dark (&:where(.dark, .dark *))

@@ -46,23 +46,23 @@ function Features() {
                     return (
                         <div
                             key={i}
-                            className="bg-[#0f0f0f] border border-zinc-800 rounded-2xl p-6
+                            className="border dark:bg-[#0f0f0f] dark:border-zinc-800 bg-gray-300 border-zinc-400 rounded-2xl p-6
                          hover:border-zinc-700 transition-all duration-200 ease-in"
                         >
 
                             {/* Icon box */}
                             <div className="w-12 h-12 flex items-center justify-center 
-                              rounded-xl bg-emerald-500/10 border border-emerald-500/20 mb-5">
-                                <Icon className="w-6 h-6 text-emerald-400" />
+                              rounded-xl dark:bg-emerald-500/10 bg-emerald-500 border dark:border-emerald-500/20 border-emerald-500 mb-5">
+                                <Icon className="w-6 h-6 dark:text-emerald-400 text-white" />
                             </div>
 
                             {/* Title */}
-                            <h3 className="text-lg font-semibold text-white mb-2">
+                            <h3 className="text-lg font-semibold dark:text-white text-black mb-2">
                                 {item.title}
                             </h3>
 
                             {/* Description */}
-                            <p className="text-zinc-400 text-sm leading-relaxed">
+                            <p className="dark:text-zinc-400 text-zinc-800 text-sm leading-relaxed">
                                 {item.desc}
                             </p>
 

@@ -57,7 +57,10 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/', (req, res) => { logger.info('Server is Working')});
+app.get('/', (req, res) => {
+    res.send('Server is Working');
+    logger.info('Server is Working');
+});
 
 
 
