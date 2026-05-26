@@ -10,9 +10,14 @@ const githubIcon = "/github-142-svgrepo-com.svg";
 function Signup() {
     const [showPassword, setShowPassword] = useState(false);
     const [password, setPassword] = useState("");
+    const [userInfo, setUserInfo] = useState({ fName: "", lName: "", email: "", password: "" });
 
     const handlePasswordChange = (e) => {
         setPassword(e.target.value);
+        setUserInfo({ password: password });
+    }
+    const submitUserInfo = (info) => {
+        
     }
     return (
         <div className="min-h-screen bg-black flex flex-col items-center justify-center pt-20">
@@ -37,10 +42,11 @@ function Signup() {
                                 <input
                                     type="text"
                                     placeholder="Alex"
-                                    className="w-full rounded-xl border border-zinc-700 
-                                        bg-zinc-900/80 px-5 py-4 text-white
-                                        placeholder:text-zinc-400
-                                        outline-none focus:border-emerald-500/40
+                                    onChange={(e) => setUserInfo({ fName: e.target.value })}
+                                    className="w-full rounded-xl border border-zinc-700
+                                bg-zinc-900/80 px-5 py-4 text-white
+                                placeholder:text-zinc-400
+                                outline-none focus:border-emerald-500/40
                                         transition"/>
                             </div>
                             {/* Last name */}
@@ -52,6 +58,7 @@ function Signup() {
                                 <input
                                     type="text"
                                     placeholder="Johnson"
+                                    onChange={(e) => setUserInfo({ lName: e.target.value })}
                                     className="w-full rounded-xl border border-zinc-700 
                                         bg-zinc-900/80 px-5 py-4 text-white
                                         placeholder:text-zinc-400
@@ -70,6 +77,7 @@ function Signup() {
                             <input
                                 type="email"
                                 placeholder="you@example.com"
+                                onChange={(e) => setUserInfo({ email: e.target.value })}
                                 className="w-full rounded-xl border border-zinc-700 
                          bg-zinc-900/80 px-5 py-4 text-white
                          placeholder:text-zinc-400
@@ -113,7 +121,7 @@ function Signup() {
                         </div>
                     </form>
                     <div className='p-8'>
-                        <button className='py-2 w-full border cursor-pointer border-zinc-400 shadow rounded-xl hover:scale-95 transition-all'>Create free account</button>
+                        <button onClick={submitUserInfo} className='py-2 w-full border cursor-pointer border-zinc-400 shadow rounded-xl hover:scale-95 transition-all'>Create free account</button>
                     </div>
                     <div>
                         <div className='flex items-center gap-2'>

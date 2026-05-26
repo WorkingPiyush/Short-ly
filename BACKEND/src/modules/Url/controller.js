@@ -23,7 +23,7 @@ export const shortUrl = asyncHandler(async (req, res) => {
             maxAge: 1000 * 60 * 60 * 24 * 30,
         })
     }
-    return res.status(200).json({ success: true, data: result, });
+    return res.status(201).json({ success: true, data: result, });
 });
 
 export const redirectUrl = asyncHandler(async (req, res) => {
