@@ -2,39 +2,35 @@ import React, { useState } from 'react'
 import { Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import axios from 'axios';
+import { useQueryClient } from '@tanstack/react-query';
 import FadeUp from '../../animation/framer-motion';
+import { useLogin } from '../../Hooks/useAuth';
 const googleIcon = "/icons8-google.svg";
 const githubIcon = "/github-142-svgrepo-com.svg";
 
 function Login() {
-    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+    const loginMutation = useLogin();
     const [loading, setLoading] = useState(false);
+
+    const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const userInfo = { email, password };
+        const formData = { email, password };
         setLoading(true);
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login`, userInfo,
-                {
-                    headers: { "Content-Type": "application/json" },
-                    withCredentials: true,
+            loginMutation.mutate(formData, {
+                onSuccess: async () => {
+                    toast.success('Login Success');
+                    navigate("/dashboard", { replace: true });
                 }
-            );
-            if (response.data.success) {
-                console.log(response.data)
-                toast.success('Login Success');
-                setEmail("");
-                setPassword("");
-                navigate("/", { replace: true });
-            }
+            });
         } catch (error) {
             toast.error("Invalid User id or Password");
-            console.log(error);
+            console.error(error.message);
         } finally {
             setLoading(false);
         }

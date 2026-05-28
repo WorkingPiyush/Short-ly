@@ -3,46 +3,37 @@ import toast from 'react-hot-toast';
 import PropTypes from "prop-types";
 import { Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import PasswordStrength from '../../components/PasswordStrength';
 import FadeUp from '../../animation/framer-motion';
+import { useSignup } from '../../Hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
 const googleIcon = "/icons8-google.svg";
 const githubIcon = "/github-142-svgrepo-com.svg";
 
 function Signup() {
-    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+    const signinMutation = useSignup();
     const [loading, setLoading] = useState(false);
+
+    const [showPassword, setShowPassword] = useState(false);
     const [name, setName] = useState("")
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const userInfo = { name, email, password };
+        const formData = { name, email, password };
         setLoading(true);
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/signup`, userInfo,
-                {
-                    headers: { "Content-Type": "application/json" },
-                    withCredentials: true,
+            signinMutation.mutate(formData, {
+                onSuccess: async () => {
+                    toast.success('Signup Success');
+                    navigate("/dashboard", { replace: true });
                 }
-            );
-
-            toast.promise(response, {
-                loading: 'User Signing',
-                success: 'Signup Success',
-                error: 'error in user signup',
             })
-            if (response.data.success) {
-                setName("");
-                setEmail("");
-                setPassword("");
-                navigate("/", { replace: true });
-            }
         } catch (error) {
-            console.error(error.message);
             toast.error("Invalid User id or Password");
+            console.error(error.message);
         } finally {
             setLoading(false);
         }

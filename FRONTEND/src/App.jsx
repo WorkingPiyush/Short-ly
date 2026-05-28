@@ -5,6 +5,7 @@ import Home from './Pages/Home/Home'
 import Layout from './Layout/Layout'
 import Signup from './Pages/Auth/Signup'
 import Login from './Pages/Auth/Login'
+import UserDashboard from './Pages/Dashboard/UserDashboard';
 
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<UserDashboard />} />
           </Route>
         </Routes>
         <Toaster position="top-center" reverseOrder={false} />

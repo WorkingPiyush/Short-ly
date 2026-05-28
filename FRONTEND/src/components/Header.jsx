@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Moon, Sun } from 'lucide-react';
 import Logo from './Logo';
 import { useTheme } from '../Context/ThemeContext';
+import { useLogout, useUser } from '../Hooks/useAuth';
 
 
 function Header() {
+    const { data: user, isLoading } = useUser()
+    const logoutMutation = useLogout();
+    const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [isScrolled, setisScrolled] = useState(false)
     const { theme, toggleTheme } = useTheme();
@@ -22,7 +26,16 @@ function Header() {
         { label: 'Pricing', to: '/pricing' },
         { label: 'Support', to: '/support' },
     ];
-
+    const handleLogout = () => {
+        logoutMutation.mutate(undefined, {
+            onSuccess: async () => {
+                navigate("/signup", { replace: true });
+            }
+        })
+    }
+    if (isLoading) {
+        return <p>Loading..</p>
+    }
     return (
         <header className='flex justify-center items-center px-4 fixed top-0 left-0 right-0 z-50 pt-4 '>
             <div className={`bg-white text-black dark:bg-zinc-900 dark:text-white ${isScrolled ? "md:w-5xl" : "md:w-6xl"} px-7 py-5 border border-black/65 dark:border-white/65  rounded-2xl backdrop-blur-md transition-all duration-250 ease-in-out`}>
@@ -53,16 +66,22 @@ function Header() {
                         <div onClick={toggleTheme} className='text-black dark:text-white p-1 rounded-xl cursor-pointer transition duration-300 ease-in-out active:scale-95'>
                             {theme === "light" ? <Moon /> : <Sun />}
                         </div>
-                        <Link to="/login"
+
+                        {!user && <Link to="/login"
                             className="text-sm font-medium cursor-pointer bg-white/60 text-black dark:bg-zinc-900 dark:text-white border px-4 py-2 rounded-lg
                                      transition-all duration-150">
                             Login
-                        </Link>
+                        </Link>}
                         {/* bg-white/60 text-black dark:bg-zinc-900 dark:text-white */}
-                        <Link to="/signup" className="text-sm font-medium cursor-pointer text-zinc-900 bg-emerald-300 px-5 py-2
+                        {!user && <Link to="/signup" className="text-sm font-medium cursor-pointer text-zinc-900 bg-emerald-300 px-5 py-2
           rounded-lg hover:bg-emerald-200 hover:scale-[1.03] transition-all duration-150">
                             Sign up free
-                        </Link>
+                        </Link>}
+                        {user &&
+                            <div onClick={handleLogout} className='h-12 w-12 text-xs flex justify-center cursor-pointer items-center bg-red-600 rounded-full'>
+                                Logout
+                            </div>
+                        }
                     </div>
                     {/* cross button */}
                     <div onClick={toggleTheme} className='text-black dark:text-white md:hidden relative left-10 p-1 rounded-xl cursor-pointer transition duration-300 ease-in-out active:scale-95'>
@@ -103,21 +122,26 @@ function Header() {
                         {/*bg-white/70 text-black dark:bg-zinc-900 dark:text-white */}
                         <div className="h-px bg-white my-2" />
                         <div className="flex gap-2.5 pt-1 pb-2">
-                            <Link
+                            {!user && <Link
                                 to="/login"
                                 onClick={() => setIsOpen(false)}
                                 className="text-sm font-medium cursor-pointer bg-white/60 text-black dark:bg-zinc-900 dark:text-white border px-4 py-2 rounded-lg
                                      transition-all duration-150">
                                 Login
-                            </Link>
-                            <Link
+                            </Link>}
+                            {!user && <Link
                                 to="/signup"
                                 onClick={() => setIsOpen(false)}
                                 className="flex-1 text-center text-sm font-medium text-zinc-900
                 bg-emerald-300 py-2.5 rounded-lg hover:bg-emerald-200 transition-all duration-150"
                             >
                                 Sign up free
-                            </Link>
+                            </Link>}
+                            {user && user?.profileImage &&
+                                <div className='h-10 w-10 bg-red-600 rounded-full'>
+                                    <img src={user?.profileImage} alt="user-image" srcSet="user-image" />
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
