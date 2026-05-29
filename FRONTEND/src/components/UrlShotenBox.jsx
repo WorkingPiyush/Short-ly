@@ -1,21 +1,44 @@
-import React from 'react'
+import React, { useState } from 'react'
+import ShorturlResult from './ShorturlResult';
+import toast from 'react-hot-toast';
+import { createUrl } from '../Api/Url';
+import { useNavigate } from 'react-router-dom';
 
 function UrlShotenBox() {
+    const navigate = useNavigate();
+    const [shortUrl, setShortUrl] = useState();
+    const [url, setUrl] = useState("");
+    const sendShorurl = async (url) => {
+        try {
+            const response = await createUrl({ originalUrl: url });
+            setShortUrl(response.shortUrl)
+        } catch (error) {
+            toast.error(error.response.data.message || "Backend Url Issue");
+            navigate("/signup", { replace: true });
+            console.error(error.response.data.message);
+        }
+    };
+    
     return (
-        <div className='w-full max-w-2xl mx-auto p-0.5 rounded-2xl bg-linear-to-r from-zinc-700/40 to-zinc-500/20 mt-8'>
-            <div className='flex items-center gap-2 bg-[#0f0f0f] rounded-xl p-2'>
-                <input type="text"
-                    placeholder='Enter your link'
-                    className='flex-1 bg-gray-200/20 dark:bg-gray-300/20 text-white placeholder:text-white/60 
+        <>
+            <div className='w-full max-w-2xl mx-auto p-0.5 rounded-2xl bg-linear-to-r from-zinc-700/40 to-zinc-500/20 mt-8'>
+                <div className='flex items-center gap-2 bg-[#0f0f0f] rounded-xl p-2'>
+                    <input type="text"
+                        placeholder='Enter your link'
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        className='flex-1 bg-gray-200/20 dark:bg-gray-300/20 text-white placeholder:text-white/60 
                      px-5 py-2 rounded-sm outline-none border border-zinc-700/50
                      focus:border-zinc-500 transition'
-                />
-                <button className="px-4 py-2.5 rounded-xl border border-zinc-600 
-                           text-zinc-200 hover:bg-zinc-800 transition cursor-pointer">
-                    Shorten it
-                </button>
+                    />
+                    <button onClick={() => sendShorurl(url)} className="px-5 py-3 md:py-2.5 rounded-xl border border-zinc-600 
+                           text-zinc-200 hover:bg-zinc-800 transition cursor-pointer text-xs md:text-sm">
+                        Shorten it
+                    </button>
+                </div>
             </div>
-        </div>
+            {shortUrl && <ShorturlResult shortUrl={shortUrl} />}
+        </>
     )
 }
 

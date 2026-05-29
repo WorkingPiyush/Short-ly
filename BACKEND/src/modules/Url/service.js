@@ -36,9 +36,8 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
             newtempId = crypto.randomUUID();
             tempId = newtempId;
         }
-        const tempUrlCount = countUrl(tempId);
-
-        if (tempUrlCount >= MAX_TEMP_URLS) {
+        const tempUrlCount = await countUrl(tempId);
+        if (tempUrlCount === MAX_TEMP_URLS) {
             throw new AppError('Signup required', 400);
         }
 
@@ -51,12 +50,10 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
 
         if (existingTempUrl) {
             return {
-                url: {
-                    originalUrl: existingTempUrl.originalUrl,
-                    shortUrl: `${process.env.BACKEND_URL}/${existingTempUrl.shortCode}`,
-                    clicks: existingTempUrl.clicks,
-                    expirationDate: existingTempUrl.expirationDate,
-                },
+                originalUrl: existingTempUrl.originalUrl,
+                shortUrl: `${process.env.BACKEND_URL}/${existingTempUrl.shortCode}`,
+                clicks: existingTempUrl.clicks,
+                expirationDate: existingTempUrl.expirationDate,
                 tempId,
             }
         }
@@ -74,13 +71,11 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
             }
         })
         return {
-            url: {
-                originalUrl: tempNewUrl.originalUrl,
-                shortUrl: `${process.env.BACKEND_URL}/${tempNewUrl.shortCode}`,
-                clicks: tempNewUrl.clicks,
-                expirationDate: tempNewUrl.expirationDate,
-                userId: tempNewUrl.userId,
-            },
+            originalUrl: tempNewUrl.originalUrl,
+            shortUrl: `${process.env.BACKEND_URL}/${tempNewUrl.shortCode}`,
+            clicks: tempNewUrl.clicks,
+            expirationDate: tempNewUrl.expirationDate,
+            userId: tempNewUrl.userId,
             tempId,
         };
     }
@@ -210,22 +205,26 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
     if (url.expirationDate && url.expirationDate < new Date()) {
         throw new AppError('Url Expired !!', 404);
     }
-    const singleUseUrl = await client.url.updateMany({
-        where: {
-            id: url.id,
-            isActive: true,
-            singleUse: true,
-        },
-        data: {
-            singleUse: false
-        }
-    })
-    if (singleUseUrl.count === 0) {
-        throw new AppError("Already used or invalid link", 400);
-    }
+    // here it is
     if (url.singleUse) {
+        const singleUseUrl = await client.url.updateMany({
+            where: {
+                id: url.id,
+                isActive: true,
+                singleUse: true,
+            },
+            data: {
+                singleUse: false
+            }
+        });
+
+        if (singleUseUrl.count == 0) {
+            throw new AppError("Already used or invalid link", 400);
+        }
+
         return url.originalUrl;
     }
+
     await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, id: url.id, userId: url.userId, liveTime: url.liveTime, isProtected: url.password ? true : false, expirationDate: url.expirationDate?.toISOString() || "", }), { EX: 3600, });
 
     if (!isBot) {

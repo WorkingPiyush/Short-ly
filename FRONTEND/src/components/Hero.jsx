@@ -1,6 +1,5 @@
 import React from 'react'
 import UrlShotenBox from './UrlShotenBox'
-import { useTheme } from '../Context/ThemeContext';
 
 function Hero() {
     // bg-white text-black dark:bg-zinc-900 dark:text-white

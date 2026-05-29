@@ -8,22 +8,21 @@ import { success } from "zod";
 
 // CRUD operations for url..
 export const shortUrl = asyncHandler(async (req, res) => {
-    const result = await urlService.urlShort({
+    const url = await urlService.urlShort({
         originalUrl: req.body.originalUrl,
         userId: req.user?.id || null,
         tempId: req.cookies?.tempId || null,
         singleUse: req.body.singleUse || null,
     });
-
-    if (result.tempId) {
-        res.cookie("tempId", result.tempId, {
+    if (url.tempId) {
+        res.cookie("tempId", url.tempId, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
             maxAge: 1000 * 60 * 60 * 24 * 30,
         })
     }
-    return res.status(200).json({ success: true, data: result, });
+    return res.status(200).json({ success: true, url, });
 });
 
 export const redirectUrl = asyncHandler(async (req, res) => {
