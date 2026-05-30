@@ -2,23 +2,34 @@ import React, { useState } from 'react'
 import ShorturlResult from './ShorturlResult';
 import toast from 'react-hot-toast';
 import { createUrl } from '../Api/Url';
-import { useNavigate } from 'react-router-dom';
 
 function UrlShotenBox() {
-    const navigate = useNavigate();
     const [shortUrl, setShortUrl] = useState();
     const [url, setUrl] = useState("");
+
+    const isValidUrl = (url) => {
+        try {
+            const parsedUrl = new URL(url);
+            const allowedProtocols = ["http:", "https:"];
+            return allowedProtocols.includes(parsedUrl.protocol);
+        } catch {
+            return false;
+        }
+    }
     const sendShorurl = async (url) => {
+        if (!isValidUrl(url)) {
+            toast.error("Invalid Url");
+            return;
+        }
         try {
             const response = await createUrl({ originalUrl: url });
             setShortUrl(response.shortUrl)
         } catch (error) {
             toast.error(error.response.data.message || "Backend Url Issue");
-            navigate("/signup", { replace: true });
             console.error(error.response.data.message);
         }
     };
-    
+
     return (
         <>
             <div className='w-full max-w-2xl mx-auto p-0.5 rounded-2xl bg-linear-to-r from-zinc-700/40 to-zinc-500/20 mt-8'>

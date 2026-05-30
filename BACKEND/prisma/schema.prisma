@@ -50,6 +50,7 @@ model Url {
   updatedAt      DateTime    @updatedAt
   liveTime       DateTime?
   singleUse      Boolean     @default(false)
+  used           Boolean     @default(true)
   userId         String?
   lastVisitedAt  DateTime?
   isActive       Boolean?    @default(true)

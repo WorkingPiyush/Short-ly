@@ -12,9 +12,9 @@ export const shortUrl = asyncHandler(async (req, res) => {
         originalUrl: req.body.originalUrl,
         userId: req.user?.id || null,
         tempId: req.cookies?.tempId || null,
-        singleUse: req.body.singleUse || null,
+        singleUse: req.body?.singleUse || false,
     });
-    if (url.tempId) {
+    if (url?.tempId) {
         res.cookie("tempId", url.tempId, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",

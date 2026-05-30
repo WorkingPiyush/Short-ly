@@ -10,13 +10,13 @@ import DeviceDetector from 'device-detector-js';
 import geoip from 'geoip-lite';
 import XLSX from 'xlsx';
 import fs from 'fs';
+import { connect } from "http2";
 
 const deviceDetector = new DeviceDetector();
 const MAX_TEMP_URLS = 3;
 const BATCH_SIZE = 10;
 
 export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
-
     if (!originalUrl) {
         throw new AppError('Invalid Url', 400);
     }
@@ -83,7 +83,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
     const existing = await client.url.findFirst({
         where: {
             urlHash,
-            userId,
+            userId: userId,
         },
         select: {
             id: true,
@@ -111,14 +111,13 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
             isActive: existing.isActive,
         }
     }
-
     let shortCode;
     let shortCodeExists = true;
 
     while (shortCodeExists) {
         shortCode = generateShortCode();
         shortCodeExists = await client.url.findUnique({
-            where: { shortCode, },
+            where: { shortCode },
         })
     }
     const expirationDate = new Date();
@@ -134,7 +133,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
             expirationDate,
             singleUse
         }
-    })
+    });
 
     const qrCodeImg = await generateQRCode(newUrl);
     const responseUrl = {
@@ -205,16 +204,17 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
     if (url.expirationDate && url.expirationDate < new Date()) {
         throw new AppError('Url Expired !!', 404);
     }
-    // here it is
+
     if (url.singleUse) {
         const singleUseUrl = await client.url.updateMany({
             where: {
                 id: url.id,
-                isActive: true,
                 singleUse: true,
+                isActive: true,
+                used: false,
             },
             data: {
-                singleUse: false
+                used: true,
             }
         });
 

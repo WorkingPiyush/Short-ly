@@ -4,6 +4,8 @@ import { Moon, Sun } from 'lucide-react';
 import Logo from './Logo';
 import { useTheme } from '../Context/ThemeContext';
 import { useLogout, useUser } from '../Hooks/useAuth';
+import ProfilePopUp from './ProfilePopUp';
+import ProfileIcon from './ProfileIcon';
 
 
 function Header() {
@@ -12,6 +14,7 @@ function Header() {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [isScrolled, setisScrolled] = useState(false)
+    const [showProfilePopUp, setShowProfilePopUp] = useState(false)
     const { theme, toggleTheme } = useTheme();
     useEffect(() => {
         const handelScrollEvent = () => {
@@ -29,7 +32,8 @@ function Header() {
     const handleLogout = () => {
         logoutMutation.mutate(undefined, {
             onSuccess: async () => {
-                navigate("/signup", { replace: true });
+                navigate("/", { replace: true });
+                setShowProfilePopUp(false);
             }
         })
     }
@@ -62,7 +66,7 @@ function Header() {
                     </nav>
                     {/* Actions */}
 
-                    <div className="hidden md:flex items-center gap-2.5">
+                    <div className="hidden md:flex items-center gap-2.5 relative">
                         <div onClick={toggleTheme} className='text-black dark:text-white p-1 rounded-xl cursor-pointer transition duration-300 ease-in-out active:scale-95'>
                             {theme === "light" ? <Moon /> : <Sun />}
                         </div>
@@ -72,17 +76,16 @@ function Header() {
                                      transition-all duration-150">
                             Login
                         </Link>}
-                        {/* bg-white/60 text-black dark:bg-zinc-900 dark:text-white */}
                         {!user && <Link to="/signup" className="text-sm font-medium cursor-pointer text-zinc-900 bg-emerald-300 px-5 py-2
           rounded-lg hover:bg-emerald-200 hover:scale-[1.03] transition-all duration-150">
                             Sign up free
                         </Link>}
                         {user &&
-                            <div onClick={handleLogout} className='h-12 w-12 text-xs flex justify-center cursor-pointer items-center bg-red-600 rounded-full'>
-                                Logout
-                            </div>
+                            <ProfileIcon showpopup={setShowProfilePopUp} popup={showProfilePopUp} />
                         }
+                        {showProfilePopUp && <ProfilePopUp userInfo={user} logout={handleLogout} />}
                     </div>
+
                     {/* cross button */}
                     <div onClick={toggleTheme} className='text-black dark:text-white md:hidden relative left-10 p-1 rounded-xl cursor-pointer transition duration-300 ease-in-out active:scale-95'>
                         {theme === "light" ? <Moon /> : <Sun />}
@@ -146,6 +149,7 @@ function Header() {
                     </div>
                 </div>
             </div>
+
         </header >
     );
 }

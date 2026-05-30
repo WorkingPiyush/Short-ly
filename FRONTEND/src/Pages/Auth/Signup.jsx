@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import PasswordStrength from '../../components/PasswordStrength';
 import FadeUp from '../../animation/framer-motion';
 import { useSignup } from '../../Hooks/useAuth';
-import { useQueryClient } from '@tanstack/react-query';
+import { signupSchema } from '../../Validator/auth.validator';
 const googleIcon = "/icons8-google.svg";
 const githubIcon = "/github-142-svgrepo-com.svg";
 
@@ -23,6 +23,12 @@ function Signup() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = { name, email, password };
+        const validFormData = signupSchema.safeParse(formData);
+        if (!validFormData.success) {
+            const { message } = JSON.parse(validFormData.error.message)[0];
+            toast.error(message);
+            return;
+        }
         setLoading(true);
         try {
             signinMutation.mutate(formData, {

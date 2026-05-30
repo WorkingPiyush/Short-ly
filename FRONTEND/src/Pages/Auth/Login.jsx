@@ -2,9 +2,9 @@ import React, { useState } from 'react'
 import { Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { useQueryClient } from '@tanstack/react-query';
 import FadeUp from '../../animation/framer-motion';
 import { useLogin } from '../../Hooks/useAuth';
+import { loginSchema } from '../../Validator/auth.validator';
 const googleIcon = "/icons8-google.svg";
 const githubIcon = "/github-142-svgrepo-com.svg";
 
@@ -20,6 +20,12 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = { email, password };
+        const validFormData = loginSchema.safeParse(formData);
+        if (!validFormData.success) {
+            const { message } = JSON.parse(validFormData.error.message)[0];
+            toast.error(message);
+            return;
+        }
         setLoading(true);
         try {
             loginMutation.mutate(formData, {
@@ -103,7 +109,7 @@ function Login() {
                             </div>
                         </div>
                         <div className='p-4'>
-                            <button type='submit' disabled={loading} className='py-2 w-full border cursor-pointer dark:border-zinc-400 text-zinc-800 shadow rounded-xl hover:scale-95 transition-all'>Login to Short-ly</button>
+                            <button type='submit' disabled={loading} className='py-2 w-full border cursor-pointer dark:text-white dark:border-zinc-400 text-zinc-800 shadow rounded-xl hover:scale-95 transition-all'>Login to Short-ly</button>
                         </div>
                     </form>
                     <div>
