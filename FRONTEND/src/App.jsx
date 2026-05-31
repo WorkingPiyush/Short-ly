@@ -6,6 +6,11 @@ import Layout from './Layout/Layout'
 import Signup from './Pages/Auth/Signup'
 import Login from './Pages/Auth/Login'
 import UserDashboard from './Pages/Dashboard/UserDashboard';
+import DashboardLayout from './Layout/DashboardLayout';
+import Links from './Pages/Dashboard/Links';
+import ProfilePage from './Pages/Dashboard/ProfilePage';
+import BulkUrl from './Pages/Dashboard/BulkUrl';
+import Analytics from './Pages/Dashboard/Analytics';
 
 
 function App() {
@@ -17,7 +22,13 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
+          </Route>
+          <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<UserDashboard />} />
+            <Route path="/dashboard/links" element={<Links />} />
+            <Route path="/dashboard/profile" element={<ProfilePage />} />
+            <Route path="/dashboard/bulk" element={<BulkUrl />} />
+            <Route path="/dashboard/analytics" element={<Analytics />} />
           </Route>
         </Routes>
         <Toaster position="top-center" reverseOrder={false} />

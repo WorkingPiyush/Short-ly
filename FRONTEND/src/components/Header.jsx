@@ -3,13 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Moon, Sun } from 'lucide-react';
 import Logo from './Logo';
 import { useTheme } from '../Context/ThemeContext';
-import { useLogout, useUser } from '../Hooks/useAuth';
+import { useLogout, useUser } from '../Hooks/useAuth.jsx';
 import ProfilePopUp from './ProfilePopUp';
 import ProfileIcon from './ProfileIcon';
 
 
 function Header() {
-    const { data: user, isLoading } = useUser()
+    const { data: user} = useUser()
     const logoutMutation = useLogout();
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
@@ -37,9 +37,7 @@ function Header() {
             }
         })
     }
-    if (isLoading) {
-        return <p>Loading..</p>
-    }
+    
     return (
         <header className='flex justify-center items-center px-4 fixed top-0 left-0 right-0 z-50 pt-4 '>
             <div className={`bg-white text-black dark:bg-zinc-900 dark:text-white ${isScrolled ? "md:w-5xl" : "md:w-6xl"} px-7 py-5 border border-black/65 dark:border-white/65  rounded-2xl backdrop-blur-md transition-all duration-250 ease-in-out`}>
@@ -81,9 +79,9 @@ function Header() {
                             Sign up free
                         </Link>}
                         {user &&
-                            <ProfileIcon showpopup={setShowProfilePopUp} popup={showProfilePopUp} />
+                            <ProfileIcon showpopup={setShowProfilePopUp} popup={showProfilePopUp} userInfo={user} />
                         }
-                        {showProfilePopUp && <ProfilePopUp userInfo={user} logout={handleLogout} />}
+                        {showProfilePopUp && <ProfilePopUp userInfo={user} logout={handleLogout} showpopup={setShowProfilePopUp} />}
                     </div>
 
                     {/* cross button */}
@@ -122,7 +120,6 @@ function Header() {
                                 {label}
                             </Link>
                         ))}
-                        {/*bg-white/70 text-black dark:bg-zinc-900 dark:text-white */}
                         <div className="h-px bg-white my-2" />
                         <div className="flex gap-2.5 pt-1 pb-2">
                             {!user && <Link
@@ -143,8 +140,7 @@ function Header() {
                             {user && user?.profileImage &&
                                 <div className='h-10 w-10 bg-red-600 rounded-full'>
                                     <img src={user?.profileImage} alt="user-image" srcSet="user-image" />
-                                </div>
-                            }
+                                </div>}
                         </div>
                     </div>
                 </div>

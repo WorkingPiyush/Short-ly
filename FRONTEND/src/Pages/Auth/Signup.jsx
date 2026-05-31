@@ -5,7 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import PasswordStrength from '../../components/PasswordStrength';
 import FadeUp from '../../animation/framer-motion';
-import { useSignup } from '../../Hooks/useAuth';
+import { useSignup } from '../../Hooks/useAuth.jsx';
 import { signupSchema } from '../../Validator/auth.validator';
 const googleIcon = "/icons8-google.svg";
 const githubIcon = "/github-142-svgrepo-com.svg";

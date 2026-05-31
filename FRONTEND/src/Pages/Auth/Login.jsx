@@ -3,7 +3,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import FadeUp from '../../animation/framer-motion';
-import { useLogin } from '../../Hooks/useAuth';
+import { useLogin } from '../../Hooks/useAuth.jsx';
 import { loginSchema } from '../../Validator/auth.validator';
 const googleIcon = "/icons8-google.svg";
 const githubIcon = "/github-142-svgrepo-com.svg";

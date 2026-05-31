@@ -38,8 +38,8 @@ export const redirectUrl = asyncHandler(async (req, res) => {
 });
 
 export const getAllUrls = asyncHandler(async (req, res) => {
-    const urls = await urlService.getMyUrl({ userId: req.user?.id });
-    return res.status(200).json({ success: true, urls });
+    const url = await urlService.getMyUrl({ userId: req.user?.id });
+    return res.status(200).json({ success: true, url });
 });
 
 export const getUrl = asyncHandler(async (req, res) => {

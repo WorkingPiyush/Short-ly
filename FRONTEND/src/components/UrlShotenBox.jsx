@@ -16,7 +16,7 @@ function UrlShotenBox() {
             return false;
         }
     }
-    const sendShorurl = async (url) => {
+    const sendShortUrl = async (url) => {
         if (!isValidUrl(url)) {
             toast.error("Invalid Url");
             return;
@@ -42,7 +42,7 @@ function UrlShotenBox() {
                      px-5 py-2 rounded-sm outline-none border border-zinc-700/50
                      focus:border-zinc-500 transition'
                     />
-                    <button onClick={() => sendShorurl(url)} className="px-5 py-3 md:py-2.5 rounded-xl border border-zinc-600 
+                    <button onClick={() => sendShortUrl(url)} className="px-5 py-3 md:py-2.5 rounded-xl border border-zinc-600 
                            text-zinc-200 hover:bg-zinc-800 transition cursor-pointer text-xs md:text-sm">
                         Shorten it
                     </button>

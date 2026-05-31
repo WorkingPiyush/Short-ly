@@ -134,7 +134,6 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
             singleUse
         }
     });
-
     const qrCodeImg = await generateQRCode(newUrl);
     const responseUrl = {
         shortUrl: `${process.env.BACKEND_URL}/${newUrl.shortCode}`,
@@ -217,7 +216,6 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
                 used: true,
             }
         });
-
         if (singleUseUrl.count == 0) {
             throw new AppError("Already used or invalid link", 400);
         }

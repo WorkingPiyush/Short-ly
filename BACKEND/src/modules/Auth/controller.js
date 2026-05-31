@@ -9,7 +9,6 @@ export const user = asyncHandler(async (req, res) => {
     const userInfo = await authService.getUser({
         userId: req.user.id
     })
-
     return res.status(200).json({
         success: true,
         user: userInfo,

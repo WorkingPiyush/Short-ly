@@ -71,7 +71,8 @@ app.get('/', (req, res) => {
 
 
 // Authentication route
-app.use("/api/auth", authRatelimit, authRoutes);
+// app.use("/api/auth", authRatelimit, authRoutes);
+app.use("/api/auth", authRoutes);
 // Url route
 app.use("/api/url", urlRoutes);
 // Url redirection route

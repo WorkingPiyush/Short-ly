@@ -25,7 +25,7 @@ export const getUser = async ({ userId }) => {
     if (!user) {
         throw new AppError("User not found", 404);
     }
-    return user;
+    return { ...user, username: user.name };
 }
 
 export const registerUser = async ({ name, email, password }) => {

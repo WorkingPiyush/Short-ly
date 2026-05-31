@@ -1,9 +1,12 @@
 import React from 'react'
+import SideBar from '../../components/SideBar'
+import CTAUrlbox from '../../components/CTAUrlbox'
 
 function UserDashboard() {
     return (
-        <div className='h-screen text-black flex justify-center items-center'>
-            this is the user dash-board
+        <div>
+            <SideBar />
+            <CTAUrlbox />
         </div>
     )
 }
