@@ -1,13 +1,32 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast';
 import { createUrl } from '../Api/Url';
 import ShorturlResult from './ShorturlResult';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function CTAUrlbox() {
+    const inputRef = useRef();
+    const location = useLocation();
+    const navigate = useNavigate();
     const [shortUrl, setShortUrl] = useState();
     const [url, setUrl] = useState("");
-    const [singleUse, setSingleUse] = useState(false)
+    const [singleUse, setSingleUse] = useState(false);
+    
+    useEffect(() => {
+        if (location.state?.focustInput) {
+            inputRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+            })
+            inputRef.current?.focus();
+            navigate(location.pathname, {
+                replace: true,
+                state: {},
+            });
+        }
 
+    }, [location, navigate])
+    
     const isValidUrl = (url) => {
         try {
             const parsedUrl = new URL(url);
@@ -16,8 +35,7 @@ function CTAUrlbox() {
         } catch {
             return false;
         }
-    }
-
+    };
     const sendShortUrl = async (url) => {
         if (!isValidUrl(url)) {
             toast.error("Invalid Url");
@@ -34,7 +52,7 @@ function CTAUrlbox() {
 
     return (
         <div className="lg:ml-64 mx-auto mt-20 max-w-4xl rounded-2xl bg-black dark:bg-white/5 backdrop-blur-md border border-white/10 p-6 md:p-8 shadow-lg">
-            <h1 className="text-2xl font-bold mb-6">
+            <h1 className="text-2xl cursor-pointer font-bold mb-6">
                 Create Short Link
             </h1>
 
@@ -49,6 +67,7 @@ function CTAUrlbox() {
 
                     <div className="flex flex-col md:flex-row gap-3">
                         <input
+                            ref={inputRef}
                             id="destination-url"
                             type="url"
                             placeholder="https://your-long-url.com"

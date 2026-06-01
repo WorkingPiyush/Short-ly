@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { IoHomeOutline } from "react-icons/io5";
 import { IoAddSharp } from "react-icons/io5";
 import { MdOutlineMenu } from "react-icons/md";
@@ -8,12 +8,20 @@ import { IoIosLink } from "react-icons/io";
 import { RiPagesLine } from "react-icons/ri";
 import { SiGoogleanalytics } from "react-icons/si";
 import { IoSettings } from "react-icons/io5";
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import Logo from './Logo';
 
 
 function SideBar() {
+    const navigate = useNavigate();
     const [showSideBar, setShowSideBar] = useState(false);
+    const handelCreateBtn = () => {
+        navigate('/dashboard', {
+            state: {
+                focustInput: true,
+            }
+        })
+    }
 
     const sideOptions = [
         { icon: <IoHomeOutline />, head: "Dashboard", to: "/dashboard", },
@@ -32,7 +40,7 @@ function SideBar() {
                     <Logo />
                 </div>
                 {/* Create Button */}
-                <button className=" flex items-center justify-center gap-2 w-full py-3 rounded-lg bg-emerald-400 text-black font-semibold hover:bg-emerald-500 transition-colors">
+                <button onClick={handelCreateBtn} className="flex items-center justify-center cursor-pointer gap-2 w-full py-3 rounded-lg bg-emerald-400 text-black font-semibold hover:bg-emerald-500 transition-colors">
                     <IoAddSharp size={18} />
                     <span>Create New</span>
                 </button>
@@ -43,7 +51,7 @@ function SideBar() {
                     {sideOptions.map((option) => (
                         <NavLink
                             key={option.to}
-                           end to={option.to}
+                            end to={option.to}
                             className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-lg text-black dark:text-white transition-all duration-200 ${isActive ? "bg-emerald-400 font-semibold dark:text-black" : "hover:bg-gray-500/10"}`}>
                             <span className="text-lg">{option.icon}</span>
                             <span>{option.head}</span>
