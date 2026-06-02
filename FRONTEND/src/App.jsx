@@ -11,6 +11,7 @@ import Links from './Pages/Dashboard/Links';
 import ProfilePage from './Pages/Dashboard/ProfilePage';
 import BulkUrl from './Pages/Dashboard/BulkUrl';
 import Analytics from './Pages/Dashboard/Analytics';
+import EditLink from './Pages/Dashboard/EditLink';
 
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/dashboard/links" element={<Links />} />
+            <Route path="/dashboard/links/:shortcode" element={<EditLink />} />
             <Route path="/dashboard/profile" element={<ProfilePage />} />
             <Route path="/dashboard/bulk" element={<BulkUrl />} />
             <Route path="/dashboard/analytics" element={<Analytics />} />

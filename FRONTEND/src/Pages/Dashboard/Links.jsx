@@ -6,10 +6,11 @@ import { RiPencilFill } from "react-icons/ri";
 import { FaShareAlt } from "react-icons/fa";
 import { SiGoogleanalytics } from "react-icons/si";
 import { BsThreeDots } from "react-icons/bs";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
 function Links() {
+  const navigate = useNavigate();
   const { data: urlRecords, isLoading } = useUser()
   const [search, setSearch] = useState("");
 
@@ -19,14 +20,18 @@ function Links() {
       month: "short",
       day: "2-digit"
     });
-  }
+  };
   const formatedLink = (link) => {
-    return link.slice(8)
-  }
+    const url = new URL(link);
+    return `${url.hostname}${url.pathname.split("/")[1] ? "/" + url.pathname.split("/")[1] : ""}`;
+  };
   const linkCopy = (shortUrl) => {
     navigator.clipboard.writeText(shortUrl);
     toast.success("Link Copied !!")
-  }
+  };
+  const destination = (url) => {
+    return url.split("/")[3];
+  };
   if (isLoading) {
     return "Loading.."
   }
@@ -38,12 +43,7 @@ function Links() {
         <h1 className="text-2xl font-bold">My Links</h1>
       </div>
 
-      <input
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search links..."
-        className="w-full max-w-md border rounded-lg px-3 py-2 mb-6"
-         />
+      <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search links..." className="w-full max-w-md border rounded-lg px-3 py-2 mb-6" />
 
       <div className="space-y-4">
         {urlRecords.map((link) => (
@@ -72,11 +72,11 @@ function Links() {
             </div>
 
             {/* right */}
-            < div className="text-xl text-white flex gap-3" >
-              <div><RiPencilFill /></div>
-              <div><FaShareAlt /></div>
-              <div><BsThreeDots /></div>
-              <div><SiGoogleanalytics /></div>
+            <div className="text-xl text-white flex gap-3" >
+              <div className='hover:bg-gray-200/70 rounded-sm h-10 w-10 flex justify-center items-center transition-all active:border active:border-emerald-500' onClick={() => navigate(`/dashboard/links/${destination(link.short_url)}`)}><RiPencilFill /></div>
+              <div className='hover:bg-gray-200/70 rounded-sm h-10 w-10 flex justify-center items-center transition-all active:border active:border-emerald-500' ><FaShareAlt /></div>
+              <div className='hover:bg-gray-200/70 rounded-sm h-10 w-10 flex justify-center items-center transition-all active:border active:border-emerald-500' ><SiGoogleanalytics /></div>
+              <div className='hover:bg-gray-200/70 rounded-sm h-10 w-10 flex justify-center items-center transition-all active:border active:border-emerald-500' ><BsThreeDots /></div>
             </div>
           </div>
         ))

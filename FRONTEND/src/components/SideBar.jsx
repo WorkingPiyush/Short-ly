@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import { IoHomeOutline } from "react-icons/io5";
 import { IoAddSharp } from "react-icons/io5";
 import { MdOutlineMenu } from "react-icons/md";
@@ -61,7 +61,6 @@ function SideBar() {
 
                 <div className="mt-auto">
                     <div className="h-px bg-gray-400/30 mb-4" />
-
                     <button className=" flex items-center justify-center gap-2  w-full py-3 rounded-lg bg-black text-emerald-400 font-semibold hover:bg-gray-900 transition-colors">
                         <IoSettings size={18} />
                         <span>Settings</span>

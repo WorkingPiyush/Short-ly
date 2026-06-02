@@ -400,6 +400,7 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
     await redisClient.del(
         urlKey(shortcode)
     );
+    
     return {
         short_url: `${process.env.BACKEND_URL}/${updatedUrl.shortCode}`,
         original_url: updatedUrl.originalUrl,
