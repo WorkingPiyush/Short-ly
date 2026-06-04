@@ -16,7 +16,7 @@ const deviceDetector = new DeviceDetector();
 const MAX_TEMP_URLS = 3;
 const BATCH_SIZE = 10;
 
-export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
+export const urlShort = async ({ originalUrl, userId, tempId, singleUse, password, expiry }) => {
     if (!originalUrl) {
         throw new AppError('Invalid Url', 400);
     }
@@ -103,12 +103,13 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
         return {
             shortUrl: `${process.env.BACKEND_URL}/${existing.shortCode}`,
             originalUrl: existing.originalUrl,
-            totalClicks: clicks,
             expiry_date: existing.expirationDate,
             creation_date: existing.createdAt,
+            singleUse: existing.singleUse,
+            totalClicks: clicks,
             isPswrdProtected: existing.password ? true : false,
-            userId: existing.userId,
             isActive: existing.isActive,
+            userId: existing.userId,
         }
     }
     let shortCode;
@@ -120,9 +121,15 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
             where: { shortCode },
         })
     }
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + 60);
+    let expirationDate;
+    if (expiry) {
+        expirationDate = expiry ? new Date(expiry) : new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
+        if (expiry && expirationDate < new Date()) {
+            throw new Error("Invalid Expiry Date");
+        };
+    };
 
+    let hashedPassword = password ? await passwordHashing(password, 10) : null;
     const newUrl = await client.url.create({
         data: {
             originalUrl,
@@ -131,7 +138,8 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
             shortCode,
             userId,
             expirationDate,
-            singleUse
+            singleUse,
+            password: hashedPassword,
         }
     });
     const qrCodeImg = await generateQRCode(newUrl);
@@ -140,9 +148,12 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
         originalUrl: newUrl.originalUrl,
         expiry_date: newUrl.expirationDate,
         creation_date: newUrl.createdAt,
-        userId: newUrl.userId,
         QrCode: qrCodeImg,
-    }
+        singleUse: newUrl.singleUse,
+        isPswrdProtected: newUrl.password ? true : false,
+        userId: newUrl.userId,
+    };
+
     return responseUrl;
 };
 
@@ -257,6 +268,7 @@ export const getMyUrl = async ({ userId }) => {
         fetchedUrl.map(async (u) => {
             const clicks = await totalClick(u.id);
             return {
+                id: u.id,
                 short_url: `${process.env.BACKEND_URL}/${u.shortCode}`,
                 original_url: u.originalUrl,
                 totalClicks: clicks,
@@ -345,42 +357,45 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
         updatedData.normalizedUrl = normalizedUrl;
         updatedData.urlHash = urlHash;
         updatedData.clicks = 0;
-    }
+    };
 
     if (expirationDate !== undefined) {
         if (expirationDate && new Date(expirationDate) < new Date()) {
             throw new Error("Invalid Expiry Date");
         }
 
-        updatedData.expirationDate = expirationDate;
-    }
+        updatedData.expirationDate = new Date(expirationDate);
+    };
 
     if (isActive !== undefined) {
         updatedData.isActive = isActive;
-    }
+    };
 
     if (password !== undefined) {
         const hashedPassword = await passwordHashing(password, 10);
         updatedData.password = hashedPassword;
-    }
+    };
+
     if (liveTime !== undefined) {
         updatedData.liveTime = liveTime;
-    }
+    };
 
     if (Object.entries(updatedData).length === 0) {
         throw new Error("No fields to update");
-    }
+    };
 
     const existing = await client.url.findFirst({
         where: { userId, shortCode: shortcode, isDeleted: false }
-    })
+    });
 
     if (!existing) {
         throw new AppError("Invalid Url", 500);
-    }
+    };
+
     await client.UrlRecord.deleteMany({
         where: { urlId: existing.id },
-    })
+    });
+
     const updatedUrl = await client.url.update({
         where: { id: existing.id },
         data: updatedData,
@@ -400,7 +415,7 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
     await redisClient.del(
         urlKey(shortcode)
     );
-    
+
     return {
         short_url: `${process.env.BACKEND_URL}/${updatedUrl.shortCode}`,
         original_url: updatedUrl.originalUrl,
