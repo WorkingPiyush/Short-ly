@@ -1,9 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { getUrl } from "../Api/Url";
+import { useUrlFilter } from "../Context/StatusFilterContext";
 
-export const useUser = () => {
+
+export const useUrl = () => {
+    const { filter } = useUrlFilter();
+    
     return useQuery({
-        queryKey: ['url'],
-        queryFn: getUrl,
+        queryKey: ['url', filter],
+        queryFn: () => getUrl(filter),
     })
 }

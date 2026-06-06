@@ -121,9 +121,9 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
             where: { shortCode },
         })
     }
-    let expirationDate;
+    let expirationDate = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
     if (expiry) {
-        expirationDate = expiry ? new Date(expiry) : new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
+        expirationDate = new Date(expiry);
         if (expiry && expirationDate < new Date()) {
             throw new Error("Invalid Expiry Date");
         };
@@ -243,12 +243,27 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
     return url.originalUrl;
 };
 
-export const getMyUrl = async ({ userId }) => {
+export const getMyUrl = async ({ userId, status }) => {
+    const now = new Date();
     let fetchedUrl;
     fetchedUrl = await client.url.findMany({
-        where: { userId, isDeleted: false },
+        where: {
+            userId,
+            isDeleted: false,
+            ...(status === "active" && {
+                expirationDate: { gt: now },
+            }),
+            ...(status === "expired" && {
+                expirationDate: { lte: now },
+                used: true
+            })
+        },
+        orderBy: {
+            createdAt: "asc",
+        },
         select: {
             id: true,
+            userId: true,
             shortCode: true,
             originalUrl: true,
             expirationDate: true,
@@ -257,13 +272,13 @@ export const getMyUrl = async ({ userId }) => {
             password: true,
             isActive: true,
             liveTime: true,
+            lastVisitedAt: true,
+            used: true,
         }
     })
-
     if (!fetchedUrl) {
-        throw new Error("No Url Found !!");
+        throw new AppError("No Url Found !!");
     }
-
     return Promise.all(
         fetchedUrl.map(async (u) => {
             const clicks = await totalClick(u.id);
@@ -276,8 +291,8 @@ export const getMyUrl = async ({ userId }) => {
                 creation_date: u.createdAt,
                 last_update_date: u.updatedAt,
                 isPswrdProtected: u.password ? true : false,
-                lastVistedAt: u.lastVisitedAt,
-                isActive: u.isActive,
+                lastVisitedAt: u.lastVisitedAt,
+                isActive: !u.used && new Date(u.expirationDate) > new Date(),
                 userId: u.userId,
                 liveTime: u.liveTime,
             }

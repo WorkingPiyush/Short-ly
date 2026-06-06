@@ -1,35 +1,26 @@
 /* eslint-disable react/prop-types */
 import React, { useState } from 'react'
-import { useUser } from '../../Hooks/useUrl.jsx'
+import { useUrl } from '../../Hooks/useUrl.jsx'
 import { IoIosSearch } from "react-icons/io";
-import { Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import LinkCard from '../../components/LinkCard.jsx';
+import { useUrlFilter } from '../../Context/StatusFilterContext.jsx';
 
 
 
 function Links() {
-  const { data: urlRecords, isLoading } = useUser()
+  const { data: urlRecords, isLoading } = useUrl()
+  const { filter, setFilter } = useUrlFilter();
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
-  const expired = (date) => {
-    return new Date(date);
-  }
-
-  const filtered = urlRecords?.filter((l) => {
-    const matchFilter = filter === "all" || l?.isActive === true;
-    const matchSearch =
-      l?.original_url.toLowerCase().includes(search.toLowerCase()) ||
-      l?.short_url.toLowerCase().includes(search.toLowerCase());
-    return matchFilter && matchSearch;
-  });
 
   const totalClicks = urlRecords?.reduce((s, l) => s + l.totalClicks, 0);
   const activeCount = urlRecords?.filter((l) => l.isActive === true).length;
-  const expiredCount = urlRecords?.filter((l) => expired(l.expiry_date) < new Date()).length;
+  const expiredCount = urlRecords?.filter((l) => new Date(l.expiry_date) < new Date()).length;
 
   const filterTabs = [
     { key: "all", label: "All" },
     { key: "isActive", label: "Active" },
+    { key: "expired", label: "Expired" },
   ];
 
   if (isLoading) {
@@ -119,9 +110,9 @@ function Links() {
         </div>
 
         {/* Links list */}
-        {filtered.length > 0 ? (
+        {urlRecords?.length > 0 ? (
           <div className="flex flex-col gap-3">
-            {filtered.map((link) => (
+            {urlRecords.map((link) => (
               <LinkCard key={link.id} link={link} />
             ))}
           </div>

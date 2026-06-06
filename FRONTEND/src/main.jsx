@@ -5,6 +5,7 @@ import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider } from './Context/ThemeContext.jsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { StatusFilterContext } from './Context/StatusFilterContext.jsx'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,12 +21,15 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <ThemeProvider>
-          <App />
-        </ThemeProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <StatusFilterContext>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <ThemeProvider>
+
+            <App />
+          </ThemeProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </StatusFilterContext>
   </StrictMode>
 )
