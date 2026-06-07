@@ -40,7 +40,7 @@ export const redirectUrl = asyncHandler(async (req, res) => {
 });
 
 export const getAllUrls = asyncHandler(async (req, res) => {
-    const url = await urlService.getMyUrl({ userId: req.user?.id, status: req.query.status || "all" });
+    const url = await urlService.getMyUrl({ userId: req.user?.id, status: req.query.status});
     return res.status(200).json({ success: true, url });
 });
 

@@ -1,6 +1,6 @@
 import dotenv from "dotenv/config";
 import { client } from '../../../config/db.js';
-import { formatBrowser, formatCountry, formatDevice, formatOperating, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, urlKey } from '../../helper/Url.helper.js';
+import { formatBrowser, formatCountry, formatDevice, formatOperating, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, urlKey, urlStatus } from '../../helper/Url.helper.js';
 import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate } from "../../helper/Db.query.js";
 import { redisClient } from "../../../config/redisClient.js";
 import { AppError } from "../../utils/AppError.js";
@@ -214,7 +214,6 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
     if (url.expirationDate && url.expirationDate < new Date()) {
         throw new AppError('Url Expired !!', 404);
     }
-
     if (url.singleUse) {
         const singleUseUrl = await client.url.updateMany({
             where: {
@@ -243,7 +242,7 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
     return url.originalUrl;
 };
 
-export const getMyUrl = async ({ userId, status }) => {
+export const getMyUrl = async ({ userId, status = "all" }) => {
     const now = new Date();
     let fetchedUrl;
     fetchedUrl = await client.url.findMany({
@@ -251,12 +250,31 @@ export const getMyUrl = async ({ userId, status }) => {
             userId,
             isDeleted: false,
             ...(status === "active" && {
-                expirationDate: { gt: now },
+                AND: [
+                    {
+                        OR: [
+                            { liveTime: null },
+                            { liveTime: { lte: now } },
+                        ],
+                    },
+                    { expirationDate: { gt: now }, },
+                    {
+                        NOT: { AND: [{ singleUse: true }, { used: true },], },
+                    }
+                ],
             }),
             ...(status === "expired" && {
-                expirationDate: { lte: now },
-                used: true
-            })
+                OR: [{
+                    expirationDate: { lte: now },
+                },
+                {
+                    AND: [
+                        { singleUse: true },
+                        { used: true },
+                    ],
+                },
+                ],
+            }),
         },
         orderBy: {
             createdAt: "asc",
@@ -270,12 +288,13 @@ export const getMyUrl = async ({ userId, status }) => {
             createdAt: true,
             updatedAt: true,
             password: true,
-            isActive: true,
             liveTime: true,
             lastVisitedAt: true,
             used: true,
+            singleUse: true,
+
         }
-    })
+    });
     if (!fetchedUrl) {
         throw new AppError("No Url Found !!");
     }
@@ -292,7 +311,7 @@ export const getMyUrl = async ({ userId, status }) => {
                 last_update_date: u.updatedAt,
                 isPswrdProtected: u.password ? true : false,
                 lastVisitedAt: u.lastVisitedAt,
-                isActive: !u.used && new Date(u.expirationDate) > new Date(),
+                isActive: await urlStatus(u),
                 userId: u.userId,
                 liveTime: u.liveTime,
             }
@@ -312,7 +331,7 @@ export const UrlDetails = async ({ userId, shortcode }) => {
             updatedAt: true,
             liveTime: true,
             lastVisitedAt: true,
-            isActive: true
+            isActive: true,
         }
     });
     if (!Url) {

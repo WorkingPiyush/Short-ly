@@ -14,12 +14,12 @@ function Links() {
   const [search, setSearch] = useState("");
 
   const totalClicks = urlRecords?.reduce((s, l) => s + l.totalClicks, 0);
-  const activeCount = urlRecords?.filter((l) => l.isActive === true).length;
-  const expiredCount = urlRecords?.filter((l) => new Date(l.expiry_date) < new Date()).length;
+  const activeCount = urlRecords?.filter((l) => l.isActive === "active").length;
+  const expiredCount = urlRecords?.filter((l) => l.isActive === "expired").length;
 
   const filterTabs = [
     { key: "all", label: "All" },
-    { key: "isActive", label: "Active" },
+    { key: "active", label: "Active" },
     { key: "expired", label: "Expired" },
   ];
 
@@ -33,10 +33,8 @@ function Links() {
 
         {/* Header */}
         <div className="flex items-center justify-between mb-7 flex-wrap gap-3">
-          <h1
-            className="font-extrabold text-2xl md:text-[28px] tracking-tight text-white"
-            style={{ fontFamily: "'Syne', sans-serif" }}
-          >
+          <h1 className="font-extrabold text-2xl md:text-[28px] tracking-tight text-white"
+            style={{ fontFamily: "'Syne', sans-serif" }} >
             My Links
           </h1>
           <Link
@@ -89,8 +87,7 @@ function Links() {
               placeholder="Search links..."
               className="w-full bg-white/4 border border-white/10 rounded-xl
                 pl-10 pr-4 py-2.5 text-sm text-white placeholder-white/25
-                outline-none focus:border-emerald-300/40 transition-colors duration-200"
-            />
+                outline-none focus:border-emerald-300/40 transition-colors duration-200"/>
           </div>
 
           {/* Filter tabs */}
@@ -98,7 +95,7 @@ function Links() {
             <button
               key={key}
               onClick={() => setFilter(key)}
-              className={`text-[13px] font-medium px-4 py-2.5 rounded-xl border transition-all duration-200
+              className={`text-[13px] font-medium px-4 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer
                 ${filter === key
                   ? "text-emerald-300 border-emerald-300/25 bg-emerald-300/10"
                   : "text-white/50 border-white/10 bg-white/4 hover:text-white hover:border-white/20"
