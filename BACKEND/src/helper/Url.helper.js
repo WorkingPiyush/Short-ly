@@ -77,3 +77,18 @@ export const passwordHashing = async (password, salt) => {
 export const passwordCompare = async (password, userPassword) => {
     return await bcrypt.compare(password, userPassword);
 }
+export const urlStatus = async (url) => {
+    // console.log(`${url.shortCode} | ${url.singleUse} | ${url.used}`)
+    const now = new Date();
+    const expiryDate = new Date(url?.expirationDate);
+
+    if (url.liveTime) {
+        return "scheduled";
+    }
+    if (url.singleUse && url.used) {
+        return "expired";
+    } if (expiryDate <= now) {
+        return "expired";
+    }
+    return "active";
+}

@@ -49,35 +49,35 @@ function PriceCategory() {
     ]
 
     return (
-        <section className="bg-[#0b0f0e] text-white py-20 px-6">
+        <section className="dark:bg-[#0b0f0e] text-white py-20 px-6">
             <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
                 {plans.map((plan, i) => (
-                    <div key={i} className={`rounded-2xl p-8 border ${plan.highlighted ? 'border-emerald-500 bg-[#0f1a17]' : 'border-gray-800 bg-[#0b0f0e]'}`}>
+                    <div key={i} className={`rounded-2xl p-8 border ${plan.highlighted ? 'border-emerald-500 dark:bg-[#0f1a17] bg-gray-900' : 'border-gray-800 bg-[#0b0f0e]'}`}>
                         {/* Tag */}
                         <span className={`inline-block px-3 py-1 text-sm rounded-full mb-6 ${plan.highlighted
-                            ? 'bg-emerald-400 text-black'
-                            : 'bg-transparent border border-gray-700 text-gray-300'
+                            ? 'bg-emerald-400 dark:text-black text-white'
+                            : 'dark:bg-transparent bg-white border border-gray-700 dark:text-gray-300 text-black'
                             }`}
                         >
                             {plan.tag}
                         </span>
 
                         {/* Title */}
-                        <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                        <h3 className="text-2xl font-bold mb-2 text-white">{plan.name}</h3>
 
                         {/* Price */}
                         <div className="flex items-end gap-1 mb-3">
-                            <span className="text-5xl font-bold">${plan.price}</span>
-                            <span className="text-gray-400">/mo</span>
+                            <span className="text-5xl font-bold ">${plan.price}</span>
+                            <span className="dark:text-gray-400 text-gray-500">/mo</span>
                         </div>
 
                         {/* Desc */}
-                        <p className="text-gray-400 text-sm mb-6">{plan.desc}</p>
+                        <p className="dark:text-gray-400 text-sm mb-6">{plan.desc}</p>
 
                         {/* Features */}
                         <ul className="space-y-3 mb-8">
                             {plan.features.map((f, idx) => (
-                                <li key={idx} className="flex items-center gap-3 text-gray-300">
+                                <li key={idx} className="flex items-center gap-3 dark:text-gray-300">
                                     <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
                                     {f}
                                 </li>

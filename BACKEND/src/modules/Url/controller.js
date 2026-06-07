@@ -8,22 +8,27 @@ import { success } from "zod";
 
 // CRUD operations for url..
 export const shortUrl = asyncHandler(async (req, res) => {
-    const result = await urlService.urlShort({
+    const url = await urlService.urlShort({
         originalUrl: req.body.originalUrl,
+        singleUse: req.body?.singleUse || false,
+        password: req.body?.password || null,
+        expiry: req.body?.expiry || null,
         userId: req.user?.id || null,
         tempId: req.cookies?.tempId || null,
-        singleUse: req.body.singleUse || null,
     });
-
-    if (result.tempId) {
-        res.cookie("tempId", result.tempId, {
+    if (url?.tempId) {
+        res.cookie("tempId", url.tempId, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
             maxAge: 1000 * 60 * 60 * 24 * 30,
         })
     }
+<<<<<<< HEAD
     return res.status(201).json({ success: true, data: result, });
+=======
+    return res.status(200).json({ success: true, url, });
+>>>>>>> b76499274c31f6f2047a4285d2b1350c154662ab
 });
 
 export const redirectUrl = asyncHandler(async (req, res) => {
@@ -39,8 +44,8 @@ export const redirectUrl = asyncHandler(async (req, res) => {
 });
 
 export const getAllUrls = asyncHandler(async (req, res) => {
-    const urls = await urlService.getMyUrl({ userId: req.user?.id });
-    return res.status(200).json({ success: true, urls });
+    const url = await urlService.getMyUrl({ userId: req.user?.id, status: req.query.status});
+    return res.status(200).json({ success: true, url });
 });
 
 export const getUrl = asyncHandler(async (req, res) => {

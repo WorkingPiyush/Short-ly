@@ -109,7 +109,7 @@ export const totalClick = (id) => {
     })
 };
 export const countUrl = async (tempId) => {
-    await client.url.count({
+    return await client.url.count({
         where: { tempId },
     })
 };

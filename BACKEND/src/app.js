@@ -57,7 +57,10 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/', (req, res) => { logger.info('Server is Working')});
+app.get('/', (req, res) => {
+    res.send('Server is Working');
+    logger.info('Server is Working');
+});
 
 
 
@@ -68,7 +71,8 @@ app.get('/', (req, res) => { logger.info('Server is Working')});
 
 
 // Authentication route
-app.use("/api/auth", authRatelimit, authRoutes);
+// app.use("/api/auth", authRatelimit, authRoutes);
+app.use("/api/auth", authRoutes);
 // Url route
 app.use("/api/url", urlRoutes);
 // Url redirection route

@@ -1,6 +1,6 @@
 import dotenv from "dotenv/config";
 import { client } from '../../../config/db.js';
-import { formatBrowser, formatCountry, formatDevice, formatOperating, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, urlKey } from '../../helper/Url.helper.js';
+import { formatBrowser, formatCountry, formatDevice, formatOperating, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, urlKey, urlStatus } from '../../helper/Url.helper.js';
 import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate } from "../../helper/Db.query.js";
 import { redisClient } from "../../../config/redisClient.js";
 import { AppError } from "../../utils/AppError.js";
@@ -10,13 +10,13 @@ import DeviceDetector from 'device-detector-js';
 import geoip from 'geoip-lite';
 import XLSX from 'xlsx';
 import fs from 'fs';
+import { connect } from "http2";
 
 const deviceDetector = new DeviceDetector();
 const MAX_TEMP_URLS = 3;
 const BATCH_SIZE = 10;
 
-export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
-
+export const urlShort = async ({ originalUrl, userId, tempId, singleUse, password, expiry }) => {
     if (!originalUrl) {
         throw new AppError('Invalid Url', 400);
     }
@@ -36,9 +36,8 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
             newtempId = crypto.randomUUID();
             tempId = newtempId;
         }
-        const tempUrlCount = countUrl(tempId);
-
-        if (tempUrlCount >= MAX_TEMP_URLS) {
+        const tempUrlCount = await countUrl(tempId);
+        if (tempUrlCount === MAX_TEMP_URLS) {
             throw new AppError('Signup required', 400);
         }
 
@@ -51,12 +50,10 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
 
         if (existingTempUrl) {
             return {
-                url: {
-                    originalUrl: existingTempUrl.originalUrl,
-                    shortUrl: `${process.env.BACKEND_URL}/${existingTempUrl.shortCode}`,
-                    clicks: existingTempUrl.clicks,
-                    expirationDate: existingTempUrl.expirationDate,
-                },
+                originalUrl: existingTempUrl.originalUrl,
+                shortUrl: `${process.env.BACKEND_URL}/${existingTempUrl.shortCode}`,
+                clicks: existingTempUrl.clicks,
+                expirationDate: existingTempUrl.expirationDate,
                 tempId,
             }
         }
@@ -74,13 +71,11 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
             }
         })
         return {
-            url: {
-                originalUrl: tempNewUrl.originalUrl,
-                shortUrl: `${process.env.BACKEND_URL}/${tempNewUrl.shortCode}`,
-                clicks: tempNewUrl.clicks,
-                expirationDate: tempNewUrl.expirationDate,
-                userId: tempNewUrl.userId,
-            },
+            originalUrl: tempNewUrl.originalUrl,
+            shortUrl: `${process.env.BACKEND_URL}/${tempNewUrl.shortCode}`,
+            clicks: tempNewUrl.clicks,
+            expirationDate: tempNewUrl.expirationDate,
+            userId: tempNewUrl.userId,
             tempId,
         };
     }
@@ -88,7 +83,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
     const existing = await client.url.findFirst({
         where: {
             urlHash,
-            userId,
+            userId: userId,
         },
         select: {
             id: true,
@@ -108,27 +103,33 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
         return {
             shortUrl: `${process.env.BACKEND_URL}/${existing.shortCode}`,
             originalUrl: existing.originalUrl,
-            totalClicks: clicks,
             expiry_date: existing.expirationDate,
             creation_date: existing.createdAt,
+            singleUse: existing.singleUse,
+            totalClicks: clicks,
             isPswrdProtected: existing.password ? true : false,
-            userId: existing.userId,
             isActive: existing.isActive,
+            userId: existing.userId,
         }
     }
-
     let shortCode;
     let shortCodeExists = true;
 
     while (shortCodeExists) {
         shortCode = generateShortCode();
         shortCodeExists = await client.url.findUnique({
-            where: { shortCode, },
+            where: { shortCode },
         })
     }
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + 60);
+    let expirationDate = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
+    if (expiry) {
+        expirationDate = new Date(expiry);
+        if (expiry && expirationDate < new Date()) {
+            throw new Error("Invalid Expiry Date");
+        };
+    };
 
+    let hashedPassword = password ? await passwordHashing(password, 10) : null;
     const newUrl = await client.url.create({
         data: {
             originalUrl,
@@ -137,19 +138,22 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse }) => {
             shortCode,
             userId,
             expirationDate,
-            singleUse
+            singleUse,
+            password: hashedPassword,
         }
-    })
-
+    });
     const qrCodeImg = await generateQRCode(newUrl);
     const responseUrl = {
         shortUrl: `${process.env.BACKEND_URL}/${newUrl.shortCode}`,
         originalUrl: newUrl.originalUrl,
         expiry_date: newUrl.expirationDate,
         creation_date: newUrl.createdAt,
-        userId: newUrl.userId,
         QrCode: qrCodeImg,
-    }
+        singleUse: newUrl.singleUse,
+        isPswrdProtected: newUrl.password ? true : false,
+        userId: newUrl.userId,
+    };
+
     return responseUrl;
 };
 
@@ -210,22 +214,25 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
     if (url.expirationDate && url.expirationDate < new Date()) {
         throw new AppError('Url Expired !!', 404);
     }
-    const singleUseUrl = await client.url.updateMany({
-        where: {
-            id: url.id,
-            isActive: true,
-            singleUse: true,
-        },
-        data: {
-            singleUse: false
-        }
-    })
-    if (singleUseUrl.count === 0) {
-        throw new AppError("Already used or invalid link", 400);
-    }
     if (url.singleUse) {
+        const singleUseUrl = await client.url.updateMany({
+            where: {
+                id: url.id,
+                singleUse: true,
+                isActive: true,
+                used: false,
+            },
+            data: {
+                used: true,
+            }
+        });
+        if (singleUseUrl.count == 0) {
+            throw new AppError("Already used or invalid link", 400);
+        }
+
         return url.originalUrl;
     }
+
     await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, id: url.id, userId: url.userId, liveTime: url.liveTime, isProtected: url.password ? true : false, expirationDate: url.expirationDate?.toISOString() || "", }), { EX: 3600, });
 
     if (!isBot) {
@@ -235,31 +242,67 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
     return url.originalUrl;
 };
 
-export const getMyUrl = async ({ userId }) => {
+export const getMyUrl = async ({ userId, status = "all" }) => {
+    const now = new Date();
     let fetchedUrl;
     fetchedUrl = await client.url.findMany({
-        where: { userId, isDeleted: false },
+        where: {
+            userId,
+            isDeleted: false,
+            ...(status === "active" && {
+                AND: [
+                    {
+                        OR: [
+                            { liveTime: null },
+                            { liveTime: { lte: now } },
+                        ],
+                    },
+                    { expirationDate: { gt: now }, },
+                    {
+                        NOT: { AND: [{ singleUse: true }, { used: true },], },
+                    }
+                ],
+            }),
+            ...(status === "expired" && {
+                OR: [{
+                    expirationDate: { lte: now },
+                },
+                {
+                    AND: [
+                        { singleUse: true },
+                        { used: true },
+                    ],
+                },
+                ],
+            }),
+        },
+        orderBy: {
+            createdAt: "asc",
+        },
         select: {
             id: true,
+            userId: true,
             shortCode: true,
             originalUrl: true,
             expirationDate: true,
             createdAt: true,
             updatedAt: true,
             password: true,
-            isActive: true,
             liveTime: true,
+            lastVisitedAt: true,
+            used: true,
+            singleUse: true,
+
         }
-    })
-
+    });
     if (!fetchedUrl) {
-        throw new Error("No Url Found !!");
+        throw new AppError("No Url Found !!");
     }
-
     return Promise.all(
         fetchedUrl.map(async (u) => {
             const clicks = await totalClick(u.id);
             return {
+                id: u.id,
                 short_url: `${process.env.BACKEND_URL}/${u.shortCode}`,
                 original_url: u.originalUrl,
                 totalClicks: clicks,
@@ -267,8 +310,8 @@ export const getMyUrl = async ({ userId }) => {
                 creation_date: u.createdAt,
                 last_update_date: u.updatedAt,
                 isPswrdProtected: u.password ? true : false,
-                lastVistedAt: u.lastVisitedAt,
-                isActive: u.isActive,
+                lastVisitedAt: u.lastVisitedAt,
+                isActive: await urlStatus(u),
                 userId: u.userId,
                 liveTime: u.liveTime,
             }
@@ -288,7 +331,7 @@ export const UrlDetails = async ({ userId, shortcode }) => {
             updatedAt: true,
             liveTime: true,
             lastVisitedAt: true,
-            isActive: true
+            isActive: true,
         }
     });
     if (!Url) {
@@ -348,42 +391,45 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
         updatedData.normalizedUrl = normalizedUrl;
         updatedData.urlHash = urlHash;
         updatedData.clicks = 0;
-    }
+    };
 
     if (expirationDate !== undefined) {
         if (expirationDate && new Date(expirationDate) < new Date()) {
             throw new Error("Invalid Expiry Date");
         }
 
-        updatedData.expirationDate = expirationDate;
-    }
+        updatedData.expirationDate = new Date(expirationDate);
+    };
 
     if (isActive !== undefined) {
         updatedData.isActive = isActive;
-    }
+    };
 
     if (password !== undefined) {
         const hashedPassword = await passwordHashing(password, 10);
         updatedData.password = hashedPassword;
-    }
+    };
+
     if (liveTime !== undefined) {
         updatedData.liveTime = liveTime;
-    }
+    };
 
     if (Object.entries(updatedData).length === 0) {
         throw new Error("No fields to update");
-    }
+    };
 
     const existing = await client.url.findFirst({
         where: { userId, shortCode: shortcode, isDeleted: false }
-    })
+    });
 
     if (!existing) {
         throw new AppError("Invalid Url", 500);
-    }
+    };
+
     await client.UrlRecord.deleteMany({
         where: { urlId: existing.id },
-    })
+    });
+
     const updatedUrl = await client.url.update({
         where: { id: existing.id },
         data: updatedData,
@@ -403,6 +449,7 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
     await redisClient.del(
         urlKey(shortcode)
     );
+
     return {
         short_url: `${process.env.BACKEND_URL}/${updatedUrl.shortCode}`,
         original_url: updatedUrl.originalUrl,
