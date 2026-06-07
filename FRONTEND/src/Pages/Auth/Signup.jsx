@@ -14,6 +14,7 @@ function Signup() {
     const navigate = useNavigate();
     const signinMutation = useSignup();
     const [loading, setLoading] = useState(false);
+<<<<<<< HEAD
 
     const [showPassword, setShowPassword] = useState(false);
     const [name, setName] = useState("")
@@ -29,6 +30,14 @@ function Signup() {
     const submitUserInfo = (info) => {
         
 =======
+=======
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [name, setName] = useState("")
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+>>>>>>> b76499274c31f6f2047a4285d2b1350c154662ab
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = { name, email, password };
@@ -52,6 +61,9 @@ function Signup() {
         } finally {
             setLoading(false);
         }
+<<<<<<< HEAD
+>>>>>>> b76499274c31f6f2047a4285d2b1350c154662ab
+=======
 >>>>>>> b76499274c31f6f2047a4285d2b1350c154662ab
     }
     return (
@@ -80,6 +92,7 @@ function Signup() {
                                     onChange={(e) => setName(e.target.value)}
                                     placeholder="Alex"
 <<<<<<< HEAD
+<<<<<<< HEAD
                                     onChange={(e) => setUserInfo({ fName: e.target.value })}
                                     className="w-full rounded-xl border border-zinc-700
                                 bg-zinc-900/80 px-5 py-4 text-white
@@ -104,6 +117,14 @@ function Signup() {
                                         transition"/>
                             </div>
 
+=======
+                                    className="w-full rounded-xl border border-zinc-700 
+                                        dark:bg-zinc-900/80 px-5 py-4 dark:text-white text-black
+                                        placeholder:text-zinc-400
+                                        outline-none focus:border-emerald-500/40
+                                        transition"/>
+                            </div>
+>>>>>>> b76499274c31f6f2047a4285d2b1350c154662ab
 =======
                                     className="w-full rounded-xl border border-zinc-700 
                                         dark:bg-zinc-900/80 px-5 py-4 dark:text-white text-black
@@ -175,9 +196,12 @@ function Signup() {
                         </div>
                     </form>
 <<<<<<< HEAD
+<<<<<<< HEAD
                     <div className='p-8'>
                         <button onClick={submitUserInfo} className='py-2 w-full border cursor-pointer border-zinc-400 shadow rounded-xl hover:scale-95 transition-all'>Create free account</button>
                     </div>
+=======
+>>>>>>> b76499274c31f6f2047a4285d2b1350c154662ab
 =======
 >>>>>>> b76499274c31f6f2047a4285d2b1350c154662ab
                     <div>

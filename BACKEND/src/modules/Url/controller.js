@@ -25,7 +25,11 @@ export const shortUrl = asyncHandler(async (req, res) => {
         })
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
     return res.status(201).json({ success: true, data: result, });
+=======
+    return res.status(200).json({ success: true, url, });
+>>>>>>> b76499274c31f6f2047a4285d2b1350c154662ab
 =======
     return res.status(200).json({ success: true, url, });
 >>>>>>> b76499274c31f6f2047a4285d2b1350c154662ab

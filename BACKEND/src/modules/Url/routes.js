@@ -21,6 +21,9 @@ router.post('/short', shortUrl); // short url creation
 router.post('/verify-password/:shortCode', verifyPassword) // password verification
 router.post("/bulkShort", routeProtection, upload.single("file"), bulkShortUrl) // bulk file url shortening 
 
+<<<<<<< HEAD
+>>>>>>> b76499274c31f6f2047a4285d2b1350c154662ab
+=======
 >>>>>>> b76499274c31f6f2047a4285d2b1350c154662ab
 router.get('/myUrl', routeProtection, getAllUrls); // getting users all urls
 router.get('/:shortCode', routeProtection, getUrl); // getting info about a specific short url 
@@ -33,6 +36,9 @@ router.post('/verify-password/:shortCode', UrlRL, verifyPassword) // password ve
 router.patch('/:shortCode', routeProtection, updateUrl) // updating the a specific short url
 
 
+<<<<<<< HEAD
+>>>>>>> b76499274c31f6f2047a4285d2b1350c154662ab
+=======
 >>>>>>> b76499274c31f6f2047a4285d2b1350c154662ab
 
 
