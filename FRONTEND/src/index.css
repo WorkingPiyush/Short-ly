@@ -13,3 +13,22 @@
 .font-roboto {
     font-family: 'Roboto', sans-serif;
 }
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --animate-slide-down:
+        slide-down 0.3s ease-in-out forwards;
+
+    @keyframes slide-down {
+        from {
+            transform: translateY(0);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(20px);
+            opacity: 1;
+        }
+    }
+}

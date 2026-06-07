@@ -8,6 +8,25 @@ import { AppError } from '../../utils/AppError.js';
 import logger from '../../../config/logger.js';
 import { passwordCompare, passwordHashing } from '../../helper/Url.helper.js';
 
+export const getUser = async ({ userId }) => {
+    const user = await client.user.findUnique({
+        where: { id: userId },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            profileImage: true,
+            isVerified: true,
+            isBlocked: true,
+            lastLoginAt: true,
+        }
+    })
+    if (!user) {
+        throw new AppError("User not found", 404);
+    }
+    return { ...user, username: user.name };
+}
 
 export const registerUser = async ({ name, email, password }) => {
     try {

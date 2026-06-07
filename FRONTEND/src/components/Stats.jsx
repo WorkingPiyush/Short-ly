@@ -8,13 +8,13 @@ function Stats() {
         { value: "140+", label: "Countries served" },
     ];
     return (
-        <div className="w-full border-y border-zinc-800 bg-black mt-18 mb-18 py-8">
+        <div className="w-full border-y border-zinc-400 bg-white dark:bg-black mt-18 mb-18 py-8 rounded-2xl shadow"> 
             <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
 
                 {stats.map((stat, i) => (
                     <div key={i} className="space-y-2">
 
-                        <h2 className="text-4xl md:text-5xl font-bold text-white">
+                        <h2 className="text-4xl md:text-5xl font-bold text-black dark:text-white">
                             {stat.value.split(/(\+)/)[0]}
                             {stat.value.includes("+") && (
                                 <span className="text-emerald-400">+</span>
@@ -24,7 +24,7 @@ function Stats() {
                             )}
                         </h2>
 
-                        <p className="text-zinc-500 text-sm">
+                        <p className="dark:text-zinc-500 text-black text-sm">
                             {stat.label}
                         </p>
 

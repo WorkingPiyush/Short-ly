@@ -1,10 +1,19 @@
-import { ZodError } from "zod";
+import { success, ZodError } from "zod";
 import { loginSchema, signupSchema } from "../../validator/auth.validator.js";
 import * as authService from "./service.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { AppError } from "../../utils/AppError.js";
 import logger from "../../../config/logger.js";
 
+export const user = asyncHandler(async (req, res) => {
+    const userInfo = await authService.getUser({
+        userId: req.user.id
+    })
+    return res.status(200).json({
+        success: true,
+        user: userInfo,
+    });
+})
 export const register = asyncHandler(async (req, res) => {
     const validatedBody = signupSchema.safeParse(req.body);
     if (!validatedBody.success) {
@@ -16,6 +25,7 @@ export const register = asyncHandler(async (req, res) => {
     req.session.user = {
         id: user.id,
         username: user.name,
+        email: user.email,
     }
 
     req.session.save((err) => {
@@ -28,7 +38,11 @@ export const register = asyncHandler(async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Signup successfully",
-            user: req.session.username,
+            user: {
+                id: user.id,
+                username: user.name,
+                email: user.email,
+            },
         });
     });
 });
@@ -56,7 +70,8 @@ export const login = asyncHandler(async (req, res) => {
             req.session.user = {
                 id: user.id,
                 username: user.name,
-            };
+                email: user.email,
+            }
             req.session.save((err) => {
                 if (err) {
                     return res.status(500).json({
@@ -66,10 +81,16 @@ export const login = asyncHandler(async (req, res) => {
                 }
                 return res.status(200).json({
                     success: true,
+                    user: {
+                        id: user.id,
+                        username: user.name,
+                        email: user.email,
+                    }
                 });
             })
             res.clearCookie("tempId");
         })
+        logger.info(user, "User logged success !!")
     } catch (err) {
         logger.error(err.message);
         res.status(400).json({ message: err.message });
@@ -86,6 +107,6 @@ export const logout = asyncHandler(async (req, res) => {
     })
     res.clearCookie("sid");
     res.json({
-        message: "Logout successfully",
+        success: true,
     })
 });
