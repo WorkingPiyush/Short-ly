@@ -199,12 +199,11 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
         return result.originalUrl;
     }
     const url = await findFirstUrl(shortCode);
+
     if (!url) {
         throw new AppError('Invalid Url', 400);
     }
-    if (!url.isActive) {
-        throw new AppError("Link is disabled", 500);
-    }
+
     if (url.liveTime && new Date() < url.liveTime) {
         throw new AppError("Link is not live yet", 500);
     }
@@ -304,6 +303,7 @@ export const getMyUrl = async ({ userId, status = "all" }) => {
             return {
                 id: u.id,
                 short_url: `${process.env.BACKEND_URL}/${u.shortCode}`,
+                short_code: u.shortCode,
                 original_url: u.originalUrl,
                 totalClicks: clicks,
                 expiry_date: u.expirationDate,
@@ -363,7 +363,7 @@ export const UrlDetails = async ({ userId, shortcode }) => {
 
 export const UrlDelete = async ({ userId, shortcode }) => {
     const result = await client.url.update({
-        where: { userId, shortCode: shortcode, isActive: true, isDeleted: false },
+        where: { userId, shortCode: shortcode, isDeleted: false },
         data: {
             isDeleted: true, deletedAt: new Date(),
         }
@@ -375,7 +375,7 @@ export const UrlDelete = async ({ userId, shortcode }) => {
 };
 
 export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive, shortcode, password, liveTime }) => {
-
+    // console.log({ userId, originalUrl, expirationDate, isActive, shortcode, password, liveTime })
     let updatedData = {};
 
     if (originalUrl) {
@@ -393,7 +393,7 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
         updatedData.clicks = 0;
     };
 
-    if (expirationDate !== undefined) {
+    if (expirationDate !== null) {
         if (expirationDate && new Date(expirationDate) < new Date()) {
             throw new Error("Invalid Expiry Date");
         }
@@ -405,12 +405,12 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
         updatedData.isActive = isActive;
     };
 
-    if (password !== undefined) {
+    if (password) {
         const hashedPassword = await passwordHashing(password, 10);
         updatedData.password = hashedPassword;
     };
 
-    if (liveTime !== undefined) {
+    if (liveTime) {
         updatedData.liveTime = liveTime;
     };
 
@@ -450,16 +450,17 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
         urlKey(shortcode)
     );
 
-    return {
-        short_url: `${process.env.BACKEND_URL}/${updatedUrl.shortCode}`,
-        original_url: updatedUrl.originalUrl,
-        expiry_date: updatedUrl.expirationDate,
-        isPswrdProtected: updatedUrl.password ? true : false,
-        Start_at: updatedUrl.liveTime,
-        creation_date: updatedUrl.createdAt,
-        last_update_date: updatedUrl.updatedAt,
-        liveTime: updatedUrl.liveTime,
-    }
+    // return {
+    //     short_url: `${process.env.BACKEND_URL}/${updatedUrl.shortCode}`,
+    //     original_url: updatedUrl.originalUrl,
+    //     expiry_date: updatedUrl.expirationDate,
+    //     isPswrdProtected: updatedUrl.password ? true : false,
+    //     Start_at: updatedUrl.liveTime,
+    //     creation_date: updatedUrl.createdAt,
+    //     last_update_date: updatedUrl.updatedAt,
+    //     liveTime: updatedUrl.liveTime,
+    // }
+    return true;
 };
 
 export const passwordVerify = async ({ password, shortCode }) => {

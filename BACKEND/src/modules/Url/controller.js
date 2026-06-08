@@ -40,43 +40,38 @@ export const redirectUrl = asyncHandler(async (req, res) => {
 });
 
 export const getAllUrls = asyncHandler(async (req, res) => {
-    const url = await urlService.getMyUrl({ userId: req.user?.id, status: req.query.status});
+    const url = await urlService.getMyUrl({ userId: req.user?.id, status: req.query.status });
     return res.status(200).json({ success: true, url });
 });
 
 export const getUrl = asyncHandler(async (req, res) => {
-    const response = await urlService.UrlDetails({
+    const url = await urlService.UrlDetails({
         userId: req.user?.id,
-        shortcode: req.params.shortCode,
+        shortcode: req.query?.shortCode,
     });
-    return res.status(200).json({ success: true, response });
 
+    return res.status(200).json({ success: true, url });
 });
 
 export const deleteUrl = asyncHandler(async (req, res) => {
     const response = await urlService.UrlDelete({
         userId: req.user?.id,
-        shortcode: req.params.shortCode,
+        shortcode: req.query?.shortCode,
     });
-    return res.status(200).json({ success: true, response });
+    return res.status(204).json({ success: true, response });
 });
 
 export const updateUrl = asyncHandler(async (req, res) => {
-    let dateValidation = timeValidation.safeParse(req.body.liveTime);
-    if (!dateValidation.success) {
-        let { message } = JSON.parse(dateValidation.error.message)[0];
-        throw new AppError(message, 400);
-    }
     const url = await urlService.UrlUpdate({
         userId: req.user?.id,
         originalUrl: req.body.originalUrl,
         expirationDate: req.body.expirationDate,
         isActive: req.body.isActive,
         password: req.body.password,
-        shortcode: req.params.shortCode,
-        liveTime: dateValidation.data,
+        shortcode: req.query?.shortCode,
+        liveTime: req.body?.liveTime,
     })
-    return res.status(200).json({ success: true, NewUrl: url });
+    return res.status(204).json({ success: true });
 });
 
 export const verifyPassword = asyncHandler(async (req, res) => {

@@ -2,7 +2,7 @@ import { client } from '../../config/db.js';
 
 export const findFirstUrl = async (shortCode) => {
     return await client.url.findFirst({
-        where: { shortCode, isDeleted: false }
+        where: { shortCode, isActive: true, isDeleted: false }
     })
 };
 export const analyticsUpdates = async (id, browser, os, device, country, city) => {

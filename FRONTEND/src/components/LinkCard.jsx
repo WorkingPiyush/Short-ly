@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MdModeEdit } from "react-icons/md";
 import { CiShare2 } from "react-icons/ci";
 import { SiSimpleanalytics } from "react-icons/si";
@@ -11,8 +11,6 @@ import CopyButton from "./CopyBtn";
 
 /* eslint-disable react/prop-types */
 export default function LinkCard({ link }) {
-
-
     const formatedDate = (input) => {
         return new Date(input)?.toLocaleString("en-In", {
             year: "numeric",
@@ -38,7 +36,7 @@ export default function LinkCard({ link }) {
                         {link.original_url}
                     </p>
                     <div className="flex items-center gap-2">
-                        <Link to="#" className={`text-[13px] font-medium transition-colors ${link.isActive === "expired" ? "text-emerald-300/35" : "text-emerald-300 hover:text-emerald-200"}`} >
+                        <Link to={link.short_url} target="_blank" className={`text-[13px] font-medium transition-colors ${link.isActive === "expired" ? "text-emerald-300/35" : "text-emerald-300 hover:text-emerald-200"}`} >
                             {link.short_url}
                         </Link>
                         <CopyButton text={link.short_url} />
@@ -48,7 +46,9 @@ export default function LinkCard({ link }) {
                 {/* Action buttons */}
                 <div className="flex items-center gap-0.5 shrink-0">
                     <ActionButton
+                        panelChange={`/dashboard/links/${link.short_code}`}
                         label="Edit"
+                        disable={link}
                         icon={<MdModeEdit />}
                     />
                     <ActionButton
@@ -85,11 +85,10 @@ export default function LinkCard({ link }) {
                     <PiCursorClick />
                     {link.totalClicks} {link.totalClicks === 1 ? "click" : "clicks"}
                 </span>
-                {link.isPswrdProtected &&
-                    <span className="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-white/5 text-white/50">
-                        <IoIosUnlock />
-                        Pasword Protected
-                    </span>}
+                {link.isPswrdProtected && <span className="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-white/5 text-white/50">
+                    <IoIosUnlock />
+                    Pasword Protected
+                </span>}
 
                 {/* Created */}
                 <span className="inline-flex items-center gap-1.5 text-[12px] text-white/30">
