@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { MdModeEdit } from "react-icons/md";
 import { CiShare2 } from "react-icons/ci";
 import { SiSimpleanalytics } from "react-icons/si";
@@ -22,24 +22,21 @@ export default function LinkCard({ link }) {
     return (
         <div
             className={`border rounded-2xl p-5 transition-all duration-200
-        ${link.isActive === "expired" ? "bg-white/1.5 border-white/6 hover:border-white/10"
-                    : "bg-white/3 border-white/8 hover:bg-white/5 hover:border-white/[0.14]"
+        ${link.isActive === "expired" ? "bg-white/1.5 border-white/6 hover:border-white/10" : link.isActive === "used" ?
+                    "bg-white/1 border-white/6 hover:border-white/10" : "bg-white/3 border-white/8 hover:bg-white/5 hover:border-white/[0.14]"
                 }`}>
             {/* Top row */}
             <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex-1 min-w-0">
-                    <p
-                        className={`font-bold text-[15px] truncate mb-1.5 tracking-tight
-              ${link.isActive === "expired" ? "text-white/35" : "text-white"}`}
-                        style={{ fontFamily: "'Syne', sans-serif" }}
-                    >
+                    <p className={`font-bold text-[15px] truncate mb-1.5 tracking-tight ${link.isActive === "expired" ? "text-white/35" : link.isActive === "used" ? "text-gray-300/10" : "text-white"}`}
+                        style={{ fontFamily: "'Syne', sans-serif" }}>
                         {link.original_url}
                     </p>
                     <div className="flex items-center gap-2">
-                        <Link to={link.short_url} target="_blank" className={`text-[13px] font-medium transition-colors ${link.isActive === "expired" ? "text-emerald-300/35" : "text-emerald-300 hover:text-emerald-200"}`} >
+                        <Link to={link.short_url} target="_blank" className={`text-[13px] font-medium transition-colors ${link.isActive === "expired" ? "text-emerald-300/35" : link.isActive === "used" ? "text-gray-400 hover:text-gray-200/35" : "text-emerald-300 hover:text-emerald-200"}`} >
                             {link.short_url}
                         </Link>
-                        <CopyButton text={link.short_url} />
+                        <CopyButton text={link.short_url} status={link.isActive} />
                     </div>
                 </div>
 
@@ -48,19 +45,22 @@ export default function LinkCard({ link }) {
                     <ActionButton
                         panelChange={`/dashboard/links/${link.short_code}`}
                         label="Edit"
-                        disable={link}
+                        disable={link.isActive}
                         icon={<MdModeEdit />}
                     />
                     <ActionButton
                         label="Share"
+                        disable={link.isActive}
                         icon={<CiShare2 />}
                     />
                     <ActionButton
                         label="Analytics"
+                        disable={link.isActive}
                         icon={<SiSimpleanalytics />}
                     />
                     <ActionButton
                         label="More options"
+                        disable={link.isActive}
                         icon={<BsThreeDotsVertical />}
                     />
                 </div>
@@ -73,11 +73,12 @@ export default function LinkCard({ link }) {
                     className={`inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full border
             ${link.isActive === "expired"
                             ? "bg-red-400/10 text-red-400 border-red-400/20" :
-                            link.isActive === "scheduled" ? "bg-yellow-500/70 text-white border-yellow-400/20"
-                                : "bg-emerald-300/10 text-emerald-300 border-emerald-300/25"
+                            link.isActive === "scheduled" ? "bg-yellow-500/70 text-white border-yellow-400/20" :
+                                link.isActive === "used" ? "bg-gray-300/70 text-black border-gray-400/20"
+                                    : "bg-emerald-300/10 text-emerald-300 border-emerald-300/25"
                         }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${link.isActive === "expired" ? "bg-red-400" : link.isActive === "scheduled" ? "bg-yellow-300" : "bg-emerald-300"}`} />
-                    {link.isActive === "expired" ? "Expired" : link.isActive === "scheduled" ? "Scheduled" : "Active"}
+                    <span className={`w-1.5 h-1.5 rounded-full ${link.isActive === "expired" ? "bg-red-400" : link.isActive === "scheduled" ? "bg-yellow-300" : link.isActive === "used" ? "bg-gray-900" : "bg-emerald-300"}`} />
+                    {link.isActive === "expired" ? "Expired" : link.isActive === "scheduled" ? "Scheduled" : link.isActive === "used" ? "Single Used" : "Active"}
                 </span>
 
                 {/* Clicks */}

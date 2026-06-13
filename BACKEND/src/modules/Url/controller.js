@@ -47,7 +47,7 @@ export const getAllUrls = asyncHandler(async (req, res) => {
 export const getUrl = asyncHandler(async (req, res) => {
     const url = await urlService.UrlDetails({
         userId: req.user?.id,
-        shortcode: req.query?.shortCode,
+        shortCode: req.params.shortCode
     });
 
     return res.status(200).json({ success: true, url });
@@ -56,7 +56,7 @@ export const getUrl = asyncHandler(async (req, res) => {
 export const deleteUrl = asyncHandler(async (req, res) => {
     const response = await urlService.UrlDelete({
         userId: req.user?.id,
-        shortcode: req.query?.shortCode,
+        shortCode: req.params.shortCode,
     });
     return res.status(204).json({ success: true, response });
 });
@@ -68,7 +68,7 @@ export const updateUrl = asyncHandler(async (req, res) => {
         expirationDate: req.body.expirationDate,
         isActive: req.body.isActive,
         password: req.body.password,
-        shortcode: req.query?.shortCode,
+        shortCode: req.params.shortCode,
         liveTime: req.body?.liveTime,
     })
     return res.status(204).json({ success: true });
@@ -77,12 +77,12 @@ export const updateUrl = asyncHandler(async (req, res) => {
 export const verifyPassword = asyncHandler(async (req, res) => {
     const result = await urlService.passwordVerify({
         password: req.body.password,
-        shortCode: req.params.shortCode
+        shortCode: req.params.shortCode,
     });
     if (result.isMatch) {
         return res.redirect(result.originalUrl);
     }
-})
+});
 
 export const bulkShortUrl = asyncHandler(async (req, res) => {
     const result = await urlService.shortUrlBulk({
@@ -90,4 +90,12 @@ export const bulkShortUrl = asyncHandler(async (req, res) => {
         userId: req.user?.id,
     })
     return res.status(200).json({ success: true, url: result })
-})
+});
+
+export const searchUrl = asyncHandler(async (req, res) => {
+    const response = await urlService.searchUrl({
+        query: req.params.query,
+        userId: req.user?.id,
+    })
+    return res.status(200).json({ success: true, response })
+});

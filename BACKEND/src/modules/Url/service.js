@@ -263,16 +263,12 @@ export const getMyUrl = async ({ userId, status = "all" }) => {
                 ],
             }),
             ...(status === "expired" && {
-                OR: [{
-                    expirationDate: { lte: now },
-                },
-                {
-                    AND: [
-                        { singleUse: true },
-                        { used: true },
-                    ],
-                },
-                ],
+                expirationDate: { lte: now }
+            }),
+            ...(status === "SingleUse" && {
+                singleUse: true,
+                used: true,
+                expirationDate: { gt: now },
             }),
         },
         orderBy: {
@@ -280,18 +276,18 @@ export const getMyUrl = async ({ userId, status = "all" }) => {
         },
         select: {
             id: true,
-            userId: true,
-            shortCode: true,
             originalUrl: true,
+            shortCode: true,
             expirationDate: true,
+            password: true,
             createdAt: true,
             updatedAt: true,
-            password: true,
             liveTime: true,
+            singleUse: true,
+            isActive: true,
+            userId: true,
             lastVisitedAt: true,
             used: true,
-            singleUse: true,
-
         }
     });
     if (!fetchedUrl) {
@@ -312,16 +308,21 @@ export const getMyUrl = async ({ userId, status = "all" }) => {
                 isPswrdProtected: u.password ? true : false,
                 lastVisitedAt: u.lastVisitedAt,
                 isActive: await urlStatus(u),
-                userId: u.userId,
                 liveTime: u.liveTime,
+                singleUse: u.singleUse,
+                userId: u.userId,
             }
         })
     );
 };
 
-export const UrlDetails = async ({ userId, shortcode }) => {
+export const UrlDetails = async ({ userId, shortCode }) => {
+    if (!shortCode) {
+        logger.error("shortCode not found !!");
+        throw new AppError("shortCode not found !!", 404);
+    };
     const Url = await client.url.findFirst({
-        where: { userId, shortCode: shortcode, isDeleted: false },
+        where: { userId, shortCode, isDeleted: false },
         select: {
             id: true,
             originalUrl: true,
@@ -376,9 +377,12 @@ export const UrlDelete = async ({ userId, shortcode }) => {
 
 export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive, shortcode, password, liveTime }) => {
     // console.log({ userId, originalUrl, expirationDate, isActive, shortcode, password, liveTime })
+    // console.log(!userId, !originalUrl, !expirationDate, !isActive, !shortcode, !password, !liveTime)
+
     let updatedData = {};
 
-    if (originalUrl) {
+    if (originalUrl !== null) {
+        console.log("url Block")
         if (!isValidUrl(originalUrl)) {
             throw new Error("Invalid Url");
         }
@@ -401,7 +405,7 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
         updatedData.expirationDate = new Date(expirationDate);
     };
 
-    if (isActive !== undefined) {
+    if (isActive !== null) {
         updatedData.isActive = isActive;
     };
 
@@ -410,7 +414,7 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
         updatedData.password = hashedPassword;
     };
 
-    if (liveTime) {
+    if (liveTime !== null) {
         updatedData.liveTime = liveTime;
     };
 
@@ -426,9 +430,11 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
         throw new AppError("Invalid Url", 500);
     };
 
-    await client.UrlRecord.deleteMany({
-        where: { urlId: existing.id },
-    });
+    if (originalUrl) {
+        await client.UrlRecord.deleteMany({
+            where: { urlId: existing.id },
+        });
+    }
 
     const updatedUrl = await client.url.update({
         where: { id: existing.id },
@@ -450,16 +456,16 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
         urlKey(shortcode)
     );
 
-    // return {
-    //     short_url: `${process.env.BACKEND_URL}/${updatedUrl.shortCode}`,
-    //     original_url: updatedUrl.originalUrl,
-    //     expiry_date: updatedUrl.expirationDate,
-    //     isPswrdProtected: updatedUrl.password ? true : false,
-    //     Start_at: updatedUrl.liveTime,
-    //     creation_date: updatedUrl.createdAt,
-    //     last_update_date: updatedUrl.updatedAt,
-    //     liveTime: updatedUrl.liveTime,
-    // }
+    return {
+        short_url: `${process.env.BACKEND_URL}/${updatedUrl.shortCode}`,
+        original_url: updatedUrl.originalUrl,
+        expiry_date: updatedUrl.expirationDate,
+        isPswrdProtected: updatedUrl.password ? true : false,
+        Start_at: updatedUrl.liveTime,
+        creation_date: updatedUrl.createdAt,
+        last_update_date: updatedUrl.updatedAt,
+        liveTime: updatedUrl.liveTime,
+    }
     return true;
 };
 
@@ -476,7 +482,7 @@ export const passwordVerify = async ({ password, shortCode }) => {
         throw new AppError("Invalid password", 500);
     }
     return { isMatch: true, originalUrl: url.originalUrl };
-}
+};
 export const shortUrlBulk = async ({ filePath, userId }) => {
     try {
         const workbook = XLSX.readFile(filePath);
@@ -497,4 +503,49 @@ export const shortUrlBulk = async ({ filePath, userId }) => {
     } finally {
         if (fs.existsSync(filePath)) { fs.unlinkSync(filePath) };
     }
-}
+};
+export const searchUrl = async ({ query, userId }) => {
+    if (!query) {
+        logger.error("Query not Found")
+        throw new AppError("Query not Found", 404);
+    };
+    let fetchedUrl;
+    fetchedUrl = await client.$queryRaw`
+        SELECT *,  
+        GREATEST(similarity("originalUrl",${query}),similarity("shortCode",${query})) AS score
+        FROM "Url"
+        WHERE "userId" = ${userId}
+        AND (
+            "originalUrl" ILIKE ${'%' + query + '%'}
+            OR 
+            "shortCode" ILIKE ${'%' + query + '%'}
+        )
+        
+        ORDER BY score DESC
+        LIMIT 10
+        `;
+    if (!fetchedUrl) {
+        throw new AppError("No matching url found !!", 404);
+    }
+    return Promise.all(
+        fetchedUrl.map(async (u) => {
+            const clicks = await totalClick(u.id);
+            return {
+                id: u.id,
+                short_url: `${process.env.BACKEND_URL}/${u.shortCode}`,
+                short_code: u.shortCode,
+                original_url: u.originalUrl,
+                totalClicks: clicks,
+                expiry_date: u.expirationDate,
+                creation_date: u.createdAt,
+                last_update_date: u.updatedAt,
+                isPswrdProtected: u.password ? true : false,
+                lastVisitedAt: u.lastVisitedAt,
+                isActive: await urlStatus(u),
+                liveTime: u.liveTime,
+                singleUse: u.singleUse,
+                userId: u.userId,
+            }
+        })
+    );
+};

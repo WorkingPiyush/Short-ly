@@ -1,26 +1,46 @@
-/* eslint-disable react/prop-types */
-import React, { useState } from 'react'
+/* eslint-disable react-hooks/set-state-in-effect */
+import React, { useEffect, useState } from 'react'
 import { useUrl } from '../../Hooks/useUrl.jsx'
 import { IoIosSearch } from "react-icons/io";
 import { Link } from 'react-router-dom';
 import LinkCard from '../../components/LinkCard.jsx';
 import { useUrlFilter } from '../../Context/StatusFilterContext.jsx';
+import { searchUrl } from '../../Api/Url.js';
 
 
 
 function Links() {
-  const { data: urlRecords, isLoading } = useUrl()
+  const { data: url, isLoading } = useUrl()
+  const [urlRecords, setUrlRecords] = useState()
   const { filter, setFilter } = useUrlFilter();
   const [search, setSearch] = useState("");
-
+  const [searchResults, setSearchResults] = useState()
+  const isSearching = search.trim().length > 0;
+  const urlResults = isSearching ? searchResults : urlRecords
   const totalClicks = urlRecords?.reduce((s, l) => s + l.totalClicks, 0);
   const activeCount = urlRecords?.filter((l) => l.isActive === "active").length;
   const expiredCount = urlRecords?.filter((l) => l.isActive === "expired").length;
+
+  useEffect(() => {
+    if (url) {
+      setUrlRecords(url);
+    }
+  }, [url]);
+  useEffect(() => {
+    if (!search.trim()) return;
+
+    const timer = setTimeout(async () => {
+      const response = await searchUrl(search);
+      setSearchResults(response);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search, url])
 
   const filterTabs = [
     { key: "all", label: "All" },
     { key: "active", label: "Active" },
     { key: "expired", label: "Expired" },
+    { key: "SingleUse", label: "Single Use" },
   ];
 
   if (isLoading) {
@@ -107,30 +127,31 @@ function Links() {
         </div>
 
         {/* Links list */}
-        {urlRecords?.length > 0 ? (
+        {urlResults?.length > 0 ? (
           <div className="flex flex-col gap-3">
-            {urlRecords.map((link) => (
+            {urlResults.map((link) => (
               <LinkCard key={link.id} link={link} />
             ))}
-          </div>
-        ) : (
-          <div className="text-center py-20 text-white/20">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-12 h-12 mx-auto mb-4 opacity-40"
-            >
-              <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
-              <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
-              <line x1="2" y1="2" x2="22" y2="22" />
-            </svg>
-            <p className="text-sm">No links found</p>
-          </div>
-        )}
+          </div>) :
+          (
+            <div className="text-center py-20 text-white/20">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-12 h-12 mx-auto mb-4 opacity-40"
+              >
+                <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
+                <line x1="2" y1="2" x2="22" y2="22" />
+              </svg>
+              <p className="text-sm">{isSearching ? "No urls found" : "No links found"}</p>
+            </div>
+          )
+        }
       </div>
     </div>
   );

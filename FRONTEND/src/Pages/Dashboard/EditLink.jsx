@@ -44,7 +44,13 @@ export default function EditLink() {
   }, [short])
 
   const handleSave = () => {
-    const data = { originalUrl, isActive, expirationDate: expirationDate ? new Date(expirationDate).toISOString() : null, liveTime: liveTime ? new Date(liveTime).toISOString() : null, passwordProtect, password, shortCode: short_Tag };
+    const data = {
+      originalUrl: originalUrl !== short?.original_url ? originalUrl : null,
+      isActive: isActive !== short?.isActive ? isActive : null,
+      expirationDate: new Date(expirationDate).toISOString() !== short?.expiry_date ? new Date(expirationDate).toISOString() : null,
+      liveTime: liveTime ? new Date(liveTime).toISOString() : null,
+      password, shortCode: short_Tag
+    };
     try {
       urlMutation.mutate(data, {
         onSuccess: async () => {
@@ -74,7 +80,7 @@ export default function EditLink() {
   if (isLoading) {
     return <h1>Loading....</h1>
   };
-  
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white px-4 py-10">
       <div className="max-w-160 mx-auto">

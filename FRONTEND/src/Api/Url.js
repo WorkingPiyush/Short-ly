@@ -7,27 +7,28 @@ export const createUrl = async (data) => {
 };
 
 export const getUrl = async (filter) => {
-    const res = await api.get("/url/myUrl", {
+    const res = await api.get("/url/", {
         params: { status: filter },
     });
     return res.data.url;
 };
 
 export const getShortUrl = async (shortCode) => {
-    const res = await api.get("/url/", {
-        params: { shortCode },
-    });
+    const res = await api.get(`/url/${shortCode}`);
     return res.data.url;
 };
 
 export const updateUrl = async ({ shortCode, ...data }) => {
-    const res = await api.patch("/url/", data, {
-        params: { shortCode },
-    });
+    const res = await api.patch(`/url/${shortCode}`, data);
     return res.data.success;
 };
 
-export const deleteUrl = async ( shortCode ) => {
-    const res = await api.delete("/url/", {params: { shortCode }});
+export const deleteUrl = async (shortCode) => {
+    const res = await api.delete(`/url/${shortCode}`);
     return res.data.success;
+};
+
+export const searchUrl = async (query) => {
+    const response = await api.get(`/url/search/${query}`);
+    return response.data.response;
 }
