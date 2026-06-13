@@ -10,8 +10,8 @@ import DashboardLayout from './Layout/DashboardLayout';
 import Links from './Pages/Dashboard/Links';
 import ProfilePage from './Pages/Dashboard/ProfilePage';
 import BulkUrl from './Pages/Dashboard/BulkUrl';
-import Analytics from './Pages/Dashboard/Analytics';
 import EditLink from './Pages/Dashboard/EditLink';
+import AnalyticsPage from './Pages/Dashboard/Analytics';
 
 
 function App() {
@@ -30,7 +30,7 @@ function App() {
             <Route path="/dashboard/links/:shortcode" element={<EditLink />} />
             <Route path="/dashboard/profile" element={<ProfilePage />} />
             <Route path="/dashboard/bulk" element={<BulkUrl />} />
-            <Route path="/dashboard/analytics" element={<Analytics />} />
+            <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
           </Route>
         </Routes>
         <Toaster position="top-center" reverseOrder={false} />

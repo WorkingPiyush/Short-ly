@@ -28,12 +28,18 @@ export default function EditLink() {
   const [password, setPassword] = useState("");
   const shortUrl = `${import.meta.env.VITE_BACKEND_URL}/${location?.pathname.split('/')[3]}`;
   const short_Tag = location?.pathname.split('/')[3];
+  const formatTimeClock = (time) => {
+    const date = new Date(time);
+    const offSet = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - offSet * 60000);
+    return localDate.toISOString().slice(0, 16);
+  };
 
   useEffect(() => {
     if (short) {
       setOriginalUrl(short?.original_url ?? "");
       setIsActive(short?.isActive ?? "");
-      setLiveTime(short?.liveTime ?? "");
+      setLiveTime(formatTimeClock(short?.liveTime) ?? "");
       setPasswordProtect(short?.ispaswordprotected ?? "");
     }
     if (short?.expiry_date) {
@@ -42,7 +48,7 @@ export default function EditLink() {
       );
     }
   }, [short])
-
+  
   const handleSave = () => {
     const data = {
       originalUrl: originalUrl !== short?.original_url ? originalUrl : null,

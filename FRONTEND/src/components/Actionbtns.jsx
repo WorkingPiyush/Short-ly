@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
 /* eslint-disable react/prop-types */
-export default function ActionButton({ icon, label, panelChange, disable }) {
+export default function ActionButton({ icon, label, panelChange, disable, share }) {
     const navigate = useNavigate();
     return (
         <button

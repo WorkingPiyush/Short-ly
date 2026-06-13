@@ -8,9 +8,12 @@ import { IoIosUnlock } from "react-icons/io";
 import { SlCalender } from "react-icons/sl";
 import ActionButton from "./Actionbtns";
 import CopyButton from "./CopyBtn";
+import ShareModal from "./ShareLink";
+import { useState } from "react";
 
 /* eslint-disable react/prop-types */
-export default function LinkCard({ link }) {
+function LinkCard({ link }) {
+    const [shareSocial, setShareSocial] = useState(false);
     const formatedDate = (input) => {
         return new Date(input)?.toLocaleString("en-In", {
             year: "numeric",
@@ -48,11 +51,14 @@ export default function LinkCard({ link }) {
                         disable={link.isActive}
                         icon={<MdModeEdit />}
                     />
-                    <ActionButton
-                        label="Share"
-                        disable={link.isActive}
-                        icon={<CiShare2 />}
-                    />
+                    <button
+                        onClick={() => setShareSocial(true)}
+                        aria-label="Share"
+                        disabled={link.isActive === "used" ? true : link.isActive === "expired" ? true : false}
+                        className="flex items-center cursor-pointer justify-center w-8 h-8 rounded-lg bg-transparent hover:border hover:border-white/10
+        text-white/30 hover:text-white/80 hover:bg-white/[0.07] disabled:cursor-not-allowed  transition-all duration-200">
+                        <CiShare2 />
+                    </button>
                     <ActionButton
                         label="Analytics"
                         disable={link.isActive}
@@ -65,6 +71,7 @@ export default function LinkCard({ link }) {
                     />
                 </div>
             </div>
+            {shareSocial && <ShareModal setStatus={setShareSocial} link={link.short_url} />}
 
             {/* Bottom info row */}
             <div className="flex items-center gap-3 flex-wrap">
@@ -109,3 +116,4 @@ export default function LinkCard({ link }) {
         </div>
     );
 }
+export default LinkCard;

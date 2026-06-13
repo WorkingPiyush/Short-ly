@@ -26,7 +26,7 @@ function SideBar() {
     const sideOptions = [
         { icon: <IoHomeOutline />, head: "Dashboard", to: "/dashboard", },
         { icon: <IoIosLink />, head: "Links", to: "/dashboard/links" },
-        { icon: <RiPagesLine />, head: "Profile Pages", to: "/dashboard/profile" },
+        // { icon: <RiPagesLine />, head: "Profile Pages", to: "/dashboard/profile" },
         { icon: <FcMultipleInputs />, head: "Bulk Urls", to: "/dashboard/bulk" },
         { icon: <SiGoogleanalytics />, head: "Analytics", to: "/dashboard/analytics" },
     ]

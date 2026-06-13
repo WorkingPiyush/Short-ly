@@ -81,7 +81,7 @@ export const urlStatus = async (url) => {
     const now = new Date();
     const expiryDate = new Date(url?.expirationDate);
 
-    if (url.liveTime) {
+    if (url.liveTime > now) {
         return "scheduled";
     }
     if (url.singleUse && url.used) {

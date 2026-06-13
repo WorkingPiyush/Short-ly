@@ -172,21 +172,22 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
     const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
     const country = ipLocation?.country ? regionNames.of(ipLocation.country) : "Unknown";
     const city = ipLocation?.city || "Unknown";
+    const now = new Date();
 
     let result = null;
     const cached = await redisClient.get(urlKey(shortCode));
     if (cached) {
         result = JSON.parse(cached);
     };
-
     if (result && Object.keys(result).length > 0) {
+        // console.log("cache Hit", result);
         if (result.expirationDate && new Date(result.expirationDate) < new Date()) {
             throw new AppError('Url Expired !!', 404);
         }
         if (result.isProtected) {
             return { requiresPassword: true };
         }
-        if (result.liveTime && new Date() < url.liveTime) {
+        if (result.liveTime && result.liveTime > now) {
             throw new AppError("Link is not live yet", 500);
         }
         if (result.userId) {
@@ -199,11 +200,10 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
         return result.originalUrl;
     }
     const url = await findFirstUrl(shortCode);
-
+    // console.log("cache miss", url)
     if (!url) {
         throw new AppError('Invalid Url', 400);
     }
-
     if (url.liveTime && new Date() < url.liveTime) {
         throw new AppError("Link is not live yet", 500);
     }
@@ -362,9 +362,9 @@ export const UrlDetails = async ({ userId, shortCode }) => {
     }
 };
 
-export const UrlDelete = async ({ userId, shortcode }) => {
+export const UrlDelete = async ({ userId, shortCode }) => {
     const result = await client.url.update({
-        where: { userId, shortCode: shortcode, isDeleted: false },
+        where: { userId, shortCode, isDeleted: false },
         data: {
             isDeleted: true, deletedAt: new Date(),
         }
@@ -375,8 +375,8 @@ export const UrlDelete = async ({ userId, shortcode }) => {
     return true;
 };
 
-export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive, shortcode, password, liveTime }) => {
-    // console.log({ userId, originalUrl, expirationDate, isActive, shortcode, password, liveTime })
+export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive, shortCode, password, liveTime }) => {
+    console.log({ userId, originalUrl, expirationDate, isActive, shortCode, password, liveTime })
     // console.log(!userId, !originalUrl, !expirationDate, !isActive, !shortcode, !password, !liveTime)
 
     let updatedData = {};
@@ -423,7 +423,7 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
     };
 
     const existing = await client.url.findFirst({
-        where: { userId, shortCode: shortcode, isDeleted: false }
+        where: { userId, shortCode, isDeleted: false }
     });
 
     if (!existing) {
@@ -435,7 +435,6 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
             where: { urlId: existing.id },
         });
     }
-
     const updatedUrl = await client.url.update({
         where: { id: existing.id },
         data: updatedData,
@@ -453,7 +452,7 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
     });
 
     await redisClient.del(
-        urlKey(shortcode)
+        urlKey(updatedUrl.shortCode)
     );
 
     return {
