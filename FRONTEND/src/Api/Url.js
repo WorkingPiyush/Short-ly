@@ -32,3 +32,8 @@ export const searchUrl = async (query) => {
     const response = await api.get(`/url/search/${query}`);
     return response.data.response;
 }
+
+export const getProtectedUrl = async (ShortCode, data) => {
+    const res = await api.post(`/url/${ShortCode}/verify-password`, data);
+    return res.data;
+}

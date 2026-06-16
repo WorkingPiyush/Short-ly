@@ -31,9 +31,9 @@ export const redirectUrl = asyncHandler(async (req, res) => {
     const response = await urlService.urlRedirect({
         shortCode: req.params.shortCode, userAgent: req.headers["user-agent"], ipAdd: process.env.NODE_ENV === 'production' ? req.headers["x-forwarded-for"] || req.socket.remoteAddress : '45.118.167.50'
     });
-
     if (response?.requiresPassword) {
-        res.status(200).json({ success: true, message: "Password Required", response });
+        // res.status(200).json({ success: true, message: "Password Required", response });
+        res.redirect(`${process.env.FONTEND_URL}/${response.shortCode}/password-verify`)
         return;
     }
     return res.redirect(response);
@@ -78,9 +78,12 @@ export const verifyPassword = asyncHandler(async (req, res) => {
     const result = await urlService.passwordVerify({
         password: req.body.password,
         shortCode: req.params.shortCode,
+        userAgent: req.headers["user-agent"],
+        ipAdd: process.env.NODE_ENV === 'production' ? req.headers["x-forwarded-for"] || req.socket.remoteAddress : '45.118.167.50'
     });
     if (result.isMatch) {
-        return res.redirect(result.originalUrl);
+        // console.log({ success: true, originalUrl: result.originalUrl })
+        res.status(200).json({ success: true, originalUrl: result.originalUrl })
     }
 });
 

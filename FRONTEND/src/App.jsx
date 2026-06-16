@@ -12,12 +12,13 @@ import ProfilePage from './Pages/Dashboard/ProfilePage';
 import BulkUrl from './Pages/Dashboard/BulkUrl';
 import EditLink from './Pages/Dashboard/EditLink';
 import AnalyticsPage from './Pages/Dashboard/Analytics';
+import ProtectedLinkPage from './Pages/Dashboard/ProtectedLinkPage';
 
 
 function App() {
   return (
     <>
-      <div className="min-h-screen p-5 bg-white text-white dark:bg-black dark:text-white">
+      <div className="min-h-screen bg-white text-white dark:bg-black dark:text-white">
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
@@ -32,6 +33,7 @@ function App() {
             <Route path="/dashboard/bulk" element={<BulkUrl />} />
             <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
           </Route>
+          <Route path="/:shortCode/password-verify" element={<ProtectedLinkPage />} />
         </Routes>
         <Toaster position="top-center" reverseOrder={false} />
       </div>

@@ -185,7 +185,7 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
             throw new AppError('Url Expired !!', 404);
         }
         if (result.isProtected) {
-            return { requiresPassword: true };
+            return { requiresPassword: true, shortCode: url.shortCode };
         }
         if (result.liveTime && result.liveTime > now) {
             throw new AppError("Link is not live yet", 500);
@@ -468,19 +468,31 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
     return true;
 };
 
-export const passwordVerify = async ({ password, shortCode }) => {
+export const passwordVerify = async ({ password, shortCode, userAgent, ipAdd }) => {
     const url = await client.url.findUnique({
         where: { shortCode },
         select: {
+            id: true,
             password: true,
             originalUrl: true
         }
     });
+    const userInfo = deviceDetector.parse(userAgent);
+    const browser = userInfo.client.name || "Unknown";;
+    const os = userInfo.os?.name || "Third Client Agent";
+    const device = userInfo.device?.type || "desktop";
+    const ipLocation = geoip.lookup(ipAdd);
+    const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+    const country = ipLocation?.country ? regionNames.of(ipLocation.country) : "Unknown";
+    const city = ipLocation?.city || "Unknown";
+
     let isMatch = await passwordCompare(password, url.password)
     if (!isMatch) {
         throw new AppError("Invalid password", 500);
+    } else {
+        void analyticsUpdates(url.id, browser, os, device, country, city).catch(console.error);
+        return { isMatch: true, originalUrl: url.originalUrl };
     }
-    return { isMatch: true, originalUrl: url.originalUrl };
 };
 export const shortUrlBulk = async ({ filePath, userId }) => {
     try {
