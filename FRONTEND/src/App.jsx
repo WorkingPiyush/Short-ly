@@ -10,14 +10,16 @@ import DashboardLayout from './Layout/DashboardLayout';
 import Links from './Pages/Dashboard/Links';
 import ProfilePage from './Pages/Dashboard/ProfilePage';
 import BulkUrl from './Pages/Dashboard/BulkUrl';
-import Analytics from './Pages/Dashboard/Analytics';
 import EditLink from './Pages/Dashboard/EditLink';
+import AnalyticsPage from './Pages/Dashboard/Analytics';
+import ProtectedLinkPage from './Pages/Dashboard/ProtectedLinkPage';
+import LinkAnalytics from './Pages/Dashboard/LinkAnalytics';
 
 
 function App() {
   return (
     <>
-      <div className="min-h-screen p-5 bg-white text-white dark:bg-black dark:text-white">
+      <div className="min-h-screen bg-white text-white dark:bg-black dark:text-white">
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
@@ -30,8 +32,10 @@ function App() {
             <Route path="/dashboard/links/:shortcode" element={<EditLink />} />
             <Route path="/dashboard/profile" element={<ProfilePage />} />
             <Route path="/dashboard/bulk" element={<BulkUrl />} />
-            <Route path="/dashboard/analytics" element={<Analytics />} />
+            <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
+            <Route path="/:shortCode/analytics" element={<LinkAnalytics />} />
           </Route>
+          <Route path="/:shortCode/password-verify" element={<ProtectedLinkPage />} />
         </Routes>
         <Toaster position="top-center" reverseOrder={false} />
       </div>

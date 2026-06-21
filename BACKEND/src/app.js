@@ -74,7 +74,7 @@ app.get('/', (req, res) => {
 // app.use("/api/auth", authRatelimit, authRoutes);
 app.use("/api/auth", authRoutes);
 // Url route
-app.use("/api/url", urlRoutes);
+app.use("/api/url/", urlRoutes);
 // Url redirection route
 app.get("/:shortCode", redirectUrl); // redirecting the short url to orgional url
 app.use(errorHandler);

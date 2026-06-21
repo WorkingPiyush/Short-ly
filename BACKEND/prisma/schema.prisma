@@ -61,6 +61,7 @@ model Url {
 
   @@index([tempId])
   @@index([shortCode])
+  @@index([originalUrl])
 }
 
 model UrlRecord {
@@ -72,5 +73,11 @@ model UrlRecord {
   device    String?
   country   String?
   city      String?
+  referrer  String?
+  ipHash    String?
   visitedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([urlId])
+  @@index([urlId, visitedAt])
 }
