@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MdModeEdit } from "react-icons/md";
 import { CiShare2 } from "react-icons/ci";
 import { SiSimpleanalytics } from "react-icons/si";
@@ -21,6 +21,7 @@ function LinkCard({ link }) {
             day: "2-digit"
         })
     };
+    const navigate = useNavigate();
 
     return (
         <div
@@ -55,15 +56,16 @@ function LinkCard({ link }) {
                         onClick={() => setShareSocial(true)}
                         aria-label="Share"
                         disabled={link.isActive === "used" ? true : link.isActive === "expired" ? true : false}
-                        className="flex items-center cursor-pointer justify-center w-8 h-8 rounded-lg bg-transparent hover:border hover:border-white/10
-        text-white/30 hover:text-white/80 hover:bg-white/[0.07] disabled:cursor-not-allowed  transition-all duration-200">
+                        className="flex items-center cursor-pointer justify-center w-8 h-8 rounded-lg bg-transparent hover:border hover:border-white/10 text-white/30 hover:text-white/80 hover:bg-white/[0.07] disabled:cursor-not-allowed  transition-all duration-200">
                         <CiShare2 />
                     </button>
-                    <ActionButton
-                        label="Analytics"
-                        disable={link.isActive}
-                        icon={<SiSimpleanalytics />}
-                    />
+                    <button
+                        onClick={() => navigate(`/${link.short_code}/analytics`)}
+                        aria-label="Analytics"
+                        disabled={link.isActive === "used" ? true : link.isActive === "expired" ? true : false}
+                        className="flex items-center cursor-pointer justify-center w-8 h-8 rounded-lg bg-transparent hover:border hover:border-white/10 text-white/30 hover:text-white/80 hover:bg-white/[0.07] disabled:cursor-not-allowed  transition-all duration-200">
+                        <SiSimpleanalytics />
+                    </button>
                     <ActionButton
                         label="More options"
                         disable={link.isActive}

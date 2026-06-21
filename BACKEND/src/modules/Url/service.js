@@ -1,7 +1,7 @@
 import dotenv from "dotenv/config";
 import { client } from '../../../config/db.js';
-import { formatBrowser, formatCountry, formatDevice, formatOperating, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, urlKey, urlStatus } from '../../helper/Url.helper.js';
-import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate } from "../../helper/Db.query.js";
+import { formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, foromtReferrer, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, urlKey, urlStatus } from '../../helper/Url.helper.js';
+import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate, dailyClicks, topReferrer } from "../../helper/Db.query.js";
 import { redisClient } from "../../../config/redisClient.js";
 import { AppError } from "../../utils/AppError.js";
 import logger from "../../../config/logger.js";
@@ -157,7 +157,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
     return responseUrl;
 };
 
-export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
+export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => {
     const isBot = /(googlebot|crawler|spider|slackbot|discordbot|twitterbot|facebookexternalhit|curl|wget|bingbot|linkedinbot)/i.test(userAgent);
     if (!shortCode) {
         throw new AppError('Invalid Url', 400);
@@ -171,6 +171,7 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
     const ipLocation = geoip.lookup(ipAdd);
     const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
     const country = ipLocation?.country ? regionNames.of(ipLocation.country) : "Unknown";
+
     const city = ipLocation?.city || "Unknown";
     const now = new Date();
 
@@ -192,7 +193,7 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
         }
         if (result.userId) {
             if (!isBot) {
-                void analyticsUpdates(result.id, browser, os, device, country, city).catch(console.error);
+                void analyticsUpdates(result.id, browser, os, device, country, city, referrer, ipAdd).catch(console.error);
             }
         } else {
             void urlCountUpdate(result.id);
@@ -200,18 +201,17 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
         return result.originalUrl;
     }
     const url = await findFirstUrl(shortCode);
-    // console.log("cache miss", url)
     if (!url) {
         throw new AppError('Invalid Url', 400);
     }
     if (url.liveTime && new Date() < url.liveTime) {
         throw new AppError("Link is not live yet", 500);
     }
-    if (url.password) {
-        return { requiresPassword: true, shortCode: url.shortCode };
-    }
     if (url.expirationDate && url.expirationDate < new Date()) {
         throw new AppError('Url Expired !!', 404);
+    }
+    if (url.password) {
+        return { requiresPassword: true, shortCode: url.shortCode };
     }
     if (url.singleUse) {
         const singleUseUrl = await client.url.updateMany({
@@ -231,7 +231,6 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd }) => {
 
         return url.originalUrl;
     }
-
     await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, id: url.id, userId: url.userId, liveTime: url.liveTime, isProtected: url.password ? true : false, expirationDate: url.expirationDate?.toISOString() || "", }), { EX: 3600, });
 
     if (!isBot) {
@@ -316,11 +315,12 @@ export const getMyUrl = async ({ userId, status = "all" }) => {
     );
 };
 
-export const UrlDetails = async ({ userId, shortCode }) => {
+export const UrlInfo = async ({ userId, shortCode }) => {
     if (!shortCode) {
         logger.error("shortCode not found !!");
         throw new AppError("shortCode not found !!", 404);
     };
+
     const Url = await client.url.findFirst({
         where: { userId, shortCode, isDeleted: false },
         select: {
@@ -332,17 +332,48 @@ export const UrlDetails = async ({ userId, shortCode }) => {
             updatedAt: true,
             liveTime: true,
             lastVisitedAt: true,
-            isActive: true,
         }
     });
     if (!Url) {
         logger.error("Url not found");
         throw new AppError('Url not found', 404);
     }
-    const [topBrowsers, topOsys, topDevices, topCountries, totalClicks] = await Promise.all([
-        topBrowser(Url.id), topOs(Url.id), topDevice(Url.id), topCountry(Url.id), totalClick(Url.id)
-    ])
 
+    if (!Url) {
+        throw new Error("No Url Found");
+    }
+
+    return {
+        short_url: `${process.env.BACKEND_URL}/${Url.shortCode}`,
+        original_url: Url.originalUrl,
+        isActive: await urlStatus(Url),
+        expiry_date: Url.expirationDate,
+        creation_date: Url.createdAt,
+        last_update_date: Url.updatedAt,
+        liveTime: Url.liveTime,
+    }
+};
+export const UrlAnalytics = async ({ userId, shortCode, period }) => {
+    if (!shortCode) {
+        logger.error("shortCode not found !!");
+        throw new AppError("shortCode not found !!", 404);
+    };
+    const Url = await client.url.findFirst({
+        where: { userId, shortCode, isDeleted: false },
+        select: {
+            id: true,
+            originalUrl: true,
+            shortCode: true,
+        }
+    });
+
+    if (!Url) {
+        logger.error("Url not found");
+        throw new AppError('Url not found', 404);
+    }
+    const [topBrowsers, topOsys, topDevices, topCountries, totalClicks, dailyClick, referrer] = await Promise.all([
+        topBrowser(Url.id), topOs(Url.id), topDevice(Url.id), topCountry(Url.id), totalClick(Url.id), dailyClicks(Url.id, period), topReferrer(Url.id)
+    ])
     if (!Url) {
         throw new Error("No Url Found");
     }
@@ -354,14 +385,10 @@ export const UrlDetails = async ({ userId, shortCode }) => {
         topOperatingSystems: formatOperating(topOsys),
         topDevices: formatDevice(topDevices),
         topCountries: formatCountry(topCountries),
-        isActive: Url.isActive,
-        expiry_date: Url.expirationDate,
-        creation_date: Url.createdAt,
-        last_update_date: Url.updatedAt,
-        liveTime: Url.liveTime,
+        dailyClicks: formatClicks(dailyClick),
+        topReferrer: foromtReferrer(referrer)
     }
 };
-
 export const UrlDelete = async ({ userId, shortCode }) => {
     const result = await client.url.update({
         where: { userId, shortCode, isDeleted: false },

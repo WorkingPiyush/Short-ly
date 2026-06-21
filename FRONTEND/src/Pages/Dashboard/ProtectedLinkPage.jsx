@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Lock, Eye, EyeClosed, Link as LinkIcon } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { getProtectedUrl } from "@/Api/Url";
+import toast from "react-hot-toast";
 
 function ProtectedLinkPage() {
     const params = useParams();
@@ -9,12 +10,14 @@ function ProtectedLinkPage() {
     const [showPassword, setShowPassword] = useState(false);
     const url = `${import.meta.env.VITE_BACKEND_URL}/${params.shortCode}`;
     const handleProtectedUrl = async () => {
-        const res = await getProtectedUrl(params.shortCode, { password: password });
-        window.location.href = res.originalUrl;
+        try {
+            const res = await getProtectedUrl(params.shortCode, { password: password });
+            window.location.href = res.originalUrl;
+        } catch (error) {
+            toast.error('Invalid Password');
+            console.log(error)
+        }
     }
-
-
-
     return (
         <div className="min-h-screen bg-black flex flex-col items-center justify-center px-2 text-white relative overflow-hidden">
             <div className="absolute w-125 h-125 bg-emerald-500/10 blur-[140px] rounded-full" />

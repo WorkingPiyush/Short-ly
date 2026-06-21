@@ -46,8 +46,22 @@ export const urlKey = (shortCode) => {
 
 export const formatBrowser = (result) => {
     return result.map(b => ({
-        browser: b.browser,
+        browser: b.browser || "unknown",
         clicks: b._count.browser,
+    }))
+};
+export const formateDate = (date) => {
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const day = date.getDate();
+    const month = monthNames[date.getMonth()];
+    const year = date.getFullYear();
+
+    return `${day}-${month}`;
+}
+export const formatClicks = (result) => {
+    return result.map(b => ({
+        day: formateDate(new Date(b.date)),
+        clicks: b.clicks,
     }))
 };
 
@@ -64,6 +78,13 @@ export const formatDevice = (result) => {
         clicks: b._count.device,
     }))
 };
+
+export const foromtReferrer = (result) => {
+    return result.map(b => ({
+        clicks: b._count.referrer,
+        referrer: b.referrer,
+    }))
+}
 
 export const formatCountry = (result) => {
     return result.map(b => ({
@@ -90,6 +111,27 @@ export const urlStatus = async (url) => {
         }
         return "used";
     }
-
+    if (expiryDate <= now) {
+        return "expired";
+    }
     return "active";
 };
+
+export const formatedReferrer = (ref) => {
+    if (!ref) return "direct";
+
+    if (ref.includes("google"))
+        return "Google";
+
+    if (ref.includes("twitter"))
+        return "Twitter";
+
+    if (ref.includes("linkedin"))
+        return "LinkedIn";
+
+    return "Other";
+};
+
+export const hashIP = (ipAdd) => {
+    return crypto.createHash("sha256").update(ipAdd).digest("hex");
+}

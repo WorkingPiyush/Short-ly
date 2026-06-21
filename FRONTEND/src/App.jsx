@@ -13,6 +13,7 @@ import BulkUrl from './Pages/Dashboard/BulkUrl';
 import EditLink from './Pages/Dashboard/EditLink';
 import AnalyticsPage from './Pages/Dashboard/Analytics';
 import ProtectedLinkPage from './Pages/Dashboard/ProtectedLinkPage';
+import LinkAnalytics from './Pages/Dashboard/LinkAnalytics';
 
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
             <Route path="/dashboard/profile" element={<ProfilePage />} />
             <Route path="/dashboard/bulk" element={<BulkUrl />} />
             <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
+            <Route path="/:shortCode/analytics" element={<LinkAnalytics />} />
           </Route>
           <Route path="/:shortCode/password-verify" element={<ProtectedLinkPage />} />
         </Routes>

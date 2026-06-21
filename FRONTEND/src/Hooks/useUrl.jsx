@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react-refresh/only-export-components */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteUrl, getShortUrl, getUrl, updateUrl } from "../Api/Url";
+import { deleteUrl, getShortUrl, getUrl, getUrlAnalytics, updateUrl } from "../Api/Url";
 import { useUrlFilter } from "../Context/StatusFilterContext";
 
 
@@ -53,5 +53,13 @@ export const UseDeleteUrl = () => {
                 refetchType: "active",
             })
         }
+    })
+};
+
+export const useShortAnalytics = (shortCode, period) => {
+    return useQuery({
+        queryKey: ['analytics', shortCode, period],
+        queryFn: () => getUrlAnalytics(shortCode, period),
+        enabled: Boolean(shortCode),
     })
 }
