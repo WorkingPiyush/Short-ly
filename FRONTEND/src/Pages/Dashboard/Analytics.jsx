@@ -1,55 +1,19 @@
 /* eslint-disable react/prop-types */
-import React from 'react'
+import React, { useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, CartesianGrid } from "recharts";
 import { Calendar } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Card from '@/components/Card';
 import useInView from '@/Hooks/View';
+import DropDownBtn from '@/components/DropDownBtn';
+import { useShortAnalytics } from '@/Hooks/useUrl';
+import { useParams } from 'react-router-dom';
 
 
-const engagementData = [
-  { day: "May 10", clicks: 12 },
-  { day: "May 12", clicks: 22 },
-  { day: "May 14", clicks: 42 },
-  { day: "May 18", clicks: 80 },
-  { day: "May 22", clicks: 60 },
-  { day: "May 28", clicks: 70 },
-  { day: "Jun 4", clicks: 82 },
-];
-
-const locations = [
-  {
-    country: "United States",
-    clicks: 560,
-    percentage: 58,
-  },
-  {
-    country: "India",
-    clicks: 210,
-    percentage: 22,
-  },
-  {
-    country: "Germany",
-    clicks: 105,
-    percentage: 11,
-  },
-  {
-    country: "Canada",
-    clicks: 89,
-    percentage: 9,
-  },
-];
-
-const referrers = [
-  { name: "Google", value: 45 },
-  { name: "Twitter", value: 30 },
-  { name: "LinkedIn", value: 25 },
-];
-
-const devices = [
-  { name: "Desktop", value: 42 },
-  { name: "Mobile", value: 38 },
-  { name: "Tablet", value: 20 },
+const timePeriod = [
+  { label: "7 Days", value: 7 },
+  { label: "30 Days", value: 30 },
+  { label: "365 Days", value: 365 },
 ];
 
 const COLORS = [
@@ -58,8 +22,31 @@ const COLORS = [
   "#F59E0B",
 ];
 
+function Analytics() {
 
-function AnalyticsPage() {
+  const params = useParams();
+  const [selectedTimePeriod, setSelectedTimePeriod] = useState(7);
+
+  const { data, isLoading, error } = useShortAnalytics(params.shortCode, selectedTimePeriod);
+  console.log(data)
+  const totalClicks = data?.totalClicks || 0;
+  const engagementData = data?.dailyClicks;
+
+  const locations = data?.topCountries.map((l) => ({
+    country: l.country,
+    clicks: l.clicks,
+    percentage: Number(((l.clicks / totalClicks) * 100).toFixed(1))
+  }));
+  const devices = data?.topDevices.map((d) => ({
+    name: d.device,
+    value: d.clicks,
+    percentage: Number(((d.clicks / totalClicks) * 100).toFixed(1))
+  }));
+  const referrers = data?.topReferrer.map((r) => ({
+    name: r.referrer,
+    value: r.clicks,
+    percentage: Number(((r.clicks / totalClicks) * 100).toFixed(1))
+  }));
   const { ref, isVisible } = useInView();
 
   return (
@@ -84,10 +71,11 @@ function AnalyticsPage() {
             </h2>
 
             {/* CALENDER */}
-            <button className="flex items-center gap-2 border border-gray-700 px-4 py-2 rounded-xl">
+            <div className="flex items-center gap-2 border border-gray-700 px-4 py-2 rounded-xl">
               <Calendar size={16} />
-              May 10 - Jun 8
-            </button>
+              <DropDownBtn time={timePeriod} state={selectedTimePeriod} setState={setSelectedTimePeriod} />
+
+            </div>
           </div>
           <div ref={ref} className="w-full h-70">
             {isVisible && (
@@ -127,7 +115,7 @@ function AnalyticsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {locations.length > 0 ? (
+              {locations?.length > 0 ? (
                 locations.map((item, index) => (
                   <TableRow key={item.country}>
                     <TableCell>{index + 1}</TableCell>
@@ -158,15 +146,14 @@ function AnalyticsPage() {
         </Card>
 
         {/* REFERRERS */}
-        <DonutSection title="Referrers" data={referrers} />
+        {referrers?.value > 0 && < DonutSection title="Referrers" data={referrers} />}
 
         {/* DEVICES */}
-        <DonutSection title="Devices" data={devices} />
+        {devices?.length > 0 && <DonutSection title="Devices" data={devices} />}
       </div>
     </div>
   );
 }
-
 
 function DonutSection({ title, data }) {
   const { ref, isVisible } = useInView();
@@ -189,14 +176,14 @@ function DonutSection({ title, data }) {
                   paddingAngle={3}
                   dataKey="value"
                 >
-                  {data.map((entry, index) => (
+                  {data?.map((entry, index) => (
                     <Cell key={index} fill={COLORS[index]} />
                   ))}
                 </Pie>
 
                 <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle">
                   <tspan x="50%" dy="-4" className="text-lg font-semibold">
-                    {data.reduce((a, b) => a + b.value, 0)}
+                    {data.reduce((a, b) => a + b?.value, 0)}
                   </tspan>
 
                   <tspan x="50%" y="50%" className="text-xs fill-muted-foreground">
@@ -208,13 +195,13 @@ function DonutSection({ title, data }) {
           )
         }
         <div className="space-y-6">
-          {data.map((item, index) => (
+          {data?.map((item, index) => (
             <div key={item.name} className="flex justify-between items-center" >
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full" style={{ background: COLORS[index], }} />
                 {item.name}
               </div>
-              <span>{item.value}%</span>
+              <span>{item.percentage}%</span>
             </div>
           ))}
         </div>
@@ -224,4 +211,5 @@ function DonutSection({ title, data }) {
     </Card>
   );
 }
-export default AnalyticsPage;
+
+export default Analytics

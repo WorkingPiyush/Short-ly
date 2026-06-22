@@ -63,6 +63,12 @@ export const getUrlAnalytics = asyncHandler(async (req, res) => {
     return res.status(200).json({ success: true, url });
 })
 
+export const Analytics = asyncHandler(async (req, res) => {
+    const url = await urlService.UserAnalytics({
+        userId: req.user?.id,
+    });
+})
+
 export const deleteUrl = asyncHandler(async (req, res) => {
     const response = await urlService.UrlDelete({
         userId: req.user?.id,

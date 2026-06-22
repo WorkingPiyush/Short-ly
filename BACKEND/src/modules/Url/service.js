@@ -103,12 +103,13 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
         return {
             shortUrl: `${process.env.BACKEND_URL}/${existing.shortCode}`,
             originalUrl: existing.originalUrl,
+            shorCode: existing.shortCode,
             expiry_date: existing.expirationDate,
             creation_date: existing.createdAt,
             singleUse: existing.singleUse,
             totalClicks: clicks,
             isPswrdProtected: existing.password ? true : false,
-            isActive: existing.isActive,
+            isActive: await urlStatus(existing),
             userId: existing.userId,
         }
     }
@@ -143,11 +144,15 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
         }
     });
     const qrCodeImg = await generateQRCode(newUrl);
+
     const responseUrl = {
         shortUrl: `${process.env.BACKEND_URL}/${newUrl.shortCode}`,
+        shorCode: newUrl.shortCode,
         originalUrl: newUrl.originalUrl,
+        isActive: await urlStatus(newUrl),
         expiry_date: newUrl.expirationDate,
         creation_date: newUrl.createdAt,
+        totalClicks: await totalClick(newUrl.id),
         QrCode: qrCodeImg,
         singleUse: newUrl.singleUse,
         isPswrdProtected: newUrl.password ? true : false,
@@ -389,6 +394,11 @@ export const UrlAnalytics = async ({ userId, shortCode, period }) => {
         topReferrer: foromtReferrer(referrer)
     }
 };
+
+export const UserAnalytics = async ({ userId }) => {
+    if (!userId) return;
+    
+}
 export const UrlDelete = async ({ userId, shortCode }) => {
     const result = await client.url.update({
         where: { userId, shortCode, isDeleted: false },

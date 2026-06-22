@@ -2,7 +2,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { MdModeEdit } from "react-icons/md";
 import { CiShare2 } from "react-icons/ci";
 import { SiSimpleanalytics } from "react-icons/si";
-import { BsThreeDotsVertical } from "react-icons/bs";
 import { PiCursorClick } from "react-icons/pi";
 import { IoIosUnlock } from "react-icons/io";
 import { SlCalender } from "react-icons/sl";
@@ -66,11 +65,6 @@ function LinkCard({ link }) {
                         className="flex items-center cursor-pointer justify-center w-8 h-8 rounded-lg bg-transparent hover:border hover:border-white/10 text-white/30 hover:text-white/80 hover:bg-white/[0.07] disabled:cursor-not-allowed  transition-all duration-200">
                         <SiSimpleanalytics />
                     </button>
-                    <ActionButton
-                        label="More options"
-                        disable={link.isActive}
-                        icon={<BsThreeDotsVertical />}
-                    />
                 </div>
             </div>
             {shareSocial && <ShareModal setStatus={setShareSocial} link={link.short_url} />}
