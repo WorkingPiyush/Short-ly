@@ -6,8 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import Card from '@/components/Card';
 import useInView from '@/Hooks/View';
 import DropDownBtn from '@/components/DropDownBtn';
-import { useShortAnalytics } from '@/Hooks/useUrl';
-import { useParams } from 'react-router-dom';
+import { useAnalytics } from '@/Hooks/useUrl';
 
 
 const timePeriod = [
@@ -23,32 +22,35 @@ const COLORS = [
 ];
 
 function Analytics() {
+  const [period, setPeriod] = useState(7);
+  const { data, isLoading } = useAnalytics({ period });
 
-  const params = useParams();
-  const [selectedTimePeriod, setSelectedTimePeriod] = useState(7);
-
-  const { data, isLoading, error } = useShortAnalytics(params.shortCode, selectedTimePeriod);
-  console.log(data)
-  const totalClicks = data?.totalClicks || 0;
+  const totalClicks = data?.totalClicks;
   const engagementData = data?.dailyClicks;
+  const topLinks = data?.mostClickedUrls;
 
-  const locations = data?.topCountries.map((l) => ({
+  const locations = data?.totalCountries.map((l) => ({
     country: l.country,
     clicks: l.clicks,
     percentage: Number(((l.clicks / totalClicks) * 100).toFixed(1))
   }));
-  const devices = data?.topDevices.map((d) => ({
+  const devices = data?.totalDevices.map((d) => ({
     name: d.device,
     value: d.clicks,
     percentage: Number(((d.clicks / totalClicks) * 100).toFixed(1))
   }));
-  const referrers = data?.topReferrer.map((r) => ({
-    name: r.referrer,
-    value: r.clicks,
-    percentage: Number(((r.clicks / totalClicks) * 100).toFixed(1))
-  }));
-  const { ref, isVisible } = useInView();
 
+
+  // const referrers = data?.topReferrer.map((r) => ({
+  //   name: r.referrer,
+  //   value: r.clicks,
+  //   percentage: Number(((r.clicks / totalClicks) * 100).toFixed(1))
+  // }));
+
+  const { ref, isVisible } = useInView();
+  if (isLoading) {
+    return 'Loading..'
+  }
   return (
     <div className="min-h-screen bg-black text-white p-8">
       <div className="max-w-4xl mx-auto">
@@ -73,7 +75,7 @@ function Analytics() {
             {/* CALENDER */}
             <div className="flex items-center gap-2 border border-gray-700 px-4 py-2 rounded-xl">
               <Calendar size={16} />
-              <DropDownBtn time={timePeriod} state={selectedTimePeriod} setState={setSelectedTimePeriod} />
+              <DropDownBtn time={timePeriod} state={period} setState={setPeriod} />
 
             </div>
           </div>
@@ -90,7 +92,31 @@ function Analytics() {
               </ResponsiveContainer>
             )}
           </div>
+          {topLinks && (<div className="rounded-2xl border border-gray-800 bg-white/3">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-900">
+                  <th className="p-1 text-center text-sm">SERIAL</th>
+                  <th className="p-1 text-center text-sm">SHORT URL</th>
+                  <th className="p-1 text-center text-sm">CLICKS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topLinks?.map((url, idx) => (
+                  <tr key={url?.shortCode} className="border-b border-gray-900 hover:bg-white/2">
+                    <td className="p-4 text-center">{idx + 1}</td>
+                    <td className="p-4 text-center">{`${import.meta.env.VITE_BACKEND_URL}/${url?.shortCode}`}</td>
+                    <td className="p-4 text-xs text-center">{url?.clicks}</td>
+                    <td className="p-4">
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+          </div>)}
         </Card>
+
         {/* LOCATIONS */}
         <Card>
           <div className="flex justify-between mb-8">
@@ -146,7 +172,7 @@ function Analytics() {
         </Card>
 
         {/* REFERRERS */}
-        {referrers?.value > 0 && < DonutSection title="Referrers" data={referrers} />}
+        {/* {referrers?.value > 0 && < DonutSection title="Referrers" data={referrers} />} */}
 
         {/* DEVICES */}
         {devices?.length > 0 && <DonutSection title="Devices" data={devices} />}

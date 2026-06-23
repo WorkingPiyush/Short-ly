@@ -1,7 +1,7 @@
 import dotenv from "dotenv/config";
 import { client } from '../../../config/db.js';
 import { formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, foromtReferrer, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, urlKey, urlStatus } from '../../helper/Url.helper.js';
-import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate, dailyClicks, topReferrer } from "../../helper/Db.query.js";
+import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics } from "../../helper/Db.query.js";
 import { redisClient } from "../../../config/redisClient.js";
 import { AppError } from "../../utils/AppError.js";
 import logger from "../../../config/logger.js";
@@ -395,9 +395,24 @@ export const UrlAnalytics = async ({ userId, shortCode, period }) => {
     }
 };
 
-export const UserAnalytics = async ({ userId }) => {
-    if (!userId) return;
-    
+export const UserAnalytics = async ({ userId, period }) => {
+    if (!period) {
+        logger.error("Period not defined !!");
+        throw new AppError("Period not defined !!", 404);
+    };
+
+    const [totalClicks, dailyClicks, totalCountries, totalBrowser, totalDevices, totalOs, mostClickedUrls] = await Promise.all([
+        totalClicksAnalytics(userId, period), dailyClicksAnalytics(userId, period), countriesAnalytics(userId, period), browsersAnalytics(userId, period), devicesAnalytics(userId, period), osAnalytics(userId, period), mostClickedUrlsAnalytics(userId, period)]);
+        
+    return {
+        totalClicks: totalClicks,
+        totalBrowser: totalBrowser,
+        topOperatingSystems: totalOs,
+        dailyClicks: formatClicks(dailyClicks),
+        totalCountries: totalCountries,
+        totalDevices: totalDevices,
+        mostClickedUrls: mostClickedUrls,
+    };
 }
 export const UrlDelete = async ({ userId, shortCode }) => {
     const result = await client.url.update({

@@ -28,7 +28,6 @@ function LinkAnalytics() {
     const [selectedTimePeriod, setSelectedTimePeriod] = useState(7);
 
     const { data, isLoading, error } = useShortAnalytics(params.shortCode, selectedTimePeriod);
-    console.log(data)
     const totalClicks = data?.totalClicks || 0;
     const engagementData = data?.dailyClicks;
 

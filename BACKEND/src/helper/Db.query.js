@@ -72,7 +72,7 @@ export const dailyClicks = (id, period) => {
     GROUP BY date
     ORDER BY date;
     `
-}
+};
 export const topOs = (id) => {
     return client.urlRecord.groupBy({
         by: ["os"],
@@ -149,4 +149,132 @@ export const countUrl = async (tempId) => {
     return await client.url.count({
         where: { tempId },
     })
+};
+
+
+
+
+// user based analytics
+export const totalClicksAnalytics = async (userid, period) => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - period);
+
+    const result = await client.$queryRaw`
+    SELECT
+    COUNT(*)::int AS clicks
+    FROM "UrlRecord" r
+    JOIN "Url" u
+    ON r."urlId" = u.id
+    WHERE u."userId" = ${userid}
+    AND r."visitedAt" >= ${startDate}
+    `;
+    return result[0]?.clicks ?? 0;
+};
+
+export const dailyClicksAnalytics = (userid, period) => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - period);
+
+    return client.$queryRaw`
+    SELECT (r."visitedAt" AT TIME ZONE 'Asia/Kolkata')::date AS date,
+    COUNT(*)::int AS clicks
+    FROM "UrlRecord" r
+    JOIN "Url" u
+    ON r."urlId" = u.id
+    WHERE u."userId" = ${userid}
+    AND r."visitedAt" >= ${startDate}
+    GROUP BY (r."visitedAt" AT TIME ZONE 'Asia/Kolkata')::date
+    ORDER BY date;
+    `;
+};
+
+export const countriesAnalytics = (userid, period) => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - period);
+
+    return client.$queryRaw`
+    SELECT COALESCE(r."country",'Unknown') AS country,
+    COUNT(*)::int AS clicks
+    FROM "UrlRecord" r
+    JOIN "Url" u
+    ON r."urlId" = u.id
+    WHERE u."userId" = ${userid}
+    AND r."visitedAt" >= ${startDate}
+    GROUP BY country
+    ORDER BY clicks DESC
+    LIMIT 10;
+    `;
+};
+
+export const browsersAnalytics = (userid, period) => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - period);
+
+    return client.$queryRaw`
+    SELECT COALESCE(r."browser",'Unknown') AS browser,
+    COUNT(*)::int AS clicks
+    FROM "UrlRecord" r
+    JOIN "Url" u
+    ON r."urlId" = u.id
+    WHERE u."userId" = ${userid}
+    AND r."visitedAt" >= ${startDate}
+    GROUP BY browser
+    ORDER BY clicks DESC;
+    `;
+};
+
+export const devicesAnalytics = (userid, period) => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - period);
+
+    return client.$queryRaw`
+    SELECT COALESCE(r."device",'Unknown') AS device,
+    COUNT(*)::int AS clicks
+    FROM "UrlRecord" r
+    JOIN "Url" u
+    ON r."urlId" = u.id
+    WHERE u."userId" = ${userid}
+    AND r."visitedAt" >= ${startDate}
+    GROUP BY device
+    ORDER BY clicks DESC;
+    `;
+};
+
+export const osAnalytics = (userid, period) => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - period);
+
+    return client.$queryRaw`
+    SELECT COALESCE(r."os",'Unknown') AS os,
+    COUNT(*)::int AS clicks
+    FROM "UrlRecord" r
+    JOIN "Url" u
+    ON r."urlId" = u.id
+    WHERE u."userId" = ${userid}
+    AND r."visitedAt" >= ${startDate}
+    GROUP BY os
+    ORDER BY clicks DESC;
+    `;
+};
+
+export const mostClickedUrlsAnalytics = (userid, period) => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - period);
+
+    return client.$queryRaw`
+    SELECT u.id , u."shortCode",
+    COUNT(r.id)::int AS clicks
+    FROM "Url" u
+    LEFT JOIN "UrlRecord" r
+    ON r."urlId" = u.id
+    WHERE u."userId" = ${userid}
+    AND (
+        r."visitedAt" >= ${startDate}
+        OR r."visitedAt" IS NULL
+    )
+    GROUP BY u.id
+    ORDER BY clicks DESC
+    LIMIT 5;
+    `;
+
 };

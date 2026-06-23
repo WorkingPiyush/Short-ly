@@ -63,9 +63,10 @@ export const useShortAnalytics = (shortCode, period) => {
         enabled: Boolean(shortCode),
     })
 }
-export const useAnalytics = () => {
+export const useAnalytics = (timePeriod) => {
     return useQuery({
-        queryKey: ['analytics'],
-        queryFn: AllAnalytics,
+        queryKey: ['analytics', timePeriod],
+        queryFn: () => AllAnalytics(timePeriod),
+        enabled: Boolean(timePeriod),
     })
 }

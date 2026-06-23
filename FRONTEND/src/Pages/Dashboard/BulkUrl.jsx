@@ -171,7 +171,7 @@ function BulkUrl() {
 
             <tbody>
               {response?.map((url, idx) => (
-                <tr key={url.shorCode} className="border-b border-gray-900 hover:bg-white/2">
+                <tr key={url.shortCode} className="border-b border-gray-900 hover:bg-white/2">
                   <td className="p-4 text-center">{idx + 1}</td>
                   <td className="p-4 text-center"><Link to={url.originalUrl} target='_blank'>{url?.originalUrl.split(".com")[0]}</Link></td>
                   <td className="p-4 text-center"> <Link to={url.shortUrl} target='_blank'>{url?.shortUrl}</Link></td>
