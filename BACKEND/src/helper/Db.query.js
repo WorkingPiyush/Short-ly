@@ -41,22 +41,19 @@ export const urlCountUpdate = async (id) => {
         }
     })
 };
-export const topBrowser = (id) => {
-    return client.urlRecord.groupBy({
-        by: ["browser"],
-        where: {
-            urlId: id
-        },
-        _count: {
-            browser: true,
-        },
-        orderBy: {
-            _count: {
-                browser: "desc",
-            },
-        },
-        take: 5
-    })
+export const topBrowser = (id, period) => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - period);
+
+    return client.$queryRaw`
+    SELECT COALESCE("browser",'Unknown') AS browser,
+    COUNT(*)::int AS clicks
+    FROM "UrlRecord"
+    WHERE "urlId" = ${id}
+    AND "visitedAt" >= ${startDate}
+    GROUP BY browser
+    ORDER BY clicks DESC;
+    `;
 };
 export const dailyClicks = (id, period) => {
     const startDate = new Date();
@@ -71,79 +68,74 @@ export const dailyClicks = (id, period) => {
     AND "visitedAt" >= ${startDate}
     GROUP BY date
     ORDER BY date;
-    `
+    `;
 };
-export const topOs = (id) => {
-    return client.urlRecord.groupBy({
-        by: ["os"],
-        where: {
-            urlId: id
-        },
-        _count: {
-            os: true
-        },
-        orderBy: {
-            _count: {
-                os: "desc"
-            },
-        },
-        take: 5,
-    })
+export const topOs = (id, period) => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - period);
+
+    return client.$queryRaw`
+    SELECT COALESCE("os",'Unknown') AS os,
+    COUNT(*)::int AS clicks
+    FROM "UrlRecord"
+    WHERE "urlId" = ${id}
+    AND "visitedAt" >= ${startDate}
+    GROUP BY os
+    ORDER BY clicks DESC;
+    `;
 };
-export const topDevice = (id) => {
-    return client.urlRecord.groupBy({
-        by: ["device"],
-        where: {
-            urlId: id,
-        },
-        _count: {
-            device: true
-        },
-        orderBy: {
-            _count: {
-                device: "desc",
-            },
-        },
-        take: 5,
-    })
+export const topDevice = (id, period) => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - period);
+
+    return client.$queryRaw`
+    SELECT COALESCE("device",'Unknown') AS device,
+    COUNT(*)::int AS clicks
+    FROM "UrlRecord"
+    WHERE "urlId" = ${id}
+    AND "visitedAt" >= ${startDate}
+    GROUP BY device
+    ORDER BY clicks DESC;
+    `;
 };
-export const topReferrer = (id) => {
-    return client.urlRecord.groupBy({
-        by: ["referrer"],
-        where: {
-            urlId: id,
-        },
-        _count: {
-            referrer: true
-        },
-        orderBy: {
-            _count: {
-                referrer: "desc",
-            },
-        },
-    })
+export const topReferrer = (id, period) => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - period);
+
+    return client.$queryRaw`
+    SELECT COALESCE("referrer",'Unknown') AS referrer,
+    COUNT(*)::int AS clicks
+    FROM "UrlRecord"
+    WHERE "urlId" = ${id}
+    AND "visitedAt" >= ${startDate}
+    GROUP BY referrer
+    ORDER BY clicks DESC;
+    `;
+
+
+
+
 };
-export const topCountry = (id) => {
-    return client.urlRecord.groupBy({
-        by: ["country"],
-        where: {
-            urlId: id
-        },
-        _count: {
-            country: true,
-        },
-        orderBy: {
-            _count: {
-                country: "desc",
-            },
-        },
-        take: 5,
-    })
+export const topCountry = (id, period) => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - period);
+
+    return client.$queryRaw`
+    SELECT COALESCE("country",'Unknown') AS country,
+    COUNT(*)::int AS clicks
+    FROM "UrlRecord"
+    WHERE "urlId" = ${id}
+    AND "visitedAt" >= ${startDate}
+    GROUP BY country
+    ORDER BY clicks DESC;
+    `;
 };
+
 export const totalClick = (id) => {
     return client.urlRecord.count({
-        where: { urlId: id },
+        where: { urlId: id, },
     })
+
 };
 export const countUrl = async (tempId) => {
     return await client.url.count({
@@ -256,6 +248,24 @@ export const osAnalytics = (userid, period) => {
     ORDER BY clicks DESC;
     `;
 };
+
+export const referrerAnalytics = (userid, period) => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - period);
+
+    return client.$queryRaw`
+    SELECT COALESCE(r."referrer",'Unknown') AS referrer,
+    COUNT(*)::int AS clicks
+    FROM "UrlRecord" r
+    JOIN "Url" u
+    ON r."urlId" = u.id
+    WHERE u."userId" = ${userid}
+    AND r."visitedAt" >= ${startDate}
+    GROUP BY referrer
+    ORDER BY clicks DESC;    
+    `;
+
+}
 
 export const mostClickedUrlsAnalytics = (userid, period) => {
     const startDate = new Date();

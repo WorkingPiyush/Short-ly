@@ -41,16 +41,13 @@ function Analytics() {
   }));
 
 
-  // const referrers = data?.topReferrer.map((r) => ({
-  //   name: r.referrer,
-  //   value: r.clicks,
-  //   percentage: Number(((r.clicks / totalClicks) * 100).toFixed(1))
-  // }));
+  const referrers = data?.totalReferrers.map((r) => ({
+    name: r.referrer,
+    value: r.clicks,
+    percentage: Number(((r.clicks / totalClicks) * 100).toFixed(1))
+  }));
 
   const { ref, isVisible } = useInView();
-  if (isLoading) {
-    return 'Loading..'
-  }
   return (
     <div className="min-h-screen bg-black text-white p-8">
       <div className="max-w-4xl mx-auto">
@@ -172,7 +169,7 @@ function Analytics() {
         </Card>
 
         {/* REFERRERS */}
-        {/* {referrers?.value > 0 && < DonutSection title="Referrers" data={referrers} />} */}
+        {referrers && < DonutSection title="Referrers" data={referrers} />}
 
         {/* DEVICES */}
         {devices?.length > 0 && <DonutSection title="Devices" data={devices} />}

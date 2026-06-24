@@ -5,7 +5,6 @@ import { MdOutlineMenu } from "react-icons/md";
 import { RxCross1 } from "react-icons/rx";
 import { FcMultipleInputs } from "react-icons/fc"
 import { IoIosLink } from "react-icons/io";
-import { RiPagesLine } from "react-icons/ri";
 import { SiGoogleanalytics } from "react-icons/si";
 import { IoSettings } from "react-icons/io5";
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -61,7 +60,7 @@ function SideBar() {
 
                 <div className="mt-auto">
                     <div className="h-px bg-gray-400/30 mb-4" />
-                    <button className=" flex items-center justify-center gap-2  w-full py-3 rounded-lg bg-black text-emerald-400 font-semibold hover:bg-gray-900 transition-colors">
+                    <button onClick={() => navigate("/profile")} className="flex items-center justify-center gap-2 cursor-pointer w-full py-3 rounded-lg bg-black text-emerald-400 font-semibold hover:bg-gray-900 transition-colors">
                         <IoSettings size={18} />
                         <span>Settings</span>
                     </button>

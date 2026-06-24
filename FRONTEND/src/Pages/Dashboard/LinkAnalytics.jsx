@@ -28,6 +28,7 @@ function LinkAnalytics() {
     const [selectedTimePeriod, setSelectedTimePeriod] = useState(7);
 
     const { data, isLoading, error } = useShortAnalytics(params.shortCode, selectedTimePeriod);
+
     const totalClicks = data?.totalClicks || 0;
     const engagementData = data?.dailyClicks;
 
@@ -46,8 +47,8 @@ function LinkAnalytics() {
         value: r.clicks,
         percentage: Number(((r.clicks / totalClicks) * 100).toFixed(1))
     }));
-    const { ref, isVisible } = useInView();
 
+    const { ref, isVisible } = useInView();
     return (
         <div className="min-h-screen bg-black text-white p-8">
             <div className="max-w-4xl mx-auto">
@@ -145,7 +146,7 @@ function LinkAnalytics() {
                 </Card>
 
                 {/* REFERRERS */}
-                {referrers?.value > 0 && < DonutSection title="Referrers" data={referrers} />}
+                {referrers && <DonutSection title="Referrers" data={referrers} />}
 
                 {/* DEVICES */}
                 {devices?.length > 0 && <DonutSection title="Devices" data={devices} />}

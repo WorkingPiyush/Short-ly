@@ -50,6 +50,7 @@ function BulkUrl() {
     setFile(null);
   };
   const formatDate = (date) => {
+
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const day = new Date(date).getDate();
     const month = monthNames[new Date(date).getMonth()];
@@ -59,13 +60,13 @@ function BulkUrl() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white px-6 py-2">
+    <div className="min-h-screen bg-black text-white px-6 py-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h2 style={{ fontFamily: "'Syne', sans-serif" }} className="text-4xl mb-3">
-            Upload your file
-          </h2>
+            <h1 style={{ fontFamily: "'Syne', sans-serif" }} className="text-3xl mb-3">
+              Upload your file
+            </h1>
           <p className="text-gray-400">
             Upload an Excel file (.xlsx, .xls) and view processed results.
           </p>

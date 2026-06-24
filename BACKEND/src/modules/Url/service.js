@@ -1,7 +1,7 @@
 import dotenv from "dotenv/config";
 import { client } from '../../../config/db.js';
 import { formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, foromtReferrer, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, urlKey, urlStatus } from '../../helper/Url.helper.js';
-import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics } from "../../helper/Db.query.js";
+import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics, referrerAnalytics } from "../../helper/Db.query.js";
 import { redisClient } from "../../../config/redisClient.js";
 import { AppError } from "../../utils/AppError.js";
 import logger from "../../../config/logger.js";
@@ -363,6 +363,7 @@ export const UrlAnalytics = async ({ userId, shortCode, period }) => {
         logger.error("shortCode not found !!");
         throw new AppError("shortCode not found !!", 404);
     };
+
     const Url = await client.url.findFirst({
         where: { userId, shortCode, isDeleted: false },
         select: {
@@ -377,7 +378,7 @@ export const UrlAnalytics = async ({ userId, shortCode, period }) => {
         throw new AppError('Url not found', 404);
     }
     const [topBrowsers, topOsys, topDevices, topCountries, totalClicks, dailyClick, referrer] = await Promise.all([
-        topBrowser(Url.id), topOs(Url.id), topDevice(Url.id), topCountry(Url.id), totalClick(Url.id), dailyClicks(Url.id, period), topReferrer(Url.id)
+        topBrowser(Url.id, period), topOs(Url.id, period), topDevice(Url.id, period), topCountry(Url.id, period), totalClick(Url.id, period), dailyClicks(Url.id, period), topReferrer(Url.id, period)
     ])
     if (!Url) {
         throw new Error("No Url Found");
@@ -401,9 +402,9 @@ export const UserAnalytics = async ({ userId, period }) => {
         throw new AppError("Period not defined !!", 404);
     };
 
-    const [totalClicks, dailyClicks, totalCountries, totalBrowser, totalDevices, totalOs, mostClickedUrls] = await Promise.all([
-        totalClicksAnalytics(userId, period), dailyClicksAnalytics(userId, period), countriesAnalytics(userId, period), browsersAnalytics(userId, period), devicesAnalytics(userId, period), osAnalytics(userId, period), mostClickedUrlsAnalytics(userId, period)]);
-        
+    const [totalClicks, dailyClicks, totalCountries, totalBrowser, totalDevices, totalOs, totalReferrers, mostClickedUrls] = await Promise.all([
+        totalClicksAnalytics(userId, period), dailyClicksAnalytics(userId, period), countriesAnalytics(userId, period), browsersAnalytics(userId, period), devicesAnalytics(userId, period),
+        osAnalytics(userId, period), referrerAnalytics(userId, period), mostClickedUrlsAnalytics(userId, period)]);
     return {
         totalClicks: totalClicks,
         totalBrowser: totalBrowser,
@@ -412,6 +413,7 @@ export const UserAnalytics = async ({ userId, period }) => {
         totalCountries: totalCountries,
         totalDevices: totalDevices,
         mostClickedUrls: mostClickedUrls,
+        totalReferrers: totalReferrers
     };
 }
 export const UrlDelete = async ({ userId, shortCode }) => {
