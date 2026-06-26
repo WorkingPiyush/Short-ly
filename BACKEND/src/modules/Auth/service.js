@@ -7,25 +7,55 @@ import { Prisma } from '@prisma/client';
 import { AppError } from '../../utils/AppError.js';
 import logger from '../../../config/logger.js';
 import { passwordCompare, passwordHashing } from '../../helper/Url.helper.js';
+import { stats, userDetails } from '../../helper/Db.query.js';
 
 export const getUser = async ({ userId }) => {
     const user = await client.user.findUnique({
         where: { id: userId },
         select: {
-            id: true,
-            name: true,
-            email: true,
             role: true,
             profileImage: true,
-            isVerified: true,
-            isBlocked: true,
+            plan: true,
+            phone: true,
+            location: true,
             lastLoginAt: true,
+            id: true,
+            headline: true,
+            createdAt: true,
+            email: true,
+            bio: true,
+            address: true,
+            name: true
         }
     })
     if (!user) {
         throw new AppError("User not found", 404);
     }
     return { ...user, username: user.name };
+}
+
+export const userInfo = async ({ userId }) => {
+    const user = await userDetails(userId);
+    const Urlstats = await stats(userId);
+    
+    if (!user) {
+        throw new AppError("User not found", 404);
+    }
+    return {
+        name: user?.name,
+        profileImage:user?.profileImage,
+        headline: user?.headline,
+        role:user?.role,
+        location: user?.location,
+        bio: user?.bio,
+        phone: user?.phone,
+        email: user?.email,
+        address: user?.address,
+        memberSince: user?.createdAt,
+        plan: user?.plan,
+        lastActive: user?.lastLoginAt,
+        url: Urlstats,
+    };
 }
 
 export const registerUser = async ({ name, email, password }) => {

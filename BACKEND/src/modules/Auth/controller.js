@@ -14,6 +14,15 @@ export const user = asyncHandler(async (req, res) => {
         user: userInfo,
     });
 })
+export const userDetails = asyncHandler(async (req, res) => {
+    const userInfo = await authService.userInfo({
+        userId: req.user.id
+    })
+    return res.status(200).json({
+        success: true,
+        user: userInfo,
+    });
+})
 export const register = asyncHandler(async (req, res) => {
     const validatedBody = signupSchema.safeParse(req.body);
     if (!validatedBody.success) {

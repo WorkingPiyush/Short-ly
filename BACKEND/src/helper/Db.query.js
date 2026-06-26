@@ -143,6 +143,59 @@ export const countUrl = async (tempId) => {
     })
 };
 
+export const userDetails = async (id) => {
+    return await client.user.findUnique({
+        where: { id },
+        select: {
+            role: true,
+            profileImage: true,
+            plan: true,
+            phone: true,
+            location: true,
+            lastLoginAt: true,
+            id: true,
+            headline: true,
+            createdAt: true,
+            email: true,
+            bio: true,
+            address: true,
+            name: true,
+        }
+    })
+};
+
+export const stats = async (id) => {
+    const now = new Date();
+    const [linksCount, linksClickCount, activeLinksCount] = await Promise.all([
+        await client.$queryRaw`
+    SELECT
+    COUNT(*)::int AS count
+    FROM "Url" u
+    WHERE u."userId" = ${id};
+    `,
+        await client.$queryRaw`
+    SELECT
+    COUNT(*)::int AS clicks
+    FROM "UrlRecord" r
+    JOIN "Url" u
+    ON r."urlId" = u.id
+    WHERE u."userId" = ${id};
+    `,
+        await client.$queryRaw`
+    SELECT
+    COUNT(*)::int AS count
+    FROM "Url" u
+    WHERE u."userId" = ${id}
+    AND u."isDeleted" = false
+    AND(
+         u."liveTime" IS NULL
+         OR u."liveTime" <= ${now}
+    )
+    AND u."expirationDate">${now}
+    AND NOT ( u."singleUse" AND u."used");`
+    ]);
+    return { linksCount: linksCount[0]?.count ?? 0, linksClickCount: linksClickCount[0]?.clicks ?? 0, activeLinksCount: activeLinksCount[0]?.count ?? 0 }
+};
 
 
 

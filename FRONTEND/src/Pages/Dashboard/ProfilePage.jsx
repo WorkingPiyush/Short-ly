@@ -1,53 +1,45 @@
 /* eslint-disable react/prop-types */
-import { useUser } from '@/Hooks/useAuth';
+import { useUserInfo } from '@/Hooks/useAuth';
+import { useUrl } from '@/Hooks/useUrl';
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
-const USER = {
-    name: "Piyush Kumar",
-    role: "Full Stack Developer",
-    location: "Delhi, India",
-    bio: "A normal human being trying to get out of the hell.... 😊 Building cool stuff with React & Node.",
-    tags: ["React", "Node.js", "Full Stack", "Open Source"],
-    avatar: null, // replace with image URL string
-    phone: "+91-8595594378",
-    email: "itsmepiyush855@gmail.com",
-    address: "Rohini, Delhi - 110085",
-    homepage: "github.com/WorkingPiyush",
-    memberSince: "01 Jan 2026",
-    plan: "Free Tier",
-    lastActive: "Today, 2:45 PM",
-    linksUsed: 4,
-    linksLimit: 50,
-};
+// const USER = {
+//     name: "Piyush Kumar",
+//     role: "Full Stack Developer",
+//     location: "Delhi, India",
+//     bio: "A normal human being trying to get out of the hell.... 😊 Building cool stuff with React & Node.",
+//     tags: ["React", "Node.js", "Full Stack", "Open Source"],
+//     avatar: null, // replace with image URL string
+//     phone: "+91-8595594378",
+//     email: "itsmepiyush855@gmail.com",
+//     address: "Rohini, Delhi - 110085",
+//     homepage: "github.com/WorkingPiyush",
+//     memberSince: "01 Jan 2026",
+//     plan: "Free Tier",
+//     lastActive: "Today, 2:45 PM",
+//     linksUsed: 4,
+//     linksLimit: 50,
+// };
 
-const STATS = [
-    { label: "Total Links", value: 4, sub: "All time" },
-    { label: "Total Clicks", value: 6, sub: "All time" },
-    { label: "Active Links", value: 3, sub: "Live now" },
-    { label: "Bio Pages", value: 1, sub: "Published" },
-];
+// const STATS = [
+//     { label: "Total Links", value: 4, sub: "All time" },
+//     { label: "Total Clicks", value: 6, sub: "All time" },
+//     { label: "Active Links", value: 3, sub: "Live now" },
+// ];
 
-const LINKS = [
-    { id: 1, emoji: "🎬", original: "www.youtube.com/watch", short: "sht.ly/FrrQ9fF", clicks: 4, status: "active" },
-    { id: 2, emoji: "🌐", original: "127.0.0.1/index.html", short: "sht.ly/DTSrrlT", clicks: 2, status: "active" },
-    { id: 3, emoji: "🔗", original: "app.bitly.com/Bp83eV8wOnQ", short: "sht.ly/EY4P2sb", clicks: 0, status: "active" },
-    { id: 4, emoji: "🎬", original: "www.youtube.com/watch?v=old", short: "sht.ly/X9kPmR2", clicks: 0, status: "expired" },
-];
+// const LINKS = [
+//     { id: 1, emoji: "🎬", original: "www.youtube.com/watch", short: "sht.ly/FrrQ9fF", clicks: 4, status: "active" },
+//     { id: 2, emoji: "🌐", original: "127.0.0.1/index.html", short: "sht.ly/DTSrrlT", clicks: 2, status: "active" },
+//     { id: 3, emoji: "🔗", original: "app.bitly.com/Bp83eV8wOnQ", short: "sht.ly/EY4P2sb", clicks: 0, status: "active" },
+//     { id: 4, emoji: "🎬", original: "www.youtube.com/watch?v=old", short: "sht.ly/X9kPmR2", clicks: 0, status: "expired" },
+// ];
 
-const ACTIVITY = [
-    { type: "create", text: "Created short link", bold: "sht.ly/FrrQ9fF", suffix: "→ youtube.com/watch", time: "Today · 2:45 PM" },
-    { type: "click", text: "", bold: "sht.ly/FrrQ9fF", suffix: "received 4 clicks from India", time: "Today · 1:12 PM" },
-    { type: "edit", text: "Updated expiry on", bold: "sht.ly/DTSrrlT", suffix: "", time: "Yesterday · 5:30 PM" },
-    { type: "create", text: "Created short link", bold: "sht.ly/DTSrrlT", suffix: "→ 127.0.0.1/index.html", time: "31 May 2026 · 11:00 AM" },
-    { type: "create", text: "Published Bio Page —", bold: "Piyush Kumar", suffix: "", time: "31 May 2026 · 10:22 AM" },
-    { type: "delete", text: "Deleted expired link", bold: "sht.ly/X9kPmR2", suffix: "", time: "01 Jun 2026 · 9:00 AM" },
-];
 
 // ─── Inline SVG icons ─────────────────────────────────────────────────────────
 const svg = (content) => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"
-        strokeLinecap="round" strokeLinejoin="round" className="w-[15px] h-[15px]"
+        strokeLinecap="round" strokeLinejoin="round" className="w-3.75 h-3.75"
         dangerouslySetInnerHTML={{ __html: content }} />
 );
 
@@ -71,7 +63,7 @@ function InfoItem({ icon, label, value }) {
     return (
         <div className="flex items-center gap-3 mb-4 last:mb-0">
             <div className="w-9 h-9 rounded-[10px] bg-emerald-300/10 border border-emerald-300/20
-        flex items-center justify-center text-emerald-300 flex-shrink-0">
+        flex items-center justify-center text-emerald-300 shrink-0">
                 {icon}
             </div>
             <div className="min-w-0">
@@ -84,7 +76,7 @@ function InfoItem({ icon, label, value }) {
 
 function SectionCard({ title, children }) {
     return (
-        <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-5">
+        <div className="bg-white/3 border border-white/8 rounded-2xl p-5">
             <p className="text-[11px] font-medium text-white/30 tracking-[.08em] uppercase mb-4">
                 {title}
             </p>
@@ -95,76 +87,53 @@ function SectionCard({ title, children }) {
 
 function LinkRow({ link, dimmed = false }) {
     return (
-        <div className={`flex items-center gap-3 bg-white/[0.02] border border-white/[0.07]
+        <div className={`flex items-center gap-3 bg-white/2 border border-white/[0.07]
       rounded-xl px-4 py-3.5 hover:border-white/[0.14] transition-all duration-200
       ${dimmed ? "opacity-50" : ""}`}>
-            <span className="text-lg flex-shrink-0">{link.emoji}</span>
             <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium text-white/75 truncate mb-0.5">{link.original}</p>
-                <p className="text-[12px] text-emerald-300">{link.short}</p>
+                <p className="text-[13px] font-medium text-white/75 truncate mb-0.5">{link.original_url}</p>
+                <p className="text-[12px] text-emerald-300">{link.short_url}</p>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
                 <span className="flex items-center gap-1 text-[12px] text-white/35">
-                    <Icons.Search /> {link.clicks}
+                    <Icons.Search /> {link.totalClicks}
                 </span>
                 <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full border
-          ${link.status === "active"
+          ${link.isActive === "active"
                         ? "bg-emerald-300/10 text-emerald-300 border-emerald-300/20"
                         : "bg-red-400/10 text-red-400 border-red-400/15"}`}>
-                    {link.status === "active" ? "Active" : "Expired"}
+                    {link.isActive === "active" ? "Active" : "Expired"}
                 </span>
             </div>
         </div>
     );
 }
 
-const activityCfg = {
-    create: { bg: "bg-emerald-300/10", color: "text-emerald-300", Icon: Icons.Plus },
-    click: { bg: "bg-violet-400/10", color: "text-violet-400", Icon: Icons.Search },
-    edit: { bg: "bg-amber-400/10", color: "text-amber-400", Icon: Icons.Edit },
-    delete: { bg: "bg-red-400/10", color: "text-red-400", Icon: Icons.Trash },
-};
 
-function ActivityRow({ item }) {
-    const { bg, color, Icon } = activityCfg[item.type];
-    return (
-        <div className="flex gap-3.5 py-3.5 border-b border-white/[0.05] last:border-b-0">
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${bg} ${color}`}>
-                <Icon />
-            </div>
-            <div className="flex-1">
-                <p className="text-[13px] text-white/55 leading-relaxed mb-0.5">
-                    {item.text && `${item.text} `}
-                    <span className="text-white/85 font-medium">{item.bold}</span>
-                    {item.suffix && ` ${item.suffix}`}
-                </p>
-                <p className="text-[11px] text-white/25">{item.time}</p>
-            </div>
-        </div>
-    );
-}
 
 // ─── Tab: Overview ────────────────────────────────────────────────────────────
-function OverviewTab({ onGoToLinks }) {
+function OverviewTab({ onGoToLinks, user, url }) {
+    const memberSince = new Date(user?.memberSince).toLocaleDateString();
+    
     return (
         <div className="flex flex-col gap-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <SectionCard title="Contact">
-                    <InfoItem icon={<Icons.Phone />} label="Mobile" value={USER.phone} />
-                    <InfoItem icon={<Icons.Mail />} label="Email" value={USER.email} />
-                    <InfoItem icon={<Icons.Pin />} label="Address" value={USER.address} />
-                    <InfoItem icon={<Icons.Globe />} label="Homepage" value={USER.homepage} />
+                    <InfoItem icon={<Icons.Phone />} label="Mobile" value={user?.phone || "No Mobile"} />
+                    <InfoItem icon={<Icons.Mail />} label="Email" value={user?.email} />
+                    <InfoItem icon={<Icons.Pin />} label="Address" value={user?.address || "No Address"} />
+                    <InfoItem icon={<Icons.Globe />} label="Homepage" value={user?.homePage || "No Home Page"} />
                 </SectionCard>
                 <SectionCard title="Account">
-                    <InfoItem icon={<Icons.Cal />} label="Member since" value={USER.memberSince} />
-                    <InfoItem icon={<Icons.Shield />} label="Plan" value={USER.plan} />
-                    <InfoItem icon={<Icons.Chart />} label="Last active" value={USER.lastActive} />
-                    <InfoItem icon={<Icons.Link />} label="Links used" value={`${USER.linksUsed} / ${USER.linksLimit} this month`} />
+                    <InfoItem icon={<Icons.Cal />} label="Member since" value={memberSince || "6/26/2026"} />
+                    <InfoItem icon={<Icons.Shield />} label="Plan" value={user?.plan} />
+                    <InfoItem icon={<Icons.Chart />} label="Last active" value={user?.lastActive} />
+                    <InfoItem icon={<Icons.Link />} label="Links used" value={`${user?.linksUsed || 0} / ${user?.linksLimit || 50} this month`} />
                 </SectionCard>
             </div>
 
             {/* Plan card */}
-            <div className="bg-emerald-300/[0.04] border border-emerald-300/25 rounded-2xl
+            <div className="bg-emerald-300/4 border border-emerald-300/25 rounded-2xl
         px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
                 <div>
                     <span className="inline-block text-[11px] font-medium text-emerald-300
@@ -173,14 +142,21 @@ function OverviewTab({ onGoToLinks }) {
                     </span>
                     <p className="font-extrabold text-[20px] text-white tracking-tight mb-1"
                         style={{ fontFamily: "'Syne', sans-serif" }}>
-                        Free Tier
+                        {user?.plan === 'FREE' ? "Free Tier" : "Premium"}
                     </p>
                     <p className="text-[12px] text-white/35">50 links/month · Basic analytics · Standard URLs</p>
                 </div>
-                <button className="text-[13px] font-medium text-zinc-900 bg-emerald-300 px-4 py-2.5
-          rounded-xl hover:bg-emerald-200 transition-all duration-150 flex-shrink-0">
-                    Upgrade to Pro →
-                </button>
+                {user?.plan === 'FREE' ?
+                    <button className="text-[13px] cursor-pointer font-medium text-zinc-900 bg-emerald-300 px-4 py-2.5
+          rounded-xl hover:bg-emerald-200 transition-all duration-150 shrink-0">
+                        Upgrade to Pro →
+                    </button>
+                    :
+                    <button className="text-[13px] cursor-pointer font-medium text-zinc-900 bg-emerald-300 px-4 py-2.5
+          rounded-xl hover:bg-emerald-200 transition-all duration-150 shrink-0">
+                        Explore Premium Pro  →
+                    </button>
+                }
             </div>
 
             {/* Recent links */}
@@ -192,15 +168,15 @@ function OverviewTab({ onGoToLinks }) {
                     </p>
                     <button
                         onClick={onGoToLinks}
-                        className="text-[12px] font-medium text-white/50 bg-white/[0.04]
+                        className="text-[12px] cursor-pointer font-medium text-white/50 bg-white/4
               border border-white/10 px-3.5 py-1.5 rounded-xl
-              hover:text-white hover:bg-white/[0.08] transition-all duration-200"
+              hover:text-white hover:bg-white/8 transition-all duration-200"
                     >
-                        See all →
+                        See More →
                     </button>
                 </div>
                 <div className="flex flex-col gap-2.5">
-                    {LINKS.slice(0, 2).map(l => <LinkRow key={l.id} link={l} />)}
+                    {url?.sort((a, b) => b.totalClicks - a.totalClicks)?.slice(2, 5).map(l => <LinkRow key={l.id} link={l} />)}
                 </div>
             </div>
         </div>
@@ -208,33 +184,33 @@ function OverviewTab({ onGoToLinks }) {
 }
 
 // ─── Tab: My Links ────────────────────────────────────────────────────────────
-function LinksTab() {
+function LinksTab({ url, navigate }) {
     return (
-        <div className="flex flex-col gap-2.5">
-            {LINKS.map(l => <LinkRow key={l.id} link={l} dimmed={l.status === "expired"} />)}
-        </div>
-    );
-}
-
-// ─── Tab: Activity ────────────────────────────────────────────────────────────
-function ActivityTab() {
-    return (
-        <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl px-5 py-2">
-            {ACTIVITY.map((a, i) => <ActivityRow key={i} item={a} />)}
+        <div className='relative'>
+            <div className="flex flex-col gap-2.5">
+                {url?.sort((a, b) => b.totalClicks - a.totalClicks)?.slice(6, 10).map(l => <LinkRow key={l.id} link={l} />)}
+            </div>
+            <button
+                onClick={() => navigate("/dashboard/links")}
+                className="text-[12px] absolute right-0 mt-2 cursor-pointer font-medium text-white/50 bg-white/4
+              border border-white/10 px-3.5 py-1.5 rounded-xl
+              hover:text-white hover:bg-white/8 transition-all duration-200"
+            >
+                See all →
+            </button>
         </div>
     );
 }
 
 // ─── Tab: Settings ───────────────────────────────────────────────────────────
-function SettingsTab() {
+function SettingsTab({ user }) {
     const navigate = useNavigate();
-    const [name, setName] = useState(USER.name);
-    const [email, setEmail] = useState(USER.email);
+    const [name, setName] = useState(user?.name);
+    const [email, setEmail] = useState(user?.email);
     const [currPw, setCurrPw] = useState("");
     const [newPw, setNewPw] = useState("");
     const [saved, setSaved] = useState(false);
     const [confirm, setConfirm] = useState(false);
-
     const handleSave = () => {
         // 🔌 Replace with: await fetch("/api/user", { method: "PATCH", body: JSON.stringify({ name, email }) })
         setSaved(true);
@@ -250,18 +226,17 @@ function SettingsTab() {
     const inputCls = `w-full bg-white/[0.04] border border-white/[0.09] rounded-xl
     px-3.5 py-3 text-[13px] text-white placeholder-white/20 outline-none
     focus:border-emerald-300/35 focus:bg-emerald-300/[0.02] transition-all duration-200`;
-
     return (
         <div className="flex flex-col gap-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <SectionCard title="Account Details">
                     <div className="mb-3">
                         <label className="block text-[12px] text-white/40 mb-1.5">Display name</label>
-                        <input value={name} onChange={e => setName(e.target.value)} className={inputCls} />
+                        <input disabled value={name} onChange={e => setName(e.target.value)} className={inputCls} />
                     </div>
                     <div>
                         <label className="block text-[12px] text-white/40 mb-1.5">Email</label>
-                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} className={inputCls} />
+                        <input disabled type="email" value={email} onChange={e => setEmail(e.target.value)} className={inputCls} />
                     </div>
                 </SectionCard>
 
@@ -287,7 +262,7 @@ function SettingsTab() {
                 {saved ? "✓ Saved!" : "Save Settings"}
             </button>
 
-            <div className="bg-red-400/[0.04] border border-red-400/15 rounded-2xl
+            <div className="bg-red-400/4 border border-red-400/15 rounded-2xl
         px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
                 <div>
                     <h4 className="text-[14px] font-medium text-red-400/85 mb-1">Delete Account</h4>
@@ -298,10 +273,10 @@ function SettingsTab() {
                 <button
                     onClick={handleDelete}
                     className={`text-[13px] font-medium px-4 py-2.5 rounded-xl border
-            transition-all duration-200 flex-shrink-0 whitespace-nowrap
+            transition-all duration-200 shrink-0 whitespace-nowrap
             ${confirm
                             ? "bg-red-500/20 border-red-400/40 text-red-300"
-                            : "bg-red-400/[0.08] border-red-400/20 text-red-400 hover:bg-red-400/15"}`}
+                            : "bg-red-400/8 border-red-400/20 text-red-400 hover:bg-red-400/15"}`}
                 >
                     {confirm ? "Tap again to confirm" : "Delete account"}
                 </button>
@@ -310,43 +285,53 @@ function SettingsTab() {
     );
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
-const TABS = ["Overview", "My Links", "Activity", "Settings"];
+
 
 
 function ProfilePage() {
-       const { data: user} = useUser()
-       console.log(user)
+    const { data: user } = useUserInfo()
+    const { data: url } = useUrl()
+    const navigate = useNavigate();
+    const TABS = ["Overview", "My Links", "Settings"];
     const [activeTab, setActiveTab] = useState(0);
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white">
             <div className="max-w-4xl mx-auto px-4 py-8">
                 <div className="bg-white/3 border border-white/8 rounded-2xl overflow-hidden mb-4">
-                    <div className="h-30 md:h-36.25" style={{ background: "linear-gradient(135deg, #0d9488 0%, #6ee7b7 100%)" }} />
-                    <div className="px-5 pb-6">
-                        <div className="flex items-end justify-between gap-3 flex-wrap -mt-10 mb-4">
+                    <div className="h-30 md:h-34" style={{ background: "linear-gradient(135deg, #0d9488 0%, #6ee7b7 100%)" }} />
+                    <div className="px-5 relative pb-6">
+                        <div className="flex justify-center items-center gap-3 flex-wrap -mt-10 mb-4">
                             <div className="w-20 h-20 rounded-full border-[3px] border-[#0a0a0a] bg-[#2a2a2a] overflow-hidden flex items-center justify-center text-4xl shrink-0">
-                                {USER.avatar ? <img src={USER.avatar} alt={USER.name} className="w-full h-full object-cover" /> : <span>👤</span>}
+                                {user?.profileImage ? <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" /> : <span>👤</span>}
                             </div>
-                            {/* <Link
-                                to="/profile/edit"
-                                className="flex items-center gap-2 text-[13px] font-medium text-white
+                            <div className='absolute right-0 top-8'>
+                                <Link
+                                    to="/profile/edit"
+                                    className="flex items-center gap-2 text-[13px] font-medium text-white
                   border border-white/20 px-4 py-2 rounded-xl bg-transparent
                   hover:bg-white/[0.07] hover:border-white/35 transition-all duration-200"
-                            >
-                                <Icons.Edit /> Edit Profile
-                            </Link> */}
+                                >
+                                    <Icons.Edit /> Edit Profile
+                                </Link>
+                            </div>
                         </div>
-
-                        <h1 className="font-extrabold text-[22px] text-white tracking-tight mb-0.5" style={{ fontFamily: "'Syne', sans-serif" }}>
-                            {USER.name}
+                        <h1 className="font-extrabold text-center text-[22px] text-white tracking-tight mb-0.5" style={{ fontFamily: "'Syne', sans-serif" }}>
+                            {user?.name || "No Name"}
                         </h1>
+                        <div className='flex flex-col items-center'>
+                            <p className="text-[13px] text-white/45 mb-3">
+                                {user?.headline || "No Role"} · {user?.location || "No Location"}
+                            </p>
+                            <p className="text-[14px] text-center text-white/55 leading-relaxed mb-4 max-w-lg">
+                                {user?.bio || "No Bio"}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                    {STATS.map(({ label, value, sub }) => (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                    {/* {STATS.map(({ label, value, sub }) => (
                         <div key={label}
                             className="bg-white/3 border border-white/[0.07] cursor-pointer rounded-2xl px-4 py-4
                 hover:border-emerald-300/20 transition-all duration-200 hover:scale-102">
@@ -359,26 +344,62 @@ function ProfilePage() {
                             </p>
                             <p className="text-[11px] text-white/25">{sub}</p>
                         </div>
-                    ))}
+                    ))} */}
+                    <div className="bg-white/3 border border-white/[0.07] cursor-pointer rounded-2xl px-4 py-4
+                hover:border-emerald-300/20 transition-all duration-200 hover:scale-102">
+                        <p className="text-[10px] font-medium text-white/30 tracking-[.06em] uppercase mb-2">
+                            Total Links
+                        </p>
+                        <p className="font-extrabold text-[26px] text-white leading-none tracking-tight mb-1"
+                            style={{ fontFamily: "'Syne', sans-serif" }}>
+                            {user?.url.linksCount}
+                        </p>
+                        <p className="text-[11px] text-white/25">All time</p>
+                    </div>
+
+                    <div className="bg-white/3 border border-white/[0.07] cursor-pointer rounded-2xl px-4 py-4
+                hover:border-emerald-300/20 transition-all duration-200 hover:scale-102">
+                        <p className="text-[10px] font-medium text-white/30 tracking-[.06em] uppercase mb-2">
+                            Total Clicks
+                        </p>
+                        <p className="font-extrabold text-[26px] text-white leading-none tracking-tight mb-1"
+                            style={{ fontFamily: "'Syne', sans-serif" }}>
+                            {user?.url.linksClickCount}
+                        </p>
+                        <p className="text-[11px] text-white/25">All time</p>
+                    </div>
+
+                    <div className="bg-white/3 border border-white/[0.07] cursor-pointer rounded-2xl px-4 py-4
+                hover:border-emerald-300/20 transition-all duration-200 hover:scale-102">
+                        <p className="text-[10px] font-medium text-white/30 tracking-[.06em] uppercase mb-2">
+                            Active Links
+                        </p>
+                        <p className="font-extrabold text-[26px] text-emerald-400 leading-none tracking-tight mb-1"
+                            style={{ fontFamily: "'Syne', sans-serif" }}>
+                            {user?.url.activeLinksCount}
+                        </p>
+                        <p className="text-[11px] text-white/25">Live now</p>
+                    </div>
+
+
                 </div>
 
-                <div className="grid grid-cols-4 gap-1 bg-white/3 border border-white/[0.07] rounded-2xl p-1.5 mb-4">
+                <div className="grid grid-cols-3 gap-1 bg-white/3 border border-white/[0.07] rounded-2xl p-1.5 mb-4">
                     {TABS.map((tab, i) => (
                         <button key={tab} onClick={() => setActiveTab(i)}
                             className={`text-[13px] font-medium py-2.5 rounded-xl cursor-pointer transition-all duration-200
-                ${activeTab === i
+                                     ${activeTab === i
                                     ? "bg-white/8 text-white"
-                                    : "text-white/40 hover:text-white/65 hover:bg-white/[0.03]"}`}>
+                                    : "text-white/40 hover:text-white/65 hover:bg-white/3"}`}>
                             {tab}
                         </button>
                     ))}
                 </div>
 
                 {/* ── Content ── */}
-                {activeTab === 0 && <OverviewTab onGoToLinks={() => setActiveTab(1)} />}
-                {activeTab === 1 && <LinksTab />}
-                {activeTab === 2 && <ActivityTab />}
-                {activeTab === 3 && <SettingsTab />}
+                {activeTab === 0 && <OverviewTab user={user} url={url?.filter((l) => l.isActive = "active")} onGoToLinks={() => setActiveTab(1)} />}
+                {activeTab === 1 && <LinksTab navigate={navigate} url={url?.filter((l) => l.isActive = "active")} />}
+                {activeTab === 2 && <SettingsTab user={user} />}
             </div>
         </div>
     )

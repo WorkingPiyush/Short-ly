@@ -15,3 +15,7 @@ export const getMe = async () => {
     const res = await api.get("/auth/me");
     return res.data.user;
 }
+export const getUserInfo = async () => {
+    const res = await api.get("/auth/getMe");
+    return res.data.user;
+}

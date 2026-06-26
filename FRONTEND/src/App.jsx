@@ -14,6 +14,7 @@ import EditLink from './Pages/Dashboard/EditLink';
 import AnalyticsPage from './Pages/Dashboard/Analytics';
 import ProtectedLinkPage from './Pages/Dashboard/ProtectedLinkPage';
 import LinkAnalytics from './Pages/Dashboard/LinkAnalytics';
+import ProfileForm from './Pages/Dashboard/ProfileForm';
 
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
             <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
             <Route path="/:shortCode/analytics" element={<LinkAnalytics />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/edit" element={<ProfileForm />} />
           </Route>
           <Route path="/:shortCode/password-verify" element={<ProtectedLinkPage />} />
         </Routes>

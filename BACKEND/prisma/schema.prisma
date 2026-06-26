@@ -8,20 +8,44 @@ datasource db {
 }
 
 model User {
-  id           String       @id @default(uuid())
-  name         String?      @default("user")
-  email        String       @unique
-  password     String?
+  id String @id @default(uuid())
+
+  name  String?
+  email String  @unique
+
+  phone    String?
+  password String?
+
   profileImage String?
-  role         Role         @default(USER)
-  isVerified   Boolean      @default(false)
-  isBlocked    Boolean      @default(false)
+
+  role Role @default(USER)
+
+  headline String?
+  bio      String? @db.Text
+
+  location String?
+  address  String? @db.Text
+
+  isVerified Boolean @default(false)
+  isBlocked  Boolean @default(false)
+
+  plan Plan @default(FREE)
+  provider   AuthProvider @default(CREDENTIALS)
+  providerId String?
+
   lastLoginAt  DateTime?
-  provider     AuthProvider @default(CREDENTIALS)
-  providerId   String?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  urls         Url[]
+  lastActiveAt DateTime?
+
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  urls       Url[]
+
+  @@unique([provider, providerId])
+}
+
+enum Plan {
+  FREE
+  PRO
 }
 
 enum Role {
