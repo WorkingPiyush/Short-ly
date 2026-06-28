@@ -7,7 +7,9 @@ import { Prisma } from '@prisma/client';
 import { AppError } from '../../utils/AppError.js';
 import logger from '../../../config/logger.js';
 import { passwordCompare, passwordHashing } from '../../helper/Url.helper.js';
-import { stats, userDetails } from '../../helper/Db.query.js';
+import { findUser, stats, userDetails } from '../../helper/Db.query.js';
+import cloudinary from '../../../config/cloudinary.js';
+import uploadImages from '../../helper/fileUpload.js';
 
 export const getUser = async ({ userId }) => {
     const user = await client.user.findUnique({
@@ -37,15 +39,15 @@ export const getUser = async ({ userId }) => {
 export const userInfo = async ({ userId }) => {
     const user = await userDetails(userId);
     const Urlstats = await stats(userId);
-    
+
     if (!user) {
         throw new AppError("User not found", 404);
     }
     return {
         name: user?.name,
-        profileImage:user?.profileImage,
+        profileImage: user?.profileImage,
         headline: user?.headline,
-        role:user?.role,
+        role: user?.role,
         location: user?.location,
         bio: user?.bio,
         phone: user?.phone,
@@ -56,6 +58,37 @@ export const userInfo = async ({ userId }) => {
         lastActive: user?.lastLoginAt,
         url: Urlstats,
     };
+}
+
+export const update = async ({ userId, data, file }) => {
+    const user = await findUser(userId);
+    let inputData = { ...data };
+
+    if (file) {
+        const uploaded = await uploadImages(file);
+        inputData.profileImage = uploaded.secure_url;
+    }
+    const updatedUser = await client.user.update({
+        where: { id: user.id },
+        data: inputData,
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            profileImage: true,
+            role: true,
+            headline: true,
+            location: true,
+            bio: true,
+            location: true,
+            plan: true,
+            createdAt: true,
+            isVerified: true,
+            address: true,
+        }
+    })
+    return updatedUser;
 }
 
 export const registerUser = async ({ name, email, password }) => {
@@ -92,6 +125,12 @@ export const loginUser = async ({ email, password }) => {
         if (!isMatch) {
             throw new AppError("Invalid Email or Password", 401);
         }
+        void client.user.update({
+            where: { id: user.id },
+            data: { lastLoginAt: new Date() }
+        }).catch((err) => {
+            console.error("Failed to update last login:", err);
+        });
         return { id: user.id, name: user.name, email: user.email };
         logger.info({ id: user.id, name: user.name, email: user.email }, 'User logged');
     } catch (err) {

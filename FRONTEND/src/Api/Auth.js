@@ -19,3 +19,7 @@ export const getUserInfo = async () => {
     const res = await api.get("/auth/getMe");
     return res.data.user;
 }
+export const updateInfo = async (data) => {
+    const res = await api.put("/auth/update", data);
+    return res.data.user;
+}

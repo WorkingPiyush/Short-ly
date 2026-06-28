@@ -2,6 +2,7 @@
 import { useUserInfo } from '@/Hooks/useAuth';
 import { useUrl } from '@/Hooks/useUrl';
 import React, { useState } from 'react'
+import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom'
 
 // const USER = {
@@ -109,12 +110,32 @@ function LinkRow({ link, dimmed = false }) {
     );
 }
 
+const formatDate = (date) => {
 
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const day = new Date(date).getDate();
+    const month = monthNames[new Date(date).getMonth()];
+    const year = new Date(date).getFullYear();
+
+    return `${day}-${month}-${year}`;
+}
+const formatDateTime = (date) => {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const day = new Date(date).getDate();
+    const month = monthNames[new Date(date).getMonth()];
+    const year = new Date(date).getFullYear();
+
+    return `${hours}:${minutes} [ ${day}-${month}-${year} ]`;
+}
 
 // ─── Tab: Overview ────────────────────────────────────────────────────────────
 function OverviewTab({ onGoToLinks, user, url }) {
-    const memberSince = new Date(user?.memberSince).toLocaleDateString();
-    
+    const memberSince = formatDate(user?.memberSince);
+
     return (
         <div className="flex flex-col gap-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -122,12 +143,11 @@ function OverviewTab({ onGoToLinks, user, url }) {
                     <InfoItem icon={<Icons.Phone />} label="Mobile" value={user?.phone || "No Mobile"} />
                     <InfoItem icon={<Icons.Mail />} label="Email" value={user?.email} />
                     <InfoItem icon={<Icons.Pin />} label="Address" value={user?.address || "No Address"} />
-                    <InfoItem icon={<Icons.Globe />} label="Homepage" value={user?.homePage || "No Home Page"} />
+                    <InfoItem icon={<Icons.Cal />} label="Member since" value={memberSince || "27/07/2005"} />
                 </SectionCard>
                 <SectionCard title="Account">
-                    <InfoItem icon={<Icons.Cal />} label="Member since" value={memberSince || "6/26/2026"} />
                     <InfoItem icon={<Icons.Shield />} label="Plan" value={user?.plan} />
-                    <InfoItem icon={<Icons.Chart />} label="Last active" value={user?.lastActive} />
+                    <InfoItem icon={<Icons.Chart />} label="Last active" value={formatDateTime(user?.lastActive)} />
                     <InfoItem icon={<Icons.Link />} label="Links used" value={`${user?.linksUsed || 0} / ${user?.linksLimit || 50} this month`} />
                 </SectionCard>
             </div>
@@ -212,7 +232,7 @@ function SettingsTab({ user }) {
     const [saved, setSaved] = useState(false);
     const [confirm, setConfirm] = useState(false);
     const handleSave = () => {
-        // 🔌 Replace with: await fetch("/api/user", { method: "PATCH", body: JSON.stringify({ name, email }) })
+        toast.success("Soon we will enable this feature");
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
     };
@@ -331,20 +351,6 @@ function ProfilePage() {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-                    {/* {STATS.map(({ label, value, sub }) => (
-                        <div key={label}
-                            className="bg-white/3 border border-white/[0.07] cursor-pointer rounded-2xl px-4 py-4
-                hover:border-emerald-300/20 transition-all duration-200 hover:scale-102">
-                            <p className="text-[10px] font-medium text-white/30 tracking-[.06em] uppercase mb-2">
-                                {label}
-                            </p>
-                            <p className="font-extrabold text-[26px] text-white leading-none tracking-tight mb-1"
-                                style={{ fontFamily: "'Syne', sans-serif" }}>
-                                {value}
-                            </p>
-                            <p className="text-[11px] text-white/25">{sub}</p>
-                        </div>
-                    ))} */}
                     <div className="bg-white/3 border border-white/[0.07] cursor-pointer rounded-2xl px-4 py-4
                 hover:border-emerald-300/20 transition-all duration-200 hover:scale-102">
                         <p className="text-[10px] font-medium text-white/30 tracking-[.06em] uppercase mb-2">

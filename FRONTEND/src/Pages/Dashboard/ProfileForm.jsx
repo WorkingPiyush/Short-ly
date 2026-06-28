@@ -1,7 +1,10 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable react/prop-types */
-import { useUserInfo } from "@/Hooks/useAuth";
+import { useUpdateProfile, useUserInfo } from "@/Hooks/useAuth";
+import { profileUpdateSchema } from "@/Validator/auth.validator";
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from 'react-hot-toast';
 
 // ── Small reusable field wrapper ──────────────────────────────────────────────
 function Field({ label, hint, children }) {
@@ -24,6 +27,7 @@ function Input({ id, type = "text", value, onChange, placeholder, error, classNa
         <input
             id={id}
             type={type}
+            disabled={type === "email"}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
@@ -64,11 +68,14 @@ function CheckIcon() { return <svg viewBox="0 0 24 24" fill="none" stroke="curre
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function ProfileForm() {
+    const profileUpdateMutation = useUpdateProfile();
+    const navigate = useNavigate();
     const { data: user } = useUserInfo()
     const fileRef = useRef();
 
     // Form state
-    const [avatarSrc, setAvatarSrc] = useState(null);
+    const [profileImg, setProfileImg] = useState(null)
+    const [image, setImage] = useState(null)
     const [name, setName] = useState("");
     const [jobTitle, setJobTitle] = useState("");
     const [location, setLocation] = useState("");
@@ -76,21 +83,18 @@ export default function ProfileForm() {
     const [phone, setPhone] = useState("");
     const [email, setEmail] = useState("");
     const [address, setAddress] = useState("");
-    const [homepage, setHomepage] = useState("");
-    const [tags, setTags] = useState([]);
     const [nameError, setNameError] = useState(false);
-    const [toast, setToast] = useState(false);
 
     useEffect(() => {
         if (user) {
-            setAvatarSrc(user?.profileImage);
+            setProfileImg(user?.profileImage);
             setName(user?.name || "");
+            setEmail(user?.email || "");
             setJobTitle(user?.headline || "");
             setLocation(user?.location || "");
-            setBio(user?.headline || "");
+            setBio(user?.bio || "");
             setPhone(user?.phone || "");
             setAddress(user?.address || "");
-            setHomepage(user?.headline || "");
         }
     }, [user])
 
@@ -98,11 +102,11 @@ export default function ProfileForm() {
     const handleAvatar = (e) => {
         const file = e.target.files[0];
         if (!file) return;
+        setImage(file)
         const reader = new FileReader();
-        reader.onload = (ev) => setAvatarSrc(ev.target.result);
+        reader.onload = (ev) => setProfileImg(ev.target.result);
         reader.readAsDataURL(file);
     };
-
 
     // Submit
     const handleSubmit = () => {
@@ -113,29 +117,74 @@ export default function ProfileForm() {
             return;
         }
 
-        const payload = {
-            avatarSrc, name, jobTitle, location, bio,
-            phone, email, address, homepage, tags,
-        };
+        const validFormData = profileUpdateSchema.safeParse({
+            name,
+            headline: jobTitle,
+            location,
+            bio,
+            phone,
+            email,
+            address,
+            image,
+        });
 
-        // 🔌 Replace with your real API call:
-        // await fetch("/api/user/profile", {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify(payload),
-        // });
+        if (!validFormData.success) {
+            const { message } = JSON.parse(validFormData.error.message)[0];
+            console.error(message);
+            return;
+        }
 
-        console.log("Submitted:", payload);
-        setToast(true);
-        setTimeout(() => setToast(false), 2800);
+        const formData = new FormData();
+
+        if (name && name !== user.name) {
+            formData.append("name", name);
+        }
+        if (jobTitle && jobTitle !== user.headline) {
+            formData.append("headline", jobTitle);
+        }
+        if (location && location !== user.location) {
+            formData.append("location", location);
+        }
+        if (bio && bio !== user.bio) {
+            formData.append("bio", bio);
+        }
+        if (phone && phone !== user.phone) {
+            formData.append("phone", phone);
+        }
+        if (address && address !== user.address) {
+            formData.append("address", address);
+        }
+        if (image) {
+            formData.append("image", image);
+        }
+
+        if (Array.from(formData).length <= 0) {
+            toast.error("No data to save !!")
+            setTimeout(() => {
+                navigate("/dashboard", { replace: true });
+            }, 800);
+            return;
+        }
+        try {
+            profileUpdateMutation.mutate(formData, {
+                onSuccess: async () => {
+                    toast.success("Profile updated Success");
+                    setTimeout(() => {
+                        navigate("/dashboard", { replace: true });
+                    }, 800);
+                }
+            })
+        } catch (error) {
+            toast.error("Profile update error")
+            console.error(error.message);
+        }
     };
 
     // Reset
-    const handleCancel = () => {
-        setAvatarSrc(null);
+    const handleReset = () => {
+        setProfileImg(null); setImage(null);
         setName(""); setJobTitle(""); setLocation(""); setBio("");
-        setPhone(""); setEmail(""); setAddress(""); setHomepage("");
-        setTags([]);
+        setPhone(""); setAddress("");
     };
 
     return (
@@ -164,8 +213,8 @@ export default function ProfileForm() {
               flex items-center justify-center text-3xl overflow-hidden
               shrink-0 cursor-pointer transition-colors duration-200"
                     >
-                        {avatarSrc
-                            ? <img src={avatarSrc} alt="avatar" className="w-full h-full object-cover" />
+                        {profileImg
+                            ? <img src={profileImg} alt="avatar" className="w-full h-full object-cover" />
                             : <span>👤</span>
                         }
                     </div>
@@ -184,9 +233,9 @@ export default function ProfileForm() {
                                 Upload photo
                                 <input type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
                             </label>
-                            {avatarSrc && (
+                            {profileImg && (
                                 <button
-                                    onClick={() => setAvatarSrc(null)}
+                                    onClick={() => setProfileImg(null)}
                                     className="text-[12px] font-medium text-white/40 bg-white/5
                     border border-white/10 px-3.5 py-1.5 rounded-[8px]
                     hover:text-white hover:bg-white/9 transition-all duration-200"
@@ -248,7 +297,7 @@ export default function ProfileForm() {
                                 type="tel"
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
-                                placeholder="8595594378"
+                                placeholder="123456789"
                                 className="w-full bg-white/4 border border-white/9 rounded-[10px]
                   pl-13 pr-3.5 py-2.75 text-[14px] text-white placeholder-white/20
                   outline-none focus:border-emerald-300/40 transition-all duration-200"
@@ -256,32 +305,31 @@ export default function ProfileForm() {
                         </div>
                     </Field>
 
-                    <Field label="Work email">
+                    <Field label="Email">
                         <Input type="email" value={email} onChange={setEmail} placeholder="you@example.com" />
                     </Field>
 
                     <Field label="Address">
                         <Input value={address} onChange={setAddress} placeholder="Rohini, Delhi - 110085" />
                     </Field>
-
-                    <Field label="Homepage / Portfolio">
-                        <Input value={homepage} onChange={setHomepage} placeholder="github.com/yourprofile" />
-                    </Field>
                 </Section>
 
                 {/* ── Actions ── */}
                 <div className="flex gap-2.5 pb-4">
                     <button
-                        onClick={handleCancel}
+                        onClick={() => navigate(-1)}
                         className="text-[14px] font-medium text-white/50 bg-white/4
               border border-white/9 px-5 py-3.5 rounded-xl
               hover:text-white hover:bg-white/8 transition-all duration-200"
                     >
                         Cancel
                     </button>
+                    <button onClick={handleReset} className="text-[14px] font-medium text-white/50 bg-white/4 border border-white/9 px-5 py-3.5 rounded-xl hover:text-white hover:bg-white/8 transition-all duration-200">
+                        Reset Data
+                    </button>
                     <button
                         onClick={handleSubmit}
-                        className="flex-1 flex items-center justify-center gap-2
+                        className="flex-1 cursor-pointer flex items-center justify-center gap-2
               text-[14px] font-medium text-zinc-900 bg-emerald-300
               py-3.5 rounded-xl hover:bg-emerald-200 hover:scale-[1.01]
               transition-all duration-150"
@@ -290,24 +338,6 @@ export default function ProfileForm() {
                         Save Profile
                     </button>
                 </div>
-            </div>
-
-            {/* Toast */}
-            <div
-                className={`fixed bottom-6 z-50 whitespace-nowrap
-          bg-emerald-300/10 border border-emerald-300/25 backdrop-blur-xl
-          rounded-xl px-5 py-3 text-[13px] font-medium text-emerald-300
-          transition-all duration-350`}
-                style={{
-                    left: "50%",
-                    transform: toast
-                        ? "translateX(-50%) translateY(0)"
-                        : "translateX(-50%) translateY(64px)",
-                    opacity: toast ? 1 : 0,
-                    pointerEvents: toast ? "auto" : "none",
-                }}
-            >
-                ✦ Profile saved successfully!
             </div>
         </div>
     );

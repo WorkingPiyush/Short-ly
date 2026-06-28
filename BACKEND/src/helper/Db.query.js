@@ -163,6 +163,27 @@ export const userDetails = async (id) => {
         }
     })
 };
+export const findUser = async (id) => {
+    return await client.user.findUnique({
+        where: { id },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            profileImage: true,
+            role: true,
+            headline: true,
+            location: true,
+            bio: true,
+            location: true,
+            plan: true,
+            createdAt: true,
+            isVerified: true,
+            address: true,
+        }
+    })
+};
 
 export const stats = async (id) => {
     const now = new Date();
