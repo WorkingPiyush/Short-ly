@@ -1,7 +1,7 @@
 import dotenv from "dotenv/config";
 import { client } from '../../../config/db.js';
 import { formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, foromtReferrer, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, urlKey, urlStatus } from '../../helper/Url.helper.js';
-import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate, dailyClicks, topReferrer } from "../../helper/Db.query.js";
+import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics, referrerAnalytics } from "../../helper/Db.query.js";
 import { redisClient } from "../../../config/redisClient.js";
 import { AppError } from "../../utils/AppError.js";
 import logger from "../../../config/logger.js";
@@ -103,12 +103,13 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
         return {
             shortUrl: `${process.env.BACKEND_URL}/${existing.shortCode}`,
             originalUrl: existing.originalUrl,
+            shorCode: existing.shortCode,
             expiry_date: existing.expirationDate,
             creation_date: existing.createdAt,
             singleUse: existing.singleUse,
             totalClicks: clicks,
             isPswrdProtected: existing.password ? true : false,
-            isActive: existing.isActive,
+            isActive: await urlStatus(existing),
             userId: existing.userId,
         }
     }
@@ -143,11 +144,15 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
         }
     });
     const qrCodeImg = await generateQRCode(newUrl);
+
     const responseUrl = {
         shortUrl: `${process.env.BACKEND_URL}/${newUrl.shortCode}`,
+        shorCode: newUrl.shortCode,
         originalUrl: newUrl.originalUrl,
+        isActive: await urlStatus(newUrl),
         expiry_date: newUrl.expirationDate,
         creation_date: newUrl.createdAt,
+        totalClicks: await totalClick(newUrl.id),
         QrCode: qrCodeImg,
         singleUse: newUrl.singleUse,
         isPswrdProtected: newUrl.password ? true : false,
@@ -358,6 +363,7 @@ export const UrlAnalytics = async ({ userId, shortCode, period }) => {
         logger.error("shortCode not found !!");
         throw new AppError("shortCode not found !!", 404);
     };
+
     const Url = await client.url.findFirst({
         where: { userId, shortCode, isDeleted: false },
         select: {
@@ -372,7 +378,7 @@ export const UrlAnalytics = async ({ userId, shortCode, period }) => {
         throw new AppError('Url not found', 404);
     }
     const [topBrowsers, topOsys, topDevices, topCountries, totalClicks, dailyClick, referrer] = await Promise.all([
-        topBrowser(Url.id), topOs(Url.id), topDevice(Url.id), topCountry(Url.id), totalClick(Url.id), dailyClicks(Url.id, period), topReferrer(Url.id)
+        topBrowser(Url.id, period), topOs(Url.id, period), topDevice(Url.id, period), topCountry(Url.id, period), totalClick(Url.id, period), dailyClicks(Url.id, period), topReferrer(Url.id, period)
     ])
     if (!Url) {
         throw new Error("No Url Found");
@@ -389,6 +395,27 @@ export const UrlAnalytics = async ({ userId, shortCode, period }) => {
         topReferrer: foromtReferrer(referrer)
     }
 };
+
+export const UserAnalytics = async ({ userId, period }) => {
+    if (!period) {
+        logger.error("Period not defined !!");
+        throw new AppError("Period not defined !!", 404);
+    };
+
+    const [totalClicks, dailyClicks, totalCountries, totalBrowser, totalDevices, totalOs, totalReferrers, mostClickedUrls] = await Promise.all([
+        totalClicksAnalytics(userId, period), dailyClicksAnalytics(userId, period), countriesAnalytics(userId, period), browsersAnalytics(userId, period), devicesAnalytics(userId, period),
+        osAnalytics(userId, period), referrerAnalytics(userId, period), mostClickedUrlsAnalytics(userId, period)]);
+    return {
+        totalClicks: totalClicks,
+        totalBrowser: totalBrowser,
+        topOperatingSystems: totalOs,
+        dailyClicks: formatClicks(dailyClicks),
+        totalCountries: totalCountries,
+        totalDevices: totalDevices,
+        mostClickedUrls: mostClickedUrls,
+        totalReferrers: totalReferrers
+    };
+}
 export const UrlDelete = async ({ userId, shortCode }) => {
     const result = await client.url.update({
         where: { userId, shortCode, isDeleted: false },

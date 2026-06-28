@@ -1,55 +1,18 @@
 /* eslint-disable react/prop-types */
-import React from 'react'
+import React, { useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, CartesianGrid } from "recharts";
 import { Calendar } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Card from '@/components/Card';
 import useInView from '@/Hooks/View';
+import DropDownBtn from '@/components/DropDownBtn';
+import { useAnalytics } from '@/Hooks/useUrl';
 
 
-const engagementData = [
-  { day: "May 10", clicks: 12 },
-  { day: "May 12", clicks: 22 },
-  { day: "May 14", clicks: 42 },
-  { day: "May 18", clicks: 80 },
-  { day: "May 22", clicks: 60 },
-  { day: "May 28", clicks: 70 },
-  { day: "Jun 4", clicks: 82 },
-];
-
-const locations = [
-  {
-    country: "United States",
-    clicks: 560,
-    percentage: 58,
-  },
-  {
-    country: "India",
-    clicks: 210,
-    percentage: 22,
-  },
-  {
-    country: "Germany",
-    clicks: 105,
-    percentage: 11,
-  },
-  {
-    country: "Canada",
-    clicks: 89,
-    percentage: 9,
-  },
-];
-
-const referrers = [
-  { name: "Google", value: 45 },
-  { name: "Twitter", value: 30 },
-  { name: "LinkedIn", value: 25 },
-];
-
-const devices = [
-  { name: "Desktop", value: 42 },
-  { name: "Mobile", value: 38 },
-  { name: "Tablet", value: 20 },
+const timePeriod = [
+  { label: "7 Days", value: 7 },
+  { label: "30 Days", value: 30 },
+  { label: "365 Days", value: 365 },
 ];
 
 const COLORS = [
@@ -58,10 +21,33 @@ const COLORS = [
   "#F59E0B",
 ];
 
+function Analytics() {
+  const [period, setPeriod] = useState(7);
+  const { data, isLoading } = useAnalytics({ period });
 
-function AnalyticsPage() {
+  const totalClicks = data?.totalClicks;
+  const engagementData = data?.dailyClicks;
+  const topLinks = data?.mostClickedUrls;
+
+  const locations = data?.totalCountries.map((l) => ({
+    country: l.country,
+    clicks: l.clicks,
+    percentage: Number(((l.clicks / totalClicks) * 100).toFixed(1))
+  }));
+  const devices = data?.totalDevices.map((d) => ({
+    name: d.device,
+    value: d.clicks,
+    percentage: Number(((d.clicks / totalClicks) * 100).toFixed(1))
+  }));
+
+
+  const referrers = data?.totalReferrers.map((r) => ({
+    name: r.referrer,
+    value: r.clicks,
+    percentage: Number(((r.clicks / totalClicks) * 100).toFixed(1))
+  }));
+
   const { ref, isVisible } = useInView();
-
   return (
     <div className="min-h-screen bg-black text-white p-8">
       <div className="max-w-4xl mx-auto">
@@ -84,10 +70,11 @@ function AnalyticsPage() {
             </h2>
 
             {/* CALENDER */}
-            <button className="flex items-center gap-2 border border-gray-700 px-4 py-2 rounded-xl">
+            <div className="flex items-center gap-2 border border-gray-700 px-4 py-2 rounded-xl">
               <Calendar size={16} />
-              May 10 - Jun 8
-            </button>
+              <DropDownBtn time={timePeriod} state={period} setState={setPeriod} />
+
+            </div>
           </div>
           <div ref={ref} className="w-full h-70">
             {isVisible && (
@@ -102,7 +89,31 @@ function AnalyticsPage() {
               </ResponsiveContainer>
             )}
           </div>
+          {topLinks && (<div className="rounded-2xl border border-gray-800 bg-white/3">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-900">
+                  <th className="p-1 text-center text-sm">SERIAL</th>
+                  <th className="p-1 text-center text-sm">SHORT URL</th>
+                  <th className="p-1 text-center text-sm">CLICKS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topLinks?.map((url, idx) => (
+                  <tr key={url?.shortCode} className="border-b border-gray-900 hover:bg-white/2">
+                    <td className="p-4 text-center">{idx + 1}</td>
+                    <td className="p-4 text-center">{`${import.meta.env.VITE_BACKEND_URL}/${url?.shortCode}`}</td>
+                    <td className="p-4 text-xs text-center">{url?.clicks}</td>
+                    <td className="p-4">
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+          </div>)}
         </Card>
+
         {/* LOCATIONS */}
         <Card>
           <div className="flex justify-between mb-8">
@@ -127,7 +138,7 @@ function AnalyticsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {locations.length > 0 ? (
+              {locations?.length > 0 ? (
                 locations.map((item, index) => (
                   <TableRow key={item.country}>
                     <TableCell>{index + 1}</TableCell>
@@ -158,15 +169,14 @@ function AnalyticsPage() {
         </Card>
 
         {/* REFERRERS */}
-        <DonutSection title="Referrers" data={referrers} />
+        {referrers && < DonutSection title="Referrers" data={referrers} />}
 
         {/* DEVICES */}
-        <DonutSection title="Devices" data={devices} />
+        {devices?.length > 0 && <DonutSection title="Devices" data={devices} />}
       </div>
     </div>
   );
 }
-
 
 function DonutSection({ title, data }) {
   const { ref, isVisible } = useInView();
@@ -189,14 +199,14 @@ function DonutSection({ title, data }) {
                   paddingAngle={3}
                   dataKey="value"
                 >
-                  {data.map((entry, index) => (
+                  {data?.map((entry, index) => (
                     <Cell key={index} fill={COLORS[index]} />
                   ))}
                 </Pie>
 
                 <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle">
                   <tspan x="50%" dy="-4" className="text-lg font-semibold">
-                    {data.reduce((a, b) => a + b.value, 0)}
+                    {data.reduce((a, b) => a + b?.value, 0)}
                   </tspan>
 
                   <tspan x="50%" y="50%" className="text-xs fill-muted-foreground">
@@ -208,13 +218,13 @@ function DonutSection({ title, data }) {
           )
         }
         <div className="space-y-6">
-          {data.map((item, index) => (
+          {data?.map((item, index) => (
             <div key={item.name} className="flex justify-between items-center" >
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full" style={{ background: COLORS[index], }} />
                 {item.name}
               </div>
-              <span>{item.value}%</span>
+              <span>{item.percentage}%</span>
             </div>
           ))}
         </div>
@@ -224,4 +234,5 @@ function DonutSection({ title, data }) {
     </Card>
   );
 }
-export default AnalyticsPage;
+
+export default Analytics

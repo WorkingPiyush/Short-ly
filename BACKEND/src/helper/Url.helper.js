@@ -47,7 +47,7 @@ export const urlKey = (shortCode) => {
 export const formatBrowser = (result) => {
     return result.map(b => ({
         browser: b.browser || "unknown",
-        clicks: b._count.browser,
+        clicks: b.clicks,
     }))
 };
 export const formateDate = (date) => {
@@ -68,20 +68,20 @@ export const formatClicks = (result) => {
 export const formatOperating = (result) => {
     return result.map(b => ({
         os: b.os,
-        clicks: b._count.os,
+        clicks: b.clicks,
     }))
 };
 
 export const formatDevice = (result) => {
     return result.map(b => ({
         device: b.device,
-        clicks: b._count.device,
+        clicks: b.clicks,
     }))
 };
 
 export const foromtReferrer = (result) => {
     return result.map(b => ({
-        clicks: b._count.referrer,
+        clicks: b.clicks,
         referrer: b.referrer,
     }))
 }
@@ -89,7 +89,7 @@ export const foromtReferrer = (result) => {
 export const formatCountry = (result) => {
     return result.map(b => ({
         country: b.country,
-        clicks: b._count.country,
+        clicks: b.clicks,
     }))
 };
 export const passwordHashing = async (password, salt) => {

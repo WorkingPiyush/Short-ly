@@ -4,44 +4,15 @@ import {
   Upload,
   FileSpreadsheet,
   Trash2,
-  Download,
 } from "lucide-react";
+import { createBulkUrl } from '@/Api/Url';
+import { Link } from 'react-router-dom';
 
-const dummyData = [
-  {
-    id: 1001,
-    customer: "John Doe",
-    product: "Laptop",
-    amount: "$1,250",
-    status: "Completed",
-  },
-  {
-    id: 1002,
-    customer: "Jane Smith",
-    product: "Mouse",
-    amount: "$25",
-    status: "Completed",
-  },
-  {
-    id: 1003,
-    customer: "Michael Brown",
-    product: "Keyboard",
-    amount: "$45",
-    status: "Pending",
-  },
-  {
-    id: 1004,
-    customer: "Emily Davis",
-    product: "Monitor",
-    amount: "$190",
-    status: "Completed",
-  },
-];
 
 function BulkUrl() {
   const [file, setFile] = useState(null);
+  const [response, setResponse] = useState();
   const [dragActive, setDragActive] = useState(false);
-
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -52,7 +23,6 @@ function BulkUrl() {
       setDragActive(false);
     }
   };
-
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -60,37 +30,43 @@ function BulkUrl() {
     setDragActive(false);
 
     const droppedFile = e.dataTransfer.files?.[0];
-    if (droppedFile &&(droppedFile.name.endsWith(".xlsx") ||droppedFile.name.endsWith(".xls"))) {
+    if (droppedFile && (droppedFile.name.endsWith(".xlsx") || droppedFile.name.endsWith(".xls"))) {
       setFile(droppedFile);
     }
   };
   const removeFile = () => {
     setFile(null);
   };
-  const handleUpload = () => {
-    toast.success("File Uploaded !!");
+  const handleUpload = async () => {
+    const formData = new FormData();
+    formData.append("file", file)
+    try {
+      const data = await createBulkUrl(formData);
+      setResponse(data);
+      toast.success("File Uploaded !!");
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    }
     setFile(null);
   };
+  const formatDate = (date) => {
 
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case "Completed":
-        return "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
-      case "Pending":
-        return "bg-yellow-500/10 text-yellow-400 border border-yellow-500/30";
-      default:
-        return "bg-red-500/10 text-red-400 border border-red-500/30";
-    }
-  };
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const day = new Date(date).getDate();
+    const month = monthNames[new Date(date).getMonth()];
+    const year = new Date(date).getFullYear();
+
+    return `${day}-${month}-${year}`;
+  }
 
   return (
-    <div className="min-h-screen bg-black text-white px-6 py-2">
+    <div className="min-h-screen bg-black text-white px-6 py-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h2 style={{ fontFamily: "'Syne', sans-serif" }} className="text-4xl mb-3">
-            Upload your file
-          </h2>
+            <h1 style={{ fontFamily: "'Syne', sans-serif" }} className="text-3xl mb-3">
+              Upload your file
+            </h1>
           <p className="text-gray-400">
             Upload an Excel file (.xlsx, .xls) and view processed results.
           </p>
@@ -103,7 +79,7 @@ function BulkUrl() {
           onDragLeave={handleDrag}
           onDrop={handleDrop}
           className={`relative border rounded-3xl p-12 transition-all duration-300 ${dragActive ? "border-emerald-400 bg-emerald-500/10" : "border-gray-700 bg-white/3"}`}>
-            
+
           <input
             type="file"
             accept=".xlsx,.xls"
@@ -165,55 +141,59 @@ function BulkUrl() {
         )}
 
         {/* Results Section */}
-        <div className="mt-12">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h3 className="text-4xl font-bold">
-                Results
-              </h3>
-              <p className="text-gray-500">
-                Preview processed data
-              </p>
+        {response && (
+          <div className="mt-12">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="text-4xl font-bold">
+                  Results
+                </h3>
+                <p className="text-gray-500">
+                  Preview processed data
+                </p>
+              </div>
             </div>
-
-            <button className="flex items-center gap-2 px-5 py-3 border border-gray-700 rounded-xl hover:border-emerald-400">
-              <Download size={18} />
-              Export
-            </button>
           </div>
+        )}
+        {/* Table */}
+        {response && (<div className="rounded-2xl border border-gray-800 bg-white/3">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-900">
+                <th className="p-1 text-center text-sm">SERIAL</th>
+                <th className="p-1 text-center text-sm">ORGINAL URL</th>
+                <th className="p-1 text-center text-sm">SHORT URL</th>
+                <th className="p-1 text-center text-sm">STATUS</th>
+                <th className="p-1 text-center text-sm">CREATION DATE</th>
+                <th className="p-1 text-center text-sm">EXPIRY DATE</th>
+                <th className="p-1 text-center text-sm">PROTECTED</th>
+              </tr>
+            </thead>
 
-          {/* Table */}
-          <div className="overflow-hidden rounded-2xl border border-gray-800 bg-white/3">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-800">
-                  <th className="p-4 text-left">SERIAL</th>
-                  <th className="p-4 text-left">ORGINAL URL</th>
-                  <th className="p-4 text-left">SHORT URL</th>
-                  <th className="p-4 text-left">CLICKS</th>
-                  <th className="p-4 text-left">CREATION DATE</th>
+            <tbody>
+              {response?.map((url, idx) => (
+                <tr key={url.shortCode} className="border-b border-gray-900 hover:bg-white/2">
+                  <td className="p-4 text-center">{idx + 1}</td>
+                  <td className="p-4 text-center"><Link to={url.originalUrl} target='_blank'>{url?.originalUrl.split(".com")[0]}</Link></td>
+                  <td className="p-4 text-center"> <Link to={url.shortUrl} target='_blank'>{url?.shortUrl}</Link></td>
+                  <td className="p-2 capitalize">
+                    <div className='inline-flex items-center h-full gap-2 px-3 py-1 cursor-pointer rounded-full bg-linear-to-r from-emerald-500/10 to-emerald-400/5 border border-emerald-400/20 text-emerald-300 text-xs font-medium shadow-[0_0_20px_rgba(16,185,129,0,0.15)] md:text-sm'>
+                      <span className="w-2 h-2 rounded-full bg-emerald-300 shadow-[0_0_8px_#6ee7b7aa]" />
+                      {url.isActive}
+                    </div>
+                  </td>
+                  {/* <td className="p-4">{new Date(url?.creation_date)}</td> */}
+                  <td className="p-4 text-xs text-center">{formatDate(url?.creation_date)}</td>
+                  <td className="p-4 text-xs text-center">{formatDate(url?.expiry_date)}</td>
+                  <td className="p-4 text-xs capitalize text-center">{url.isPswrdProtected ? "Yes" : "No"}</td>
+                  <td className="p-4">
+                  </td>
                 </tr>
-              </thead>
+              ))}
+            </tbody>
+          </table>
 
-              <tbody>
-                {dummyData.map((row) => (
-                  <tr key={row.id} className="border-b border-gray-900 hover:bg-white/2">
-                    <td className="p-4">{row.id}</td>
-                    <td className="p-4">{row.customer}</td>
-                    <td className="p-4">{row.product}</td>
-                    <td className="p-4">{row.amount}</td>
-                    <td className="p-4">
-                      <span className={`px-3 py-1 rounded-full text-sm ${getStatusStyle(row.status)}`}>
-                        {row.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-          </div>
-        </div>
+        </div>)}
       </div>
     </div>
   );

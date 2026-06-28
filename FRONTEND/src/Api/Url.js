@@ -44,3 +44,11 @@ export const getUrlAnalytics = async (ShortCode, period) => {
     });
     return res.data.url;
 };
+export const AllAnalytics = async (period) => {
+    const res = await api.get(`/url/analytics`, { params: period });
+    return res.data;
+}
+export const createBulkUrl = async (data) => {
+    const res = await api.post("/url/bulk", data);
+    return res.data.url;
+};
