@@ -187,7 +187,7 @@ export const findUser = async (id) => {
 
 export const stats = async (id) => {
     const now = new Date();
-    const [linksCount, linksClickCount, activeLinksCount] = await Promise.all([
+    const [linksCount, linksClickCount, activeLinksCount, monthlyLinks] = await Promise.all([
         await client.$queryRaw`
     SELECT
     COUNT(*)::int AS count
@@ -213,9 +213,17 @@ export const stats = async (id) => {
          OR u."liveTime" <= ${now}
     )
     AND u."expirationDate">${now}
-    AND NOT ( u."singleUse" AND u."used");`
+    AND NOT ( u."singleUse" AND u."used");`,
+
+        await client.$queryRaw`
+    SELECT
+    COUNT(*)::int AS count
+    FROM "Url" u
+    WHERE u."userId" = ${id}
+    AND u."createdAt" >= DATE_TRUNC('month', CURRENT_DATE)
+    AND u."createdAt" < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month';`,
     ]);
-    return { linksCount: linksCount[0]?.count ?? 0, linksClickCount: linksClickCount[0]?.clicks ?? 0, activeLinksCount: activeLinksCount[0]?.count ?? 0 }
+    return { linksCount: linksCount[0]?.count ?? 0, linksClickCount: linksClickCount[0]?.clicks ?? 0, activeLinksCount: activeLinksCount[0]?.count ?? 0, monthlyLinks: monthlyLinks[0]?.count ?? 0 }
 };
 
 

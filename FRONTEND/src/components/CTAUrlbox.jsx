@@ -93,7 +93,7 @@ function CTAUrlbox() {
     }, [location, navigate])
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white px-4 py-10 flex items-start justify-center">
+        <div className="min-h-screen  dark:text-black dark:bg-[#0a0a0a] text-black px-4 py-10 flex items-start justify-center">
             <div className="w-full max-w-xl md:max-w-3xl">
 
                 {/* Header */}

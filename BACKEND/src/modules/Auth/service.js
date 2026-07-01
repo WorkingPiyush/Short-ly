@@ -39,7 +39,6 @@ export const getUser = async ({ userId }) => {
 export const userInfo = async ({ userId }) => {
     const user = await userDetails(userId);
     const Urlstats = await stats(userId);
-
     if (!user) {
         throw new AppError("User not found", 404);
     }
@@ -56,6 +55,7 @@ export const userInfo = async ({ userId }) => {
         memberSince: user?.createdAt,
         plan: user?.plan,
         lastActive: user?.lastLoginAt,
+        totalAvailableLinks: user.plan === "FREE" ? 50 : 1000,
         url: Urlstats,
     };
 }

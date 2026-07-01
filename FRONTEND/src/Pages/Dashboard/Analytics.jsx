@@ -49,7 +49,7 @@ function Analytics() {
 
   const { ref, isVisible } = useInView();
   return (
-    <div className="min-h-screen bg-black text-white p-8">
+    <div className="min-h-screen dark:bg-black dark:text-white bg-white text-black p-8">
       <div className="max-w-4xl mx-auto">
         {/* HEADER */}
         <div className="flex justify-between items-start mb-10">
@@ -57,7 +57,7 @@ function Analytics() {
             <h1 style={{ fontFamily: "'Syne', sans-serif" }} className="text-3xl">
               Analytics
             </h1>
-            <p className="text-gray-400 mt-2 text-sm">
+            <p className="dark:text-gray-400 text-black mt-2 text-sm">
               Track and analyze your link performance.
             </p>
           </div>
@@ -70,7 +70,7 @@ function Analytics() {
             </h2>
 
             {/* CALENDER */}
-            <div className="flex items-center gap-2 border border-gray-700 px-4 py-2 rounded-xl">
+            <div className="flex items-center gap-2 border  border-gray-700 px-4 py-2 rounded-xl">
               <Calendar size={16} />
               <DropDownBtn time={timePeriod} state={period} setState={setPeriod} />
 
@@ -93,7 +93,7 @@ function Analytics() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-900">
-                  <th className="p-1 text-center text-sm">SERIAL</th>
+                  <th className="p-1 text-center text-sm">#</th>
                   <th className="p-1 text-center text-sm">SHORT URL</th>
                   <th className="p-1 text-center text-sm">CLICKS</th>
                 </tr>
@@ -121,7 +121,7 @@ function Analytics() {
               Locations
             </h2>
             <div className="flex bg-[#111827] rounded-xl p-1">
-              <button className="px-4 py-2 bg-black cursor-pointer rounded-lg active:bg-gray-950/10">
+              <button className="px-4 py-2 dark:bg-black bg-white cursor-pointer rounded-lg dark:active:bg-gray-950/10 active:bg-gray-200">
                 Countries
               </button>
             </div>

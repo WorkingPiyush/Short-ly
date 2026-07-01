@@ -33,7 +33,7 @@ function SideBar() {
     return (
         <div>
             {/* Sidebar */}
-            <aside className={`fixed top-0 left-0 z-40 h-dvh w-64 text-black bg-white/10 border-r border-gray-700/20 px-4 py-6 flex flex-col gap-6 transition-transform duration-300
+            <aside className={`fixed top-0 left-0 z-40 h-dvh w-64 text-black dark:bg-white/10 bg-white border-r border-gray-700/20 px-4 py-6 flex flex-col gap-6 transition-transform duration-300
             ${showSideBar ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 `}>
                 <div className='flex justify-center'>
                     <Logo />

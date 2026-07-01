@@ -48,12 +48,13 @@ function Links() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white px-4 py-8 md:px-8">
+   
+    <div className="min-h-screen dark:bg-[#0a0a0a] dark:text-white bg-white text-black px-4 py-8 md:px-8">
       <div className="max-w-4xl mx-auto">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-7 flex-wrap gap-3">
-          <h1 className="font-extrabold text-2xl md:text-[28px] tracking-tight text-white"
+          <h1 className="font-extrabold text-2xl md:text-[28px] tracking-tight"
             style={{ fontFamily: "'Syne', sans-serif" }} >
             My Links
           </h1>
@@ -71,7 +72,7 @@ function Links() {
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-7">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-7 dark:text-white dark:bg-black bg-white text-black">
           {[
             { label: "Total links", value: urlRecords?.length },
             { label: "Total clicks", value: totalClicks },
@@ -80,9 +81,9 @@ function Links() {
           ].map(({ label, value }) => (
             <div
               key={label}
-              className="bg-white/3 border border-white/[0.07] rounded-xl px-4 py-3.5"
+              className="dark:bg-white/3 bg-black/70 border border-white/[0.07] rounded-xl px-4 py-3.5"
             >
-              <p className="text-[11px] text-white/35 mb-1.5 tracking-wide uppercase">{label}</p>
+              <p className="text-[11px] dark:text-white/35 text-black/70  mb-1.5 tracking-wide uppercase">{label}</p>
               <p
                 className="font-extrabold text-[22px] text-white tracking-tight leading-none"
                 style={{ fontFamily: "'Syne', sans-serif" }}
@@ -94,10 +95,10 @@ function Links() {
         </div>
 
         {/* Controls */}
-        <div className="flex gap-2.5 mb-6 flex-wrap">
+        <div className="flex gap-2.5 mb-6 flex-wrap dark:bg-[#0a0a0a] dark:text-white bg-white text-black">
           {/* Search */}
           <div className="relative flex-1 min-w-50 ">
-            <span className='absolute top-2.5 left-3 text-white/20'>
+            <span className='absolute top-2.5 left-3 dark:text-white/20 text-white'>
               <IoIosSearch size={22} />
             </span>
             <input
