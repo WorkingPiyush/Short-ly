@@ -2,8 +2,10 @@
 import { useUserInfo } from '@/Hooks/useAuth';
 import { useUrl } from '@/Hooks/useUrl';
 import React, { useState } from 'react'
+import { CiMail } from "react-icons/ci";
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom'
+import { forgetPassword } from '@/Api/Auth';
 
 // const USER = {
 //     name: "Piyush Kumar",
@@ -120,7 +122,7 @@ const formatDate = (date) => {
     return `${day}-${month}-${year}`;
 }
 const formatDateTime = (date) => {
-    const now = new Date();
+    const now = new Date(date);
     const hours = now.getHours();
     const minutes = now.getMinutes();
 
@@ -148,7 +150,7 @@ function OverviewTab({ onGoToLinks, user, url }) {
                 <SectionCard title="Account">
                     <InfoItem icon={<Icons.Shield />} label="Plan" value={user?.plan} />
                     <InfoItem icon={<Icons.Chart />} label="Last active" value={formatDateTime(user?.lastActive)} />
-                    <InfoItem icon={<Icons.Link />} label="Links used" value={`${user?.linksUsed || 0} / ${user?.linksLimit || 50} this month`} />
+                    <InfoItem icon={<Icons.Link />} label="Links used" value={`${user?.url.linksCount} / ${user?.totalAvailableLinks} this month`} />
                 </SectionCard>
             </div>
 
@@ -178,7 +180,6 @@ function OverviewTab({ onGoToLinks, user, url }) {
                     </button>
                 }
             </div>
-
             {/* Recent links */}
             <div>
                 <div className="flex items-center justify-between mb-3">
@@ -186,14 +187,18 @@ function OverviewTab({ onGoToLinks, user, url }) {
                         style={{ fontFamily: "'Syne', sans-serif" }}>
                         Recent Links
                     </p>
-                    <button
-                        onClick={onGoToLinks}
-                        className="text-[12px] cursor-pointer font-medium text-white/50 bg-white/4
+                    {
+                        url.length > 0 ?
+                            <button
+                                onClick={onGoToLinks}
+                                className="text-[12px] cursor-pointer font-medium text-white/50 bg-white/4
               border border-white/10 px-3.5 py-1.5 rounded-xl
               hover:text-white hover:bg-white/8 transition-all duration-200"
-                    >
-                        See More →
-                    </button>
+                            >
+                                See More →
+                            </button>
+                            : ""
+                    }
                 </div>
                 <div className="flex flex-col gap-2.5">
                     {url?.sort((a, b) => b.totalClicks - a.totalClicks)?.slice(2, 5).map(l => <LinkRow key={l.id} link={l} />)}
@@ -210,37 +215,32 @@ function LinksTab({ url, navigate }) {
             <div className="flex flex-col gap-2.5">
                 {url?.sort((a, b) => b.totalClicks - a.totalClicks)?.slice(6, 10).map(l => <LinkRow key={l.id} link={l} />)}
             </div>
-            <button
-                onClick={() => navigate("/dashboard/links")}
-                className="text-[12px] absolute right-0 mt-2 cursor-pointer font-medium text-white/50 bg-white/4
+            {
+                url.length > 0 ?
+                    <button
+                        onClick={() => navigate("/dashboard/links")}
+                        className="text-[12px] cursor-pointer font-medium text-white/50 bg-white/4
               border border-white/10 px-3.5 py-1.5 rounded-xl
               hover:text-white hover:bg-white/8 transition-all duration-200"
-            >
-                See all →
-            </button>
+                    >
+                        See More →
+                    </button>
+                    : ""
+            }
         </div>
     );
 }
 
 // ─── Tab: Settings ───────────────────────────────────────────────────────────
 function SettingsTab({ user }) {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const [name, setName] = useState(user?.name);
     const [email, setEmail] = useState(user?.email);
-    const [currPw, setCurrPw] = useState("");
-    const [newPw, setNewPw] = useState("");
-    const [saved, setSaved] = useState(false);
-    const [confirm, setConfirm] = useState(false);
-    const handleSave = () => {
-        toast.success("Soon we will enable this feature");
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
-    };
-
-    const handleDelete = () => {
-        if (!confirm) { setConfirm(true); setTimeout(() => setConfirm(false), 3500); return; }
-        // 🔌 Replace with: await fetch("/api/user", { method: "DELETE" }); then redirect
-        navigate("/");
+    const handleResetPassword = async () => {
+        const reset = await forgetPassword({ email });
+        if (reset.success) {
+            toast.success("Mail Sent !!")
+        }
     };
 
     const inputCls = `w-full bg-white/[0.04] border border-white/[0.09] rounded-xl
@@ -251,7 +251,7 @@ function SettingsTab({ user }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <SectionCard title="Account Details">
                     <div className="mb-3">
-                        <label className="block text-[12px] text-white/40 mb-1.5">Display name</label>
+                        <label className="block text-[12px] text-white/40 mb-1.5">User&apos;s name</label>
                         <input disabled value={name} onChange={e => setName(e.target.value)} className={inputCls} />
                     </div>
                     <div>
@@ -260,29 +260,21 @@ function SettingsTab({ user }) {
                     </div>
                 </SectionCard>
 
-                <SectionCard title="Password">
-                    <div className="mb-3">
-                        <label className="block text-[12px] text-white/40 mb-1.5">Current password</label>
-                        <input type="password" value={currPw} onChange={e => setCurrPw(e.target.value)}
-                            placeholder="••••••••" className={inputCls} />
+                <SectionCard title="Reset Password">
+                    <div className="mb-3 flex flex-col gap-2">
+                        <h1>Reset Password by Mail</h1>
+                        <span className='text-[12px] text-white/40'>We&apos;ll send a password reset link to your email address. Click the link in the emial to create new password.</span>
                     </div>
-                    <div>
-                        <label className="block text-[12px] text-white/40 mb-1.5">New password</label>
-                        <input type="password" value={newPw} onChange={e => setNewPw(e.target.value)}
-                            placeholder="••••••••" className={inputCls} />
+                    <div onClick={handleResetPassword}>
+                        <div className='flex items-center w-fit gap-3 border text-emerald-300 border-emerald-400 px-5 py-2 rounded-xl cursor-pointer select-none active:scale-101 transition-all'>
+                            <CiMail size={22} />
+                            <span> Send password reset link</span>
+                        </div>
                     </div>
                 </SectionCard>
             </div>
 
-            <button
-                onClick={handleSave}
-                className="w-full text-[14px] font-medium text-zinc-900 bg-emerald-300
-          py-3.5 rounded-xl hover:bg-emerald-200 transition-all duration-150"
-            >
-                {saved ? "✓ Saved!" : "Save Settings"}
-            </button>
-
-            <div className="bg-red-400/4 border border-red-400/15 rounded-2xl
+            {/* <div className="bg-red-400/4 border border-red-400/15 rounded-2xl
         px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
                 <div>
                     <h4 className="text-[14px] font-medium text-red-400/85 mb-1">Delete Account</h4>
@@ -300,7 +292,7 @@ function SettingsTab({ user }) {
                 >
                     {confirm ? "Tap again to confirm" : "Delete account"}
                 </button>
-            </div>
+            </div> */}
         </div>
     );
 }

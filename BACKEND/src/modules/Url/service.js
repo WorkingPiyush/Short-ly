@@ -239,7 +239,7 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, id: url.id, userId: url.userId, liveTime: url.liveTime, isProtected: url.password ? true : false, expirationDate: url.expirationDate?.toISOString() || "", }), { EX: 3600, });
 
     if (!isBot) {
-        void analyticsUpdates(url.id, browser, os, device, country, city).catch(console.error);
+        void analyticsUpdates(url.id, browser, os, device, country, city, referrer, ipAdd).catch(console.error);
     }
 
     return url.originalUrl;

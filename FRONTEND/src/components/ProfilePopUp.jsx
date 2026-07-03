@@ -16,10 +16,10 @@ function ProfilePopUp({ userInfo, logout, showpopup }) {
         <div className='z-100 h-fit w-80 text-black flex flex-col gap-3 bg-white dark:bg-black dark:text-white absolute top-12 right-0 rounded-sm shadow dark:shadow-white shadow-black '>
             <div className='flex w-full px-3 py-3 items-center gap-4'>
                 <div className='h-15 w-15 bg-amber-400 dark:bg-amber-950 text-xl text-black dark:text-white flex justify-center items-center rounded-full'>
-                    {userInfo?.username?.charAt(0)}
+                    {userInfo?.name?.charAt(0)}
                 </div>
                 <div className='text-black h-15 dark:text-white'>
-                    <p className='text-xl  font-bold'>{userInfo.username}</p>
+                    <p className='text-xl  font-bold'>{userInfo.name}</p>
                     <p className='text-sm'>{userInfo.email}</p>
                 </div>
             </div>

@@ -60,7 +60,7 @@ function BulkUrl() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white px-6 py-8">
+    <div className="min-h-screen darkbg-black dark:text-white dark:bg-black bg-white text-black px-6 py-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">

@@ -14,12 +14,12 @@ function DropDownBtn({ time, state, setState }) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <button className="border rounded px-4 py-2 bg-[#0B0F19] cursor-pointer">
+                <button className="border rounded px-4 py-2 dark:bg-[#0B0F19] bg-white cursor-pointer">
                     {`${state} Days`}
                 </button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent className="bg-[#0B0F19] cursor-pointer">
+            <DropdownMenuContent className="dark:bg-[#0B0F19] bg-gray-200 shadow cursor-pointer">
                 <DropdownMenuRadioGroup value={state} onValueChange={setState} >
                     {time.map((item) => (
                         <DropdownMenuRadioItem key={item.value} value={String(item.value)}>

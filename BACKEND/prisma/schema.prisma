@@ -29,16 +29,17 @@ model User {
   isVerified Boolean @default(false)
   isBlocked  Boolean @default(false)
 
-  plan Plan @default(FREE)
+  plan       Plan         @default(FREE)
   provider   AuthProvider @default(CREDENTIALS)
   providerId String?
 
   lastLoginAt  DateTime?
   lastActiveAt DateTime?
 
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  urls       Url[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  urls           Url[]
+  resetPasswords ResetPassword[]
 
   @@unique([provider, providerId])
 }
@@ -104,4 +105,14 @@ model UrlRecord {
 
   @@index([urlId])
   @@index([urlId, visitedAt])
+}
+
+model ResetPassword {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }

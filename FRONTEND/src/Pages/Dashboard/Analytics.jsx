@@ -49,7 +49,7 @@ function Analytics() {
 
   const { ref, isVisible } = useInView();
   return (
-    <div className="min-h-screen bg-black text-white p-8">
+    <div className="min-h-screen dark:bg-black dark:text-white bg-white text-black p-8">
       <div className="max-w-4xl mx-auto">
         {/* HEADER */}
         <div className="flex justify-between items-start mb-10">
@@ -57,7 +57,7 @@ function Analytics() {
             <h1 style={{ fontFamily: "'Syne', sans-serif" }} className="text-3xl">
               Analytics
             </h1>
-            <p className="text-gray-400 mt-2 text-sm">
+            <p className="dark:text-gray-400 text-black mt-2 text-sm">
               Track and analyze your link performance.
             </p>
           </div>
@@ -70,13 +70,13 @@ function Analytics() {
             </h2>
 
             {/* CALENDER */}
-            <div className="flex items-center gap-2 border border-gray-700 px-4 py-2 rounded-xl">
+            <div className="flex items-center gap-2 border  border-gray-700 px-4 py-2 rounded-xl">
               <Calendar size={16} />
               <DropDownBtn time={timePeriod} state={period} setState={setPeriod} />
 
             </div>
           </div>
-          <div ref={ref} className="w-full h-70">
+          {engagementData?.length ? <div ref={ref} className="w-full h-70">
             {isVisible && (
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={engagementData} barGap="0" margin={{ top: 5, right: 5, left: 2, bottom: 0, }}>
@@ -88,30 +88,50 @@ function Analytics() {
                 </BarChart>
               </ResponsiveContainer>
             )}
-          </div>
-          {topLinks && (<div className="rounded-2xl border border-gray-800 bg-white/3">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-900">
-                  <th className="p-1 text-center text-sm">SERIAL</th>
-                  <th className="p-1 text-center text-sm">SHORT URL</th>
-                  <th className="p-1 text-center text-sm">CLICKS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topLinks?.map((url, idx) => (
-                  <tr key={url?.shortCode} className="border-b border-gray-900 hover:bg-white/2">
-                    <td className="p-4 text-center">{idx + 1}</td>
-                    <td className="p-4 text-center">{`${import.meta.env.VITE_BACKEND_URL}/${url?.shortCode}`}</td>
-                    <td className="p-4 text-xs text-center">{url?.clicks}</td>
-                    <td className="p-4">
-                    </td>
+          </div> : (
+            <div className="text-center py-20 text-white/20 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                className="lucide lucide-globe-off-icon lucide-globe-off">
+                <path d="M10.114 4.462A14.5 14.5 0 0 1 12 2a10 10 0 0 1 9.313 13.643" />
+                <path d="M15.557 15.556A14.5 14.5 0 0 1 12 22 10 10 0 0 1 4.929 4.929" />
+                <path d="M15.892 10.234A14.5 14.5 0 0 0 12 2a10 10 0 0 0-3.643.687" />
+                <path d="M17.656 12H22" />
+                <path d="M19.071 19.071A10 10 0 0 1 12 22 14.5 14.5 0 0 1 8.44 8.45" />
+                <path d="M2 12h10" /><path d="m2 2 20 20" />
+              </svg>
+            </div>
+          )}
+          {topLinks.length ?
+            (<div className="rounded-2xl border border-gray-800 bg-white/3">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-900">
+                    <th className="p-1 text-center text-sm">#</th>
+                    <th className="p-1 text-center text-sm">SHORT URL</th>
+                    <th className="p-1 text-center text-sm">CLICKS</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-
-          </div>)}
+                </thead>
+                <tbody>
+                  {topLinks?.map((url, idx) => (
+                    <tr key={url?.shortCode} className="border-b border-gray-900 hover:bg-white/2">
+                      <td className="p-4 text-center">{idx + 1}</td>
+                      <td className="p-4 text-center">{`${import.meta.env.VITE_BACKEND_URL}/${url?.shortCode}`}</td>
+                      <td className="p-4 text-xs text-center">{url?.clicks}</td>
+                      <td className="p-4">
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>) :
+            (
+              <div className="text-center border-t py-20 text-white/20 flex items-center justify-center">
+                <h1>No Data</h1>
+              </div>
+            )
+          }
         </Card>
 
         {/* LOCATIONS */}
@@ -121,7 +141,7 @@ function Analytics() {
               Locations
             </h2>
             <div className="flex bg-[#111827] rounded-xl p-1">
-              <button className="px-4 py-2 bg-black cursor-pointer rounded-lg active:bg-gray-950/10">
+              <button className="px-4 py-2 dark:bg-black bg-white cursor-pointer rounded-lg dark:active:bg-gray-950/10 active:bg-gray-200">
                 Countries
               </button>
             </div>
@@ -156,7 +176,7 @@ function Analytics() {
                 <TableRow>
                   <TableCell colSpan={5} className="h-40">
                     <div className="flex flex-col items-center justify-center gap-2 text-center">
-                      <p className="text-sm font-medium">No analytics available</p>
+                      <p className="text-sm font-medium">No Location data available</p>
                       <p className="text-xs text-muted-foreground">
                         Data will appear once tracking starts
                       </p>
@@ -169,7 +189,22 @@ function Analytics() {
         </Card>
 
         {/* REFERRERS */}
-        {referrers && < DonutSection title="Referrers" data={referrers} />}
+        {referrers.length ? < DonutSection title="Referrers" data={referrers} />
+          : (
+            <div className='flex justify-center items-center'>
+              <TableRow>
+                <TableCell colSpan={5} className="h-40">
+                  <div className="flex flex-col items-center justify-center gap-2 text-center">
+                    <p className="text-sm font-medium">No Pie charts available</p>
+                    <p className="text-xs text-muted-foreground">
+                      Data will appear once tracking starts
+                    </p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            </div>
+          )
+        }
 
         {/* DEVICES */}
         {devices?.length > 0 && <DonutSection title="Devices" data={devices} />}
