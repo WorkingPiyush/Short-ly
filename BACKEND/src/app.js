@@ -28,7 +28,7 @@ app.use(express.json());
 app.use(helmet());
 app.use(cookieParser());
 app.use(cors({
-    origin: process.env.FONTEND_URL,
+    origin: process.env.FRONTEND_URL,
     credentials: true,
 }))
 

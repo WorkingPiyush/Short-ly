@@ -33,7 +33,7 @@ export const redirectUrl = asyncHandler(async (req, res) => {
     });
     if (response?.requiresPassword) {
         // res.status(200).json({ success: true, message: "Password Required", response });
-        res.redirect(`${process.env.FONTEND_URL}/${response.shortCode}/password-verify`)
+        res.redirect(`${process.env.FRONTEND_URL}/${response.shortCode}/password-verify`)
         return;
     }
     return res.redirect(response);

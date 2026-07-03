@@ -163,6 +163,16 @@ export const userDetails = async (id) => {
         }
     })
 };
+
+export const createUser = async (name, email, hashedPassword) => {
+    return await client.user.create({
+        data: {
+            name: name,
+            email,
+            password: hashedPassword
+        }
+    })
+}
 export const findUser = async (id) => {
     return await client.user.findUnique({
         where: { id },

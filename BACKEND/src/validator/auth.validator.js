@@ -20,3 +20,5 @@ export const profileUpdateSchema = z.object({
     image: z.instanceof(File).nullable().optional().refine((file) => !file || file.size <= MAX_FILE_SIZE, { message: "Image must be smaller than 2MB." })
         .refine((file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type), { message: "Only JPG, PNG and WebP images are allowed." }),
 })
+
+export const passwordSchema = z.string({ required_error: "Password is required", invalid_type_error: "Password must be String", }).min(8, { message: "Must be at least 8 characters long" }).regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" }).regex(/[0-9]/, { message: "Password must contain at least one number" })

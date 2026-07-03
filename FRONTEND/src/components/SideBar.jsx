@@ -62,7 +62,7 @@ function SideBar() {
                     <div className="h-px bg-gray-400/30 mb-4" />
                     <button onClick={() => navigate("/profile")} className="flex items-center justify-center gap-2 cursor-pointer w-full py-3 rounded-lg bg-black text-emerald-400 font-semibold hover:bg-gray-900 transition-colors">
                         <IoSettings size={18} />
-                        <span>Settings</span>
+                        <span>Profile</span>
                     </button>
                 </div>
             </aside>

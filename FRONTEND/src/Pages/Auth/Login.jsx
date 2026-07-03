@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import FadeUp from '../../animation/framer-motion';
 import { useLogin } from '../../Hooks/useAuth.jsx';
 import { loginSchema } from '../../Validator/auth.validator';
+import axios from 'axios';
 const googleIcon = "/icons8-google.svg";
 const githubIcon = "/github-142-svgrepo-com.svg";
 
@@ -32,10 +33,17 @@ function Login() {
                 onSuccess: async () => {
                     toast.success('Login Success');
                     navigate("/dashboard", { replace: true });
+                },
+                onError: async (error) => {
+                    if (axios.isAxiosError(error)) {
+                        if (error.response) {
+                            console.log(error.response.data.message)
+                            toast.error("Invalid User id or Password");
+                        }
+                    }
                 }
             });
         } catch (error) {
-            toast.error("Invalid User id or Password");
             console.error(error.message);
         } finally {
             setLoading(false);
