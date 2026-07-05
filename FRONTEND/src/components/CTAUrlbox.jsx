@@ -11,7 +11,6 @@ import '../index.css'
 
 
 function CTAUrlbox() {
-    // const [slug, setSlug] = useState("");
     const inputRef = useRef();
     const location = useLocation();
     const navigate = useNavigate();
@@ -93,7 +92,7 @@ function CTAUrlbox() {
     }, [location, navigate])
 
     return (
-        <div className="min-h-screen  dark:text-black dark:bg-[#0a0a0a] text-black px-4 py-10 flex items-start justify-center">
+        <div className="min-h-screen  dark:text-black text-black dark:bg-[#0a0a0a] px-4 py-10 flex items-start justify-center">
             <div className="w-full max-w-xl md:max-w-3xl">
 
                 {/* Header */}
@@ -103,21 +102,21 @@ function CTAUrlbox() {
                         <span>URL Shortener</span>
                     </div>
 
-                    <h1 className="font-extrabold text-[26px] tracking-tight text-white mb-1.5"
+                    <h1 className="font-extrabold text-[26px] tracking-tight dark:text-white text-black mb-1.5"
                         style={{ fontFamily: "'Syne', sans-serif" }}>
                         Create Short Link
                     </h1>
-                    <p className="text-[15px] text-white/40 leading-relaxed">
+                    <p className="text-[15px] dark:text-white/40 text-black leading-relaxed">
                         Paste a long URL and get a clean, trackable short link instantly.
                     </p>
                 </div>
 
                 {/* Form card */}
-                <div className="bg-white/3 border border-white/8 rounded-2xl p-8 md:p-7">
+                <div className="bg-black/6 border border-white/8 rounded-2xl p-8 md:p-7">
                     {/* URL input + button */}
                     <div className="flex gap-2.5 mb-4">
                         <div className="relative flex-1">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 dark:text-white/25 text-black pointer-events-none">
                                 <IoIosLink />
                             </span>
                             <input
@@ -128,27 +127,27 @@ function CTAUrlbox() {
                                 onKeyDown={(e) => e.key === "Enter" && handleShorten()}
                                 placeholder="https://your-long-url.com"
                                 disabled={Boolean(result)}
-                                className="w-full bg-white/4 border border-white/10 rounded-xl
-                  pl-10 pr-4 py-3.5 text-sm text-white placeholder-white/22
-                  outline-none focus:border-emerald-300/40 focus:bg-emerald-300/2
+                                className="w-full dark:bg-white/4 bg-black/15 border dark:border-white/10 border-black/50 rounded-xl
+                  pl-10 pr-4 py-3.5 text-sm dark:text-white text-black dark:placeholder-white/22 placeholder-gray-600
+                  outline-none focus:border-emerald-300/40 dark:focus:bg-emerald-300/2 focus:bg-black/5
                   transition-all duration-200 disabled:opacity-50"/>
                         </div>
                         <button
                             onClick={handleShorten}
                             disabled={Boolean(result) || !url.trim()}
                             className="text-sm font-medium text-zinc-900 bg-emerald-300 px-5 py-3.5
-                rounded-xl hover:bg-emerald-200 hover:scale-[1.02] transition-all duration-150
+                rounded-xl hover:bg-emerald-400 cursor-pointer hover:scale-[1.02] transition-all duration-150
                 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100
-                disabled:hover:bg-emerald-300 shrink-0 whitespace-nowrap">
-                            Shorten URL
+                dark:disabled:hover:bg-emerald-300 disabled:hover:bg-emerald-500 disabled:text-zinc-900 shrink-0 whitespace-nowrap">
+                            Shorten UR
                         </button>
                     </div>
 
                     {/* Divider */}
-                    <div className="h-px bg-white/6 my-5" />
+                    <div className="h-px dark:bg-white/6 bg-black/50 my-5" />
 
                     {/* Advanced options */}
-                    <p className="text-[11px] font-medium text-white/30 tracking-widest uppercase mb-4">
+                    <p className="text-[11px] font-medium dark:text-white/30 tracking-widest uppercase mb-4">
                         Advanced options
                     </p>
 
@@ -172,18 +171,18 @@ function CTAUrlbox() {
                         </div>
                         */}
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-[12px] font-medium text-white/50">
-                                Expiry date <span className="text-white/25">(optional)</span>
+                            <label className="text-[12px] font-medium dark:text-white/50">
+                                Expiry date <span className="dark:text-white/25">(optional)</span>
                             </label>
                             <input
                                 type="date"
                                 value={expiry}
                                 onChange={(e) => setExpiry(e.target.value)}
                                 disabled={Boolean(result)}
-                                className="bg-white/3 border border-white/8 rounded-[10px]
-                  px-3 py-2.5 text-[13px] text-white/70
-                  outline-none focus:border-emerald-300/35 transition-colors duration-200
-                  disabled:opacity-40 scheme-dark" />
+                                className="dark:bg-white/3 border text-black dark:border-white/8 border-black/20 rounded-[10px]
+                  px-3 py-2.5 text-[13px] dark:text-white/70
+                  outline-none dark:focus:border-emerald-300/35 transition-colors duration-200
+                  disabled:opacity-40 dark:scheme-dark" />
                         </div>
                     </div>
 
@@ -202,8 +201,8 @@ function CTAUrlbox() {
                                     onKeyDown={(e) => e.key === "Enter" && handleShorten()}
                                     placeholder="Password for Url Protection"
                                     disabled={Boolean(result)}
-                                    className="w-full max-w-sm bg-white/4 border border-white/10 rounded-xl
-                   pl-10 py-3.5 text-sm text-white placeholder-white/22
+                                    className="w-full max-w-sm dark:bg-white/4 bg-black/10 border dark:border-white/10 border-black/10 rounded-xl
+                   pl-10 py-3.5 text-sm dark:text-white dark:placeholder-white/22 placeholder-black
                   outline-none transition-all duration-200 disabled:opacity-50"/>
 
                                 <button
@@ -221,13 +220,13 @@ function CTAUrlbox() {
                     }
                     {/* Result box */}
                     {result && (
-                        <div className="mt-5 bg-emerald-300/5 border border-emerald-300/25
+                        <div className="mt-5 dark:bg-emerald-300/5 bg-zinc-100 border dark:border-emerald-300/25 border-black/22
               rounded-2xl p-5 animate-slide-down">
-                            <p className="text-[11px] font-medium text-emerald-300 tracking-widest uppercase mb-3">
+                            <p className="text-[11px] font-medium dark:text-emerald-300 text-emerald-600 tracking-widest uppercase mb-3">
                                 ✦ Your short link is ready
                             </p>
                             <p
-                                className="font-extrabold text-[20px] text-white tracking-tight break-all mb-4"
+                                className="font-extrabold text-[20px] dark:text-white tracking-tight break-all mb-4"
                                 style={{ fontFamily: "'Syne', sans-serif" }}
                             >
                                 {result.short}
@@ -237,7 +236,7 @@ function CTAUrlbox() {
                                 <button
                                     onClick={handleCopy}
                                     className="flex items-center gap-2 text-[13px] font-medium text-zinc-900
-                    bg-emerald-300 px-4 py-2.5 rounded-[10px] hover:bg-emerald-200 transition-all duration-150"
+                    dark:bg-emerald-300 bg-emerald-500 px-4 py-2.5 rounded-[10px] dark:hover:bg-emerald-200 hover:bg-emerald-300 cursor-pointer transition-all duration-150"
                                 >
                                     {copied ? (
                                         <>
@@ -257,15 +256,15 @@ function CTAUrlbox() {
 
                                 <button
                                     onClick={handleReset}
-                                    className="text-[13px] font-medium text-white/50 bg-white/5 border border-white/10
-                    px-4 py-2.5 rounded-[10px] hover:text-white hover:bg-white/9 transition-all duration-200" >
+                                    className="text-[13px] font-medium dark:text-white/50 text-zinc-800 dark:bg-white/5 bg-black/26 border dark:border-white/10
+                    px-4 py-2.5 rounded-[10px] dark:hover:text-white dark:hover:bg-white/9 transition-all duration-200" >
                                     Shorten another
                                 </button>
 
                                 <Link
                                     to="/dashboard/links"
-                                    className="text-[13px] font-medium text-emerald-300/70 bg-transparent border border-emerald-300/20
-                    px-4 py-2.5 rounded-[10px] hover:text-emerald-300 hover:border-emerald-300/40 transition-all duration-200"
+                                    className="text-[13px] font-medium dark:text-emerald-300/70 bg-transparent border dark:border-emerald-300/20 border-black/20
+                    px-4 py-2.5 rounded-[10px] dark:hover:text-emerald-300 hover:text-gray-700 dark:hover:border-emerald-300/40 hover:border-zinc-600 transition-all duration-200"
                                 >
                                     View all links →
                                 </Link>
@@ -274,12 +273,12 @@ function CTAUrlbox() {
                             {(result.expiry || result.singleUse || result.trackClicks || result.passwordProtect) && (
                                 <div className="flex gap-4 flex-wrap mt-4 pt-4 border-t border-white/[0.07]">
                                     {result.expiry && (
-                                        <span className="flex items-center gap-1.5 text-[12px] text-white/30">
+                                        <span className="flex items-center gap-1.5 text-[12px] dark:text-white/30 text-black">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
                                                 strokeLinecap="round" className="w-3.5 h-3.5 opacity-50">
                                                 <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
                                             </svg>
-                                            Expires <span className="text-white/55 font-medium ml-0.5">{formatDate(result.expiry)}</span>
+                                            Expires <span className="dark:text-white/55 text-zinc-700 font-medium ml-0.5">{formatDate(result.expiry)}</span>
                                         </span>
                                     )}
                                     {result.singleUse && (
@@ -289,7 +288,7 @@ function CTAUrlbox() {
                                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                                                 <circle cx="12" cy="12" r="3" />
                                             </svg>
-                                            <span className="text-white/55 font-medium">Single-use</span>
+                                            <span className="dark:text-white/55 text-zinc-700 font-medium ml-0.5">Single-use</span>
                                         </span>
                                     )}
                                     {result.trackClicks && (
@@ -298,7 +297,7 @@ function CTAUrlbox() {
                                                 strokeLinecap="round" className="w-3.5 h-3.5 opacity-50">
                                                 <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                                             </svg>
-                                            <span className="text-white/55 font-medium">Click tracking on</span>
+                                            <span className="dark:text-white/55 text-zinc-700 font-medium ml-0.5">Click tracking on</span>
                                         </span>
                                     )}
                                     {result.passwordProtect && (
@@ -308,7 +307,7 @@ function CTAUrlbox() {
                                                 <rect x="3" y="11" width="18" height="11" rx="2" />
                                                 <path d="M7 11V7a5 5 0 0110 0v4" />
                                             </svg>
-                                            <span className="text-white/55 font-medium">Password protected</span>
+                                            <span className="dark:text-white/55 text-zinc-700 font-medium ml-0.5">Password protected</span>
                                         </span>
                                     )}
                                 </div>

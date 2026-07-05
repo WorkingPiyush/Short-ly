@@ -88,13 +88,13 @@ export default function EditLink() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white px-4 py-10">
-      <div className="max-w-160 mx-auto">
+    <div className="min-h-screen bg-[#0a0a0a] px-4 py-10 bg-linear-to-br from-zinc-50 via-white to-emerald-50 dark:from-[#090909] dark:via-[#0b0b0b] dark:to-[#07110d] text-zinc-900 dark:text-white">
+      <div className="max-w-4xl mx-auto space-y-2">
 
         {/* Header */}
         <Link
           to="/dashboard/links"
-          className="inline-flex items-center gap-1.5 text-[13px] text-white/35 hover:text-white/70 transition-colors duration-200 mb-6">
+          className="inline-flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-500 hover:text-emerald-600 dark:hover:text-white transition duration-200 mb-6">
 
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
             strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
@@ -103,29 +103,26 @@ export default function EditLink() {
           Back to My Links
         </Link>
         <div className='flex justify-center items-center '>
-          <div className="inline-flex items-center gap-1.5 bg-emerald-300/8 border
-          border-emerald-300/25 rounded-full px-9 py-1.5 text-sm text-emerald-300
-          font-medium mb-3">
+          <div className="inline-flex items-center gap-2 bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300 rounded-full px-4 py-1 text-sm font-medium mb-3">
             <span className="w-2 h-2 rounded-full bg-emerald-300" />
             Edit Link
           </div>
         </div>
 
-        <h1 className="font-extrabold text-[26px] tracking-tight text-white mb-1.5"
+        <h1 className="font-extrabold text-[26px] tracking-tight text-zinc-900 dark:text-white mb-1.5"
           style={{ fontFamily: "'Syne', sans-serif" }}>
           Edit Short Link
         </h1>
-        <p className="text-[14px] text-white/38 mb-6 leading-relaxed">
+        <p className="text-[14px] text-zinc-500 dark:text-zinc-400 mb-6 leading-relaxed">
           Update your link settings — changes apply immediately.
         </p>
 
         {/* Current short URL pill */}
-        <div className="flex items-center gap-3 bg-white/3 border border-white/[0.07]
-          rounded-xl px-4 py-3 mb-6">
+        <div className="flex items-center gap-3 bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-xl  px-4 py-3 mb-6">
           <span className="w-2 h-2 rounded-full bg-emerald-300 shadow-[0_0_6px_rgba(110,231,183,0.5)] shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] text-white/30 uppercase tracking-wider mb-0.5">Short URL</p>
-            <p className="text-[13px] font-medium text-emerald-300 truncate">{shortUrl}</p>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-500 uppercase tracking-wider mb-0.5">Short URL</p>
+            <p className="text-[13px] font-medium text-emerald-600 dark:text-emerald-400 truncate">{shortUrl}</p>
           </div>
         </div>
 
@@ -155,21 +152,21 @@ export default function EditLink() {
               <button
                 onClick={() => setIsActive(true)}
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl
-                  border text-[13px] font-medium transition-all duration-200 cursor-pointer
+                  border text-sm font-medium transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:shadow-md
                   ${isActive
-                    ? "bg-emerald-300/10 border-emerald-300/25 text-emerald-300"
-                    : "bg-transparent border-white/8 text-white/35 hover:text-white/60"
+                    ?"bg-linear-to-r from-emerald-50 to-emerald-100 dark:from-emerald-500/10 dark:to-emerald-500/5 border-emerald-300 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300 shadow-sm"
+                    : "bg-[#FFF9F2] dark:bg-zinc-900/40 border-[#E8DDD0] dark:border-zinc-700 text-zinc-700 dark:text-zinc-400 hover:bg-[#F8F0E6] dark:hover:bg-zinc-800 hover:border-[#D9C9B6] dark:hover:border-zinc-600"
                   }`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-emerald-300" : "bg-white/20"}`} />
                 Active
               </button>
               <button
                 onClick={() => setIsActive(false)}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl
-                  border text-[13px] font-medium transition-all duration-200 cursor-pointer
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl
+                  border text-sm font-medium transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:shadow-sm
                   ${!isActive
-                    ? "bg-red-400/8 border-red-400/20 text-red-400"
-                    : "bg-transparent border-white/8 text-white/35 hover:text-white/60"
+                    ?"bg-linear-to-r from-red-50 to-red-100 dark:from-red-500/10 dark:to-red-500/5 border-red-300 dark:border-red-500/30 text-red-700 dark:text-red-300 shadow-sm"
+                    : "bg-[#FFF9F2] dark:bg-zinc-900/40 border-[#E8DDD0] dark:border-zinc-700 text-zinc-700 dark:text-zinc-400 hover:bg-[#F8F0E6] dark:hover:bg-zinc-800 hover:border-[#D9C9B6] dark:hover:border-zinc-600"
                   }`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${!isActive ? "bg-red-400" : "bg-white/20"}`} />
                 Inactive
@@ -227,17 +224,16 @@ export default function EditLink() {
         </Section>
 
         {/* ── Danger Zone ── */}
-        <div className="bg-red-400/4 border border-red-400/15 rounded-[18px]
-          px-6 py-5 mb-3.5 flex items-center justify-between gap-4 flex-wrap">
+        <div className="bg-red-500/20 dark:bg-red-500/5 border border-red-200 dark:border-red-500/2 rounded-[18px] px-6 py-5 mb-3.5 flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h4 className="text-[14px] font-medium text-red-400/85 mb-1">Delete this link</h4>
-            <p className="text-[12px] text-white/25 leading-relaxed max-w-xs">
+            <h4 className="text-[14px] font-medium dark:text-red-400/85 text-red-600 mb-1">Delete this link</h4>
+            <p className="text-[12px] text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-xs">
               Permanently removes the short link and all associated analytics. This cannot be undone.
             </p>
           </div>
           <button
             onClick={handleDelete}
-            className="text-[13px] font-medium px-4 py-2.5 rounded-[10px] border transition-all duration-200 cursor-pointer shrink-0 whitespace-nowrap bg-red-400/8 border-red-400/20 text-red-400 hover:bg-red-400/15">
+            className="text-[13px] font-medium px-4 py-2.5 rounded-[10px] border transition-all duration-200 cursor-pointer shrink-0 whitespace-nowrap bg-red-400/8 dark:border-red-400/20 border-red-400/50 dark:text-red-400 text-red-600 hover:bg-red-400/15">
             Delete link
           </button>
         </div>
@@ -246,17 +242,13 @@ export default function EditLink() {
         <div className="flex gap-2.5">
           <Link
             to="/dashboard/links"
-            className="text-[14px] font-medium text-white/50 bg-white/4 border border-white/9
-              px-5 py-3.5 rounded-xl hover:text-white hover:bg-white/8
-              transition-all duration-200 text-center"
-          >
+            className=" px-5 py-3.5 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:text-zinc-300 text-[14px] font-medium
+              transition-all duration-200 text-center">
             Cancel
           </Link>
           <button
             onClick={handleSave}
-            className="flex-1 text-[14px] font-medium text-zinc-900 bg-emerald-300
-              py-3.5 rounded-xl hover:bg-emerald-200 hover:scale-[1.01]
-              transition-all duration-150">
+            className="flex-1 rounded-xl cursor-pointer bg-emerald-500 text-white font-semibold py-3.5 hover:bg-emerald-600 hover:shadow-lg hover:shadow-emerald-500/25 text-[14px] active:scale-99 transition-all duration-150">
             Save changes
           </button>
         </div>

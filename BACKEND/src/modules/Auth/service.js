@@ -81,8 +81,7 @@ export const update = async ({ userId, data, file }) => {
 export const registerUser = async ({ name, email, password }) => {
     try {
         const hashedPassword = await passwordHashing(password, 10)
-        const user = createUser(name, email, hashedPassword)
-
+        const user = await createUser(name, email, hashedPassword)
         logger.info({ id: user.id, name: user.name, email: user.email }, 'User registered');
         return { id: user.id, name: user.name, email: user.email };
     } catch (err) {
@@ -151,7 +150,8 @@ export const resetPassword = async ({ email }) => {
         const link = `${process.env.FRONTEND_URL}/reset-password/${token}`;
 
         // await sendEmail("mk3554299@gmail.com", "Password Reset", link);
-        await sendEmail(user.email, "Password Reset", link);
+        console.log(link)
+        // await sendEmail(user.email, "Password Reset", link);
         logger.info({ userId: user.id, email: user.email, event: "PASSWORD_RESET_REQUEST" });
         return;
     } catch (error) {

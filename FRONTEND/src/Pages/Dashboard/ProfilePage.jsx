@@ -6,37 +6,8 @@ import { CiMail } from "react-icons/ci";
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom'
 import { forgetPassword } from '@/Api/Auth';
+import InfoCard from '../../components/InfoCard.jsx';
 
-// const USER = {
-//     name: "Piyush Kumar",
-//     role: "Full Stack Developer",
-//     location: "Delhi, India",
-//     bio: "A normal human being trying to get out of the hell.... 😊 Building cool stuff with React & Node.",
-//     tags: ["React", "Node.js", "Full Stack", "Open Source"],
-//     avatar: null, // replace with image URL string
-//     phone: "+91-8595594378",
-//     email: "itsmepiyush855@gmail.com",
-//     address: "Rohini, Delhi - 110085",
-//     homepage: "github.com/WorkingPiyush",
-//     memberSince: "01 Jan 2026",
-//     plan: "Free Tier",
-//     lastActive: "Today, 2:45 PM",
-//     linksUsed: 4,
-//     linksLimit: 50,
-// };
-
-// const STATS = [
-//     { label: "Total Links", value: 4, sub: "All time" },
-//     { label: "Total Clicks", value: 6, sub: "All time" },
-//     { label: "Active Links", value: 3, sub: "Live now" },
-// ];
-
-// const LINKS = [
-//     { id: 1, emoji: "🎬", original: "www.youtube.com/watch", short: "sht.ly/FrrQ9fF", clicks: 4, status: "active" },
-//     { id: 2, emoji: "🌐", original: "127.0.0.1/index.html", short: "sht.ly/DTSrrlT", clicks: 2, status: "active" },
-//     { id: 3, emoji: "🔗", original: "app.bitly.com/Bp83eV8wOnQ", short: "sht.ly/EY4P2sb", clicks: 0, status: "active" },
-//     { id: 4, emoji: "🎬", original: "www.youtube.com/watch?v=old", short: "sht.ly/X9kPmR2", clicks: 0, status: "expired" },
-// ];
 
 
 // ─── Inline SVG icons ─────────────────────────────────────────────────────────
@@ -66,12 +37,12 @@ function InfoItem({ icon, label, value }) {
     return (
         <div className="flex items-center gap-3 mb-4 last:mb-0">
             <div className="w-9 h-9 rounded-[10px] bg-emerald-300/10 border border-emerald-300/20
-        flex items-center justify-center text-emerald-300 shrink-0">
+        flex items-center justify-center dark:text-emerald-300 text-black shrink-0">
                 {icon}
             </div>
             <div className="min-w-0">
-                <p className="text-[11px] text-white/30 mb-0.5">{label}</p>
-                <p className="text-[13px] font-medium text-white/80 truncate">{value}</p>
+                <p className="text-[11px] dark:text-white/30 text-zinc-800 mb-0.5">{label}</p>
+                <p className="text-[13px] font-medium dark:text-white/80 text-emerald-500 truncate">{value}</p>
             </div>
         </div>
     );
@@ -79,8 +50,8 @@ function InfoItem({ icon, label, value }) {
 
 function SectionCard({ title, children }) {
     return (
-        <div className="bg-white/3 border border-white/8 rounded-2xl p-5">
-            <p className="text-[11px] font-medium text-white/30 tracking-[.08em] uppercase mb-4">
+        <div className="bg-linear-to-br from-[#F6F3EE] via-[#FBFAF7] to-[#EEF8F2] dark:from-[#090909] dark:via-[#0b0b0b] dark:to-[#07110d] border dark:border-white/8 border-black/10 shadow-sm rounded-2xl p-5">
+            <p className="text-[11px] font-medium dark:text-white/30 text-zinc-800 tracking-[.08em] uppercase mb-4">
                 {title}
             </p>
             {children}
@@ -90,20 +61,19 @@ function SectionCard({ title, children }) {
 
 function LinkRow({ link, dimmed = false }) {
     return (
-        <div className={`flex items-center gap-3 bg-white/2 border border-white/[0.07]
-      rounded-xl px-4 py-3.5 hover:border-white/[0.14] transition-all duration-200
+        <div className={`flex items-center gap-3 dark:bg-white/2 bg-black/10 border dark:border-white/[0.07] border-black/10 rounded-xl px-4 py-3.5 dark:hover:border-white/[0.14] hover:border-black/60 transition-all duration-200
       ${dimmed ? "opacity-50" : ""}`}>
             <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium text-white/75 truncate mb-0.5">{link.original_url}</p>
-                <p className="text-[12px] text-emerald-300">{link.short_url}</p>
+                <p className="text-[13px] font-medium dark:text-white/75 text-zinc-900 truncate mb-0.5">{link.original_url}</p>
+                <p className="text-[12px] dark:text-emerald-300 text-emerald-500">{link.short_url}</p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-                <span className="flex items-center gap-1 text-[12px] text-white/35">
+                <span className="flex items-center gap-1 text-[12px] dark:text-white/35 text-black/66">
                     <Icons.Search /> {link.totalClicks}
                 </span>
                 <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full border
           ${link.isActive === "active"
-                        ? "bg-emerald-300/10 text-emerald-300 border-emerald-300/20"
+                        ? "dark:bg-emerald-300/10 bg-emerald-300/20 dark:text-emerald-300 text-emerald-600 dark:border-emerald-300/20 border-emerald-300"
                         : "bg-red-400/10 text-red-400 border-red-400/15"}`}>
                     {link.isActive === "active" ? "Active" : "Expired"}
                 </span>
@@ -137,7 +107,6 @@ const formatDateTime = (date) => {
 // ─── Tab: Overview ────────────────────────────────────────────────────────────
 function OverviewTab({ onGoToLinks, user, url }) {
     const memberSince = formatDate(user?.memberSince);
-
     return (
         <div className="flex flex-col gap-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -155,78 +124,79 @@ function OverviewTab({ onGoToLinks, user, url }) {
             </div>
 
             {/* Plan card */}
-            <div className="bg-emerald-300/4 border border-emerald-300/25 rounded-2xl
-        px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
+            <div className="dark:bg-emerald-300/4 bg-emerald-300/50 border dark:border-emerald-300/25 border-emerald-300/50 rounded-2xl px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
                 <div>
-                    <span className="inline-block text-[11px] font-medium text-emerald-300
-            bg-emerald-300/10 border border-emerald-300/20 px-2.5 py-1 rounded-full mb-2">
+                    <span className="inline-block text-gray-950/85 text-[11px] font-medium dark:text-emerald-300 dark:bg-emerald-300/10 bg-emerald-300/50 border border-emerald-300/20 px-2.5 py-1 rounded-full mb-2">
                         Current plan
                     </span>
-                    <p className="font-extrabold text-[20px] text-white tracking-tight mb-1"
+                    <p className="font-extrabold text-[20px] dark:text-white text-gray-950/85 tracking-tight mb-1"
                         style={{ fontFamily: "'Syne', sans-serif" }}>
                         {user?.plan === 'FREE' ? "Free Tier" : "Premium"}
                     </p>
-                    <p className="text-[12px] text-white/35">50 links/month · Basic analytics · Standard URLs</p>
+                    <p className="text-[12px] dark:text-white/35 text-gray-500">50 links/month · Basic analytics · Standard URLs</p>
                 </div>
                 {user?.plan === 'FREE' ?
-                    <button className="text-[13px] cursor-pointer font-medium text-zinc-900 bg-emerald-300 px-4 py-2.5
-          rounded-xl hover:bg-emerald-200 transition-all duration-150 shrink-0">
+                    <button className="text-[13px] cursor-pointer font-medium text-zinc-900 dar:bg-emerald-300 bg-emerald-400 px-4 py-2.5
+          rounded-xl dark:hover:bg-emerald-200 hover:bg-emerald-300 transition-all duration-150 shrink-0">
                         Upgrade to Pro →
                     </button>
                     :
-                    <button className="text-[13px] cursor-pointer font-medium text-zinc-900 bg-emerald-300 px-4 py-2.5
-          rounded-xl hover:bg-emerald-200 transition-all duration-150 shrink-0">
+                    <button className="text-[13px] cursor-pointer font-medium text-zinc-900 dar:bg-emerald-300 bg-emerald-400 px-4 py-2.5
+          rounded-xl dark:hover:bg-emerald-200 hover:bg-emerald-300 transition-all duration-150 shrink-0">
                         Explore Premium Pro  →
                     </button>
                 }
             </div>
             {/* Recent links */}
-            <div>
-                <div className="flex items-center justify-between mb-3">
-                    <p className="font-bold text-[15px] text-white/80"
-                        style={{ fontFamily: "'Syne', sans-serif" }}>
-                        Recent Links
-                    </p>
-                    {
-                        url.length > 0 ?
-                            <button
-                                onClick={onGoToLinks}
-                                className="text-[12px] cursor-pointer font-medium text-white/50 bg-white/4
-              border border-white/10 px-3.5 py-1.5 rounded-xl
-              hover:text-white hover:bg-white/8 transition-all duration-200"
-                            >
-                                See More →
-                            </button>
-                            : ""
-                    }
+            {url?.length > 0 ? (
+                <div>
+                    <div className="flex items-center justify-between mb-3">
+                        <p className="font-bold text-[15px] text-white/80"
+                            style={{ fontFamily: "'Syne', sans-serif" }}>
+                            Recent Links
+                        </p>
+                        <button onClick={onGoToLinks}
+                            className="text-[12px] cursor-pointer font-medium dark:text-white/50 text-zinc-900 dark:bg-white/4 bg-black/4
+              border dark:border-white/10 border-black/10 px-3.5 py-1.5 rounded-xl dark:hover:text-white  hover:text-zinc-800 hover:bg-white/8 transition-all duration-200"
+                        >
+                            See More →
+                        </button>
+                    </div>
+                    <div className="flex flex-col gap-2.5">
+                        {url?.sort((a, b) => b.totalClicks - a.totalClicks)?.slice(0, 5).map(l => <LinkRow key={l.id} link={l} />)}
+
+                    </div>
                 </div>
-                <div className="flex flex-col gap-2.5">
-                    {url?.sort((a, b) => b.totalClicks - a.totalClicks)?.slice(2, 5).map(l => <LinkRow key={l.id} link={l} />)}
-                </div>
-            </div>
+            ) :
+                (
+                    <div className='h-25 flex justify-center items-center'>
+                        <h1 style={{ fontFamily: "'Syne', sans-serif" }}>No data to show</h1>
+                    </div>
+                )
+            }
         </div>
     );
 }
 
 // ─── Tab: My Links ────────────────────────────────────────────────────────────
 function LinksTab({ url, navigate }) {
+    if (url.length < 0) {
+        return <div className='h-25 flex justify-center items-center'>
+            <h1 style={{ fontFamily: "'Syne', sans-serif" }}>No data to show</h1>
+        </div>
+    }
     return (
         <div className='relative'>
             <div className="flex flex-col gap-2.5">
-                {url?.sort((a, b) => b.totalClicks - a.totalClicks)?.slice(6, 10).map(l => <LinkRow key={l.id} link={l} />)}
+                {url?.sort((a, b) => b.totalClicks - a.totalClicks)?.slice(0, 10).map(l => <LinkRow key={l.id} link={l} />)}
             </div>
-            {
-                url.length > 0 ?
-                    <button
-                        onClick={() => navigate("/dashboard/links")}
-                        className="text-[12px] cursor-pointer font-medium text-white/50 bg-white/4
-              border border-white/10 px-3.5 py-1.5 rounded-xl
-              hover:text-white hover:bg-white/8 transition-all duration-200"
-                    >
-                        See More →
-                    </button>
-                    : ""
-            }
+            <button onClick={() => navigate("/dashboard/links")}
+                className="text-[12px] cursor-pointer font-medium dark:text-white/50 text-zinc-900 dark:bg-white/4 bg-black/4
+              border dark:border-white/10 border-black/10 px-3.5 py-1.5 rounded-xl absolute mt-2 right-0
+              dark:hover:text-white  hover:text-zinc-800 hover:bg-white/8 transition-all duration-200"
+            >
+                See More →
+            </button>
         </div>
     );
 }
@@ -243,19 +213,19 @@ function SettingsTab({ user }) {
         }
     };
 
-    const inputCls = `w-full bg-white/[0.04] border border-white/[0.09] rounded-xl
-    px-3.5 py-3 text-[13px] text-white placeholder-white/20 outline-none
+    const inputCls = `w-full dark:bg-white/[0.04] bg-yellow-600/20 border dark:border-white/[0.09] border-black/20 rounded-sm
+    px-3.5 py-3 text-[13px] dark:text-white text-black dark:placeholder-white/20 placeholder-gray-500/20 outline-none
     focus:border-emerald-300/35 focus:bg-emerald-300/[0.02] transition-all duration-200`;
     return (
         <div className="flex flex-col gap-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <SectionCard title="Account Details">
                     <div className="mb-3">
-                        <label className="block text-[12px] text-white/40 mb-1.5">User&apos;s name</label>
+                        <label className="block text-[12px] dark:dark:text-white/40 text-zinc-800 mb-1.5">User&apos;s name</label>
                         <input disabled value={name} onChange={e => setName(e.target.value)} className={inputCls} />
                     </div>
                     <div>
-                        <label className="block text-[12px] text-white/40 mb-1.5">Email</label>
+                        <label className="block text-[12px] dark:text-white/40 text-zinc-800 mb-1.5">Email</label>
                         <input disabled type="email" value={email} onChange={e => setEmail(e.target.value)} className={inputCls} />
                     </div>
                 </SectionCard>
@@ -263,13 +233,13 @@ function SettingsTab({ user }) {
                 <SectionCard title="Reset Password">
                     <div className="mb-3 flex flex-col gap-2">
                         <h1>Reset Password by Mail</h1>
-                        <span className='text-[12px] text-white/40'>We&apos;ll send a password reset link to your email address. Click the link in the emial to create new password.</span>
+                        <span className='text-[12px] dark:text-white/40 text-zinc-600'>We&apos;ll send a password reset link to your email address. Click the link in the emial to create new password.</span>
                     </div>
-                    <div onClick={handleResetPassword}>
-                        <div className='flex items-center w-fit gap-3 border text-emerald-300 border-emerald-400 px-5 py-2 rounded-xl cursor-pointer select-none active:scale-101 transition-all'>
-                            <CiMail size={22} />
-                            <span> Send password reset link</span>
-                        </div>
+                    <div
+                        onClick={handleResetPassword}
+                        className='flex items-center w-fit gap-3 border dark:text-emerald-300 text-emerald-600  dark:border-emerald-400 border-emerald-400 hover:scale-102 px-5 py-2 rounded-xl cursor-pointer select-none active:scale-101 active:bg-emerald-400 active:text-white transition-all'>
+                        <CiMail size={22} />
+                        <span> Send password reset link</span>
                     </div>
                 </SectionCard>
             </div>
@@ -308,31 +278,30 @@ function ProfilePage() {
     const [activeTab, setActiveTab] = useState(0);
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white">
+        <div className="min-h-screen bg-linear-to-br from-[#F6F3EE] via-[#FBFAF7] to-[#EEF8F2] dark:from-[#090909] dark:via-[#0b0b0b] dark:to-[#07110d] text-zinc-900 dark:text-white">
             <div className="max-w-4xl mx-auto px-4 py-8">
-                <div className="bg-white/3 border border-white/8 rounded-2xl overflow-hidden mb-4">
-                    <div className="h-30 md:h-34" style={{ background: "linear-gradient(135deg, #0d9488 0%, #6ee7b7 100%)" }} />
+                <div className="bg-[#FFFDF9] dark:bg-zinc-900/70 border border-[#E7DFD3] dark:border-zinc-800 rounded-xl overflow-hidden mb-4">
+                    <div className="h-30 md:h-34" style={{ background: "linear-gradient(135deg, #10b981 0%, #34d399 45%,#a7f3d0 100%)" }} />
                     <div className="px-5 relative pb-6">
                         <div className="flex justify-center items-center gap-3 flex-wrap -mt-10 mb-4">
-                            <div className="w-20 h-20 rounded-full border-[3px] border-[#0a0a0a] bg-[#2a2a2a] overflow-hidden flex items-center justify-center text-4xl shrink-0">
+                            <div className="w-20 h-20 rounded-full border-[3px] border-[#FFFDF9] dark:border-zinc-900 bg-white dark:bg-zinc-800 overflow-hidden flex items-center justify-center text-4xl shrink-0">
                                 {user?.profileImage ? <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" /> : <span>👤</span>}
                             </div>
                             <div className='absolute right-0 top-8'>
                                 <Link
                                     to="/profile/edit"
-                                    className="flex items-center gap-2 text-[13px] font-medium text-white
-                  border border-white/20 px-4 py-2 rounded-xl bg-transparent
-                  hover:bg-white/[0.07] hover:border-white/35 transition-all duration-200"
+                                    className="flex items-center gap-2 text-[13px] font-medium dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-[#F8F4EC] dark:hover:bg-zinc-800 hover:border-emerald-400
+                  border border-[#E7DFD3] px-4 py-2 rounded-xl transition-all duration-200"
                                 >
                                     <Icons.Edit /> Edit Profile
                                 </Link>
                             </div>
                         </div>
-                        <h1 className="font-extrabold text-center text-[22px] text-white tracking-tight mb-0.5" style={{ fontFamily: "'Syne', sans-serif" }}>
+                        <h1 className="font-extrabold text-center text-[22px] text-zinc-900 dark:text-white tracking-tight mb-0.5" style={{ fontFamily: "'Syne', sans-serif" }}>
                             {user?.name || "No Name"}
                         </h1>
                         <div className='flex flex-col items-center'>
-                            <p className="text-[13px] text-white/45 mb-3">
+                            <p className="text-[13px] text-zinc-600 dark:text-zinc-300 mb-3">
                                 {user?.headline || "No Role"} · {user?.location || "No Location"}
                             </p>
                             <p className="text-[14px] text-center text-white/55 leading-relaxed mb-4 max-w-lg">
@@ -343,52 +312,22 @@ function ProfilePage() {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-                    <div className="bg-white/3 border border-white/[0.07] cursor-pointer rounded-2xl px-4 py-4
-                hover:border-emerald-300/20 transition-all duration-200 hover:scale-102">
-                        <p className="text-[10px] font-medium text-white/30 tracking-[.06em] uppercase mb-2">
-                            Total Links
-                        </p>
-                        <p className="font-extrabold text-[26px] text-white leading-none tracking-tight mb-1"
-                            style={{ fontFamily: "'Syne', sans-serif" }}>
-                            {user?.url.linksCount}
-                        </p>
-                        <p className="text-[11px] text-white/25">All time</p>
-                    </div>
-
-                    <div className="bg-white/3 border border-white/[0.07] cursor-pointer rounded-2xl px-4 py-4
-                hover:border-emerald-300/20 transition-all duration-200 hover:scale-102">
-                        <p className="text-[10px] font-medium text-white/30 tracking-[.06em] uppercase mb-2">
-                            Total Clicks
-                        </p>
-                        <p className="font-extrabold text-[26px] text-white leading-none tracking-tight mb-1"
-                            style={{ fontFamily: "'Syne', sans-serif" }}>
-                            {user?.url.linksClickCount}
-                        </p>
-                        <p className="text-[11px] text-white/25">All time</p>
-                    </div>
-
-                    <div className="bg-white/3 border border-white/[0.07] cursor-pointer rounded-2xl px-4 py-4
-                hover:border-emerald-300/20 transition-all duration-200 hover:scale-102">
-                        <p className="text-[10px] font-medium text-white/30 tracking-[.06em] uppercase mb-2">
-                            Active Links
-                        </p>
-                        <p className="font-extrabold text-[26px] text-emerald-400 leading-none tracking-tight mb-1"
-                            style={{ fontFamily: "'Syne', sans-serif" }}>
-                            {user?.url.activeLinksCount}
-                        </p>
-                        <p className="text-[11px] text-white/25">Live now</p>
-                    </div>
-
-
+                    {
+                        [
+                            { label: "Total Links", value: user?.url.linksCount, footer: "All time" },
+                            { label: "Total Clicks", value: user?.url.linksClickCount, footer: "All time" },
+                            { label: " Active Links", value: user?.url.activeLinksCount, footer: "Live now" },
+                        ].map(({ label, footer, value }) => (
+                            <InfoCard key={label} label={label} value={value} footer={footer} />
+                        ))
+                    }
                 </div>
-
-                <div className="grid grid-cols-3 gap-1 bg-white/3 border border-white/[0.07] rounded-2xl p-1.5 mb-4">
+                <div className="grid grid-cols-3 gap-1 dark:bg-white/3 bg-yellow-600/10 border dark:border-white/[0.07] border-black/[0.07] rounded-2xl p-1.5 mb-4">
                     {TABS.map((tab, i) => (
                         <button key={tab} onClick={() => setActiveTab(i)}
                             className={`text-[13px] font-medium py-2.5 rounded-xl cursor-pointer transition-all duration-200
-                                     ${activeTab === i
-                                    ? "bg-white/8 text-white"
-                                    : "text-white/40 hover:text-white/65 hover:bg-white/3"}`}>
+                                     ${activeTab === i ? "dark:bg-white/8 text bg-yellow-500/40 border border-black/45 dark:text-white text-zinc-800"
+                                    : "dark:text-white/40 text-gray-600 dark:hover:text-white/65 hover:text-black/49 hover:bg-white/3"}`}>
                             {tab}
                         </button>
                     ))}

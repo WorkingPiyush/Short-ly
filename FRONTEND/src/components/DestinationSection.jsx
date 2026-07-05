@@ -3,9 +3,8 @@ import React from 'react'
 
 function Section({ icon, title, children }) {
     return (
-        <div className="bg-white/3 border border-white/8 rounded-[18px] p-6 mb-3.5">
-            <div className="flex items-center gap-2 text-[11px] font-medium text-white/40
-        tracking-[.08em] uppercase mb-5">
+        <div className="bg-[#FFFCF7] dark:bg-zinc-900/60 border border-[#eae8e4] dark:border-zinc-800 rounded-2xl shadow-sm p-6">
+            <div className="flex items-center gap-2 text-[11px] font-medium dark:text-white/40 text-zinc-900 tracking-[.08em] uppercase mb-5">
                 {icon}
                 {title}
             </div>
