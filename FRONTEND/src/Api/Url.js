@@ -47,8 +47,15 @@ export const getUrlAnalytics = async (ShortCode, period) => {
 export const AllAnalytics = async (period) => {
     const res = await api.get(`/url/analytics`, { params: period });
     return res.data;
-}
+};
+
 export const createBulkUrl = async (data) => {
     const res = await api.post("/url/bulk", data);
     return res.data.url;
 };
+
+export const addTags = async (tags, shortCode) => {
+    // if (tags.length >= 0) return;
+    const res = await api.patch(`/url/${shortCode}`, { tags });
+    return res.data
+}

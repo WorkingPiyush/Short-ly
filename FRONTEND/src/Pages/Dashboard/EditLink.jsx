@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -11,6 +12,111 @@ import Input from '../../components/Input';
 import Section from '../../components/DestinationSection';
 import ToggleRow from '../../components/ToggleRow';
 import { UseDeleteUrl, useshortUrl, useUpdateUrl } from '../../Hooks/useUrl';
+import { Check, Plus, Tags } from 'lucide-react';
+
+function SectionCard({ icon: Icon, title, children }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-[#0a0a0a] p-6">
+      <div className="mb-5 flex items-center gap-2 text-white/50">
+        <Icon size={15} />
+        <span className="text-xs font-semibold uppercase tracking-wider">
+          {title}
+        </span>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/* ---------- Category section: create + single-select ---------- */
+function CategorySection({ categories, selectedId, onSelect, onCreate }) {
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState("");
+
+  const submitNewCategory = () => {
+    const trimmed = newName.trim();
+    if (!trimmed) return;
+    onCreate(trimmed);
+    setNewName("");
+    setCreating(false);
+  };
+
+  return (
+    <SectionCard icon={Tags} title="Category">
+      <p className="mb-3 text-sm font-medium text-white/80 bg-black">Assign category</p>
+
+      <div className="flex flex-wrap gap-2.5">
+        {categories.map((cat) => {
+          const isSelected = selectedId === cat.id;
+          return (
+            <button
+              key={cat.id}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              onClick={() => onSelect(isSelected ? null : cat.id)}
+              className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${isSelected
+                ? "border-[#6ee7b7]/40 bg-linear-to-r from-[#6ee7b7]/15 to-transparent text-[#6ee7b7]"
+                : "border-white/10 bg-transparent text-white/60 hover:border-white/20 hover:text-white/80"
+                }`}
+            >
+              <span
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{ backgroundColor: cat.color }}
+              />
+              {cat.name}
+              {isSelected && <Check size={14} className="shrink-0" />}
+            </button>
+          );
+        })}
+
+        {/* New category control */}
+        {creating ? (
+          <div className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-2 py-1.5">
+            <input
+              autoFocus
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && submitNewCategory()}
+              placeholder="Category name"
+              className="w-32 bg-transparent px-1 text-sm text-white placeholder-white/30 outline-none"
+            />
+            <button
+              type="button"
+              onClick={submitNewCategory}
+              className="shrink-0 rounded-lg bg-[#6ee7b7] px-2.5 py-1 text-xs font-semibold text-black transition-opacity hover:opacity-90"
+            >
+              Add
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setCreating(false);
+                setNewName("");
+              }}
+              className="shrink-0 px-1.5 text-xs text-white/40 hover:text-white/70"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setCreating(true)}
+            className="flex items-center gap-1.5 rounded-xl border border-dashed border-white/15 px-4 py-2.5 text-sm font-medium text-white/50 transition-colors hover:border-[#6ee7b7]/40 hover:text-[#6ee7b7]"
+          >
+            <Plus size={14} />
+            New category
+          </button>
+        )}
+      </div>
+
+      <p className="mt-3 text-xs text-white/35">
+        Pick one category to group this link under. Selecting another replaces it.
+      </p>
+    </SectionCard>
+  );
+}
 
 export default function EditLink() {
   const location = useLocation();
@@ -35,6 +141,28 @@ export default function EditLink() {
     return localDate.toISOString().slice(0, 16);
   };
 
+  const DEFAULT_CATEGORIES = [
+    { id: "cricket", name: "Cricket", color: "#6ee7b7" },
+    { id: "work", name: "Work", color: "#93c5fd" },
+    { id: "personal", name: "Personal", color: "#fca5a5" },
+    { id: "campaigns", name: "Campaigns", color: "#fcd34d" },
+  ];
+
+
+  // 
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  const [selectedCategoryId, setSelectedCategoryId] = useState("cricket");
+
+  const createCategory = (name) => {
+    const id = name.toLowerCase().replace(/\s+/g, "-");
+    const palette = ["#6ee7b7", "#93c5fd", "#fca5a5", "#fcd34d", "#c4b5fd"];
+    const color = palette[categories.length % palette.length];
+    const newCat = { id, name, color };
+    setCategories((prev) => [...prev, newCat]);
+    setSelectedCategoryId(id);
+  };
+  // 
+
   useEffect(() => {
     if (short) {
       setOriginalUrl(short?.original_url ?? "");
@@ -48,7 +176,7 @@ export default function EditLink() {
       );
     }
   }, [short])
-  
+
   const handleSave = () => {
     const data = {
       originalUrl: originalUrl !== short?.original_url ? originalUrl : null,
@@ -141,6 +269,13 @@ export default function EditLink() {
           </Field>
         </Section>
 
+        <CategorySection
+          categories={categories}
+          selectedId={selectedCategoryId}
+          onSelect={setSelectedCategoryId}
+          onCreate={createCategory}
+        />
+
         {/* ── Section 2: Status ── */}
         <Section
           title="Link Status"
@@ -154,7 +289,7 @@ export default function EditLink() {
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl
                   border text-sm font-medium transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:shadow-md
                   ${isActive
-                    ?"bg-linear-to-r from-emerald-50 to-emerald-100 dark:from-emerald-500/10 dark:to-emerald-500/5 border-emerald-300 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300 shadow-sm"
+                    ? "bg-linear-to-r from-emerald-50 to-emerald-100 dark:from-emerald-500/10 dark:to-emerald-500/5 border-emerald-300 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300 shadow-sm"
                     : "bg-[#FFF9F2] dark:bg-zinc-900/40 border-[#E8DDD0] dark:border-zinc-700 text-zinc-700 dark:text-zinc-400 hover:bg-[#F8F0E6] dark:hover:bg-zinc-800 hover:border-[#D9C9B6] dark:hover:border-zinc-600"
                   }`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-emerald-300" : "bg-white/20"}`} />
@@ -165,7 +300,7 @@ export default function EditLink() {
                 className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl
                   border text-sm font-medium transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:shadow-sm
                   ${!isActive
-                    ?"bg-linear-to-r from-red-50 to-red-100 dark:from-red-500/10 dark:to-red-500/5 border-red-300 dark:border-red-500/30 text-red-700 dark:text-red-300 shadow-sm"
+                    ? "bg-linear-to-r from-red-50 to-red-100 dark:from-red-500/10 dark:to-red-500/5 border-red-300 dark:border-red-500/30 text-red-700 dark:text-red-300 shadow-sm"
                     : "bg-[#FFF9F2] dark:bg-zinc-900/40 border-[#E8DDD0] dark:border-zinc-700 text-zinc-700 dark:text-zinc-400 hover:bg-[#F8F0E6] dark:hover:bg-zinc-800 hover:border-[#D9C9B6] dark:hover:border-zinc-600"
                   }`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${!isActive ? "bg-red-400" : "bg-white/20"}`} />
@@ -174,6 +309,7 @@ export default function EditLink() {
             </div>
           </Field>
         </Section>
+
 
         {/* ── Section 3: Scheduling ── */}
         <Section

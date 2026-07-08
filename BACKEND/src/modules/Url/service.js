@@ -79,7 +79,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
             tempId,
         };
     }
-
+    let qrCodeImg;
     const existing = await client.url.findFirst({
         where: {
             urlHash,
@@ -97,8 +97,8 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
             isActive: true,
         }
     });
-
     if (existing) {
+        qrCodeImg = await generateQRCode(existing);
         const clicks = await totalClick(existing.id);
         return {
             shortUrl: `${process.env.BACKEND_URL}/${existing.shortCode}`,
@@ -106,6 +106,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
             shorCode: existing.shortCode,
             expiry_date: existing.expirationDate,
             creation_date: existing.createdAt,
+            QrCode: qrCodeImg,
             singleUse: existing.singleUse,
             totalClicks: clicks,
             isPswrdProtected: existing.password ? true : false,
@@ -143,7 +144,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
             password: hashedPassword,
         }
     });
-    const qrCodeImg = await generateQRCode(newUrl);
+    qrCodeImg = await generateQRCode(newUrl);
 
     const responseUrl = {
         shortUrl: `${process.env.BACKEND_URL}/${newUrl.shortCode}`,
@@ -292,6 +293,8 @@ export const getMyUrl = async ({ userId, status = "all" }) => {
             userId: true,
             lastVisitedAt: true,
             used: true,
+            tags: true,
+            category: true
         }
     });
     if (!fetchedUrl) {
@@ -315,6 +318,8 @@ export const getMyUrl = async ({ userId, status = "all" }) => {
                 liveTime: u.liveTime,
                 singleUse: u.singleUse,
                 userId: u.userId,
+                tags: u.tags,
+                category: u.category,
             }
         })
     );
@@ -429,14 +434,12 @@ export const UrlDelete = async ({ userId, shortCode }) => {
     return true;
 };
 
-export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive, shortCode, password, liveTime }) => {
-    console.log({ userId, originalUrl, expirationDate, isActive, shortCode, password, liveTime })
+export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive, shortCode, password, liveTime, tags }) => {
+    // console.log({ userId, originalUrl, expirationDate, isActive, shortCode, password, liveTime })
     // console.log(!userId, !originalUrl, !expirationDate, !isActive, !shortcode, !password, !liveTime)
 
     let updatedData = {};
-
-    if (originalUrl !== null) {
-        console.log("url Block")
+    if (originalUrl !== null && originalUrl !== undefined) {
         if (!isValidUrl(originalUrl)) {
             throw new Error("Invalid Url");
         }
@@ -451,7 +454,7 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
         updatedData.clicks = 0;
     };
 
-    if (expirationDate !== null) {
+    if (expirationDate !== null && originalUrl !== undefined) {
         if (expirationDate && new Date(expirationDate) < new Date()) {
             throw new Error("Invalid Expiry Date");
         }
@@ -459,18 +462,64 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
         updatedData.expirationDate = new Date(expirationDate);
     };
 
-    if (isActive !== null) {
+    if (isActive !== null && isActive !== undefined) {
         updatedData.isActive = isActive;
     };
 
-    if (password) {
+    if (password && password !== undefined) {
         const hashedPassword = await passwordHashing(password, 10);
         updatedData.password = hashedPassword;
     };
 
-    if (liveTime !== null) {
+    if (liveTime !== null && liveTime !== undefined) {
         updatedData.liveTime = liveTime;
     };
+
+    if (tags) {
+        const existing = await client.url.findFirst({
+            where: { userId, shortCode, isDeleted: false }
+        });
+
+        if (!existing) {
+            throw new AppError("Invalid Url", 500);
+        };
+        const palette = [
+            "#6ee7b7",
+            "#93c5fd",
+            "#fca5a5",
+            "#fcd34d",
+            "#c4b5fd"
+        ];
+
+        const color = palette[Math.floor(Math.random() * palette.length)];
+
+        const link = `${process.env.BACKEND_URL}/${existing.shortCode}`
+
+        const tagsCount = await client.url.update({
+            where: {
+                shortCode
+            },
+            data: {
+                tags: {
+                    set: [],
+                    connectOrCreate: tags.map((tag) => ({
+                        where: {
+                            userId_name: {
+                                userId,
+                                name: tag.toLowerCase().trim(),
+                            },
+                        },
+                        create: {
+                            userId,
+                            name: tag.toLowerCase().trim(),
+                            color
+                        },
+                    })),
+                }
+            }
+        });
+        return tagsCount;
+    }
 
     if (Object.entries(updatedData).length === 0) {
         throw new Error("No fields to update");

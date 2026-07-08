@@ -55,6 +55,7 @@ CREATE TABLE "Url" (
     "isActive" BOOLEAN DEFAULT true,
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "deletedAt" TIMESTAMP(3),
+    "categoryId" TEXT,
 
     CONSTRAINT "Url_pkey" PRIMARY KEY ("id")
 );
@@ -88,6 +89,36 @@ CREATE TABLE "ResetPassword" (
     CONSTRAINT "ResetPassword_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Tags" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Tags_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Category" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "color" TEXT DEFAULT '#6366F1',
+    "userId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "_TagsToUrl" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL,
+
+    CONSTRAINT "_TagsToUrl_AB_pkey" PRIMARY KEY ("A","B")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -115,11 +146,35 @@ CREATE INDEX "UrlRecord_urlId_visitedAt_idx" ON "UrlRecord"("urlId", "visitedAt"
 -- CreateIndex
 CREATE UNIQUE INDEX "ResetPassword_tokenHash_key" ON "ResetPassword"("tokenHash");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "Tags_userId_name_key" ON "Tags"("userId", "name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Category_userId_name_key" ON "Category"("userId", "name");
+
+-- CreateIndex
+CREATE INDEX "_TagsToUrl_B_index" ON "_TagsToUrl"("B");
+
 -- AddForeignKey
 ALTER TABLE "Url" ADD CONSTRAINT "Url_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Url" ADD CONSTRAINT "Url_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UrlRecord" ADD CONSTRAINT "UrlRecord_urlId_fkey" FOREIGN KEY ("urlId") REFERENCES "Url"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ResetPassword" ADD CONSTRAINT "ResetPassword_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Tags" ADD CONSTRAINT "Tags_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Category" ADD CONSTRAINT "Category_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_TagsToUrl" ADD CONSTRAINT "_TagsToUrl_A_fkey" FOREIGN KEY ("A") REFERENCES "Tags"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_TagsToUrl" ADD CONSTRAINT "_TagsToUrl_B_fkey" FOREIGN KEY ("B") REFERENCES "Url"("id") ON DELETE CASCADE ON UPDATE CASCADE;

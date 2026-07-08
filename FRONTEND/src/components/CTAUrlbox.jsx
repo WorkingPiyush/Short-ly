@@ -46,6 +46,7 @@ function CTAUrlbox() {
                 expiry: response.expiry_date,
                 singleUse: response.singleUse,
                 passwordProtect: response.isPswrdProtected,
+                qrCode: response.QrCode,
             })
         } catch (error) {
             toast.error(error.response.data.message || "Backend Url Issue");
@@ -75,7 +76,6 @@ function CTAUrlbox() {
             year: "numeric",
         })
     }
-
     useEffect(() => {
         if (location.state?.focustInput) {
             inputRef.current.scrollIntoView({
@@ -90,7 +90,6 @@ function CTAUrlbox() {
         }
 
     }, [location, navigate])
-
     return (
         <div className="min-h-screen  dark:text-black text-black dark:bg-[#0a0a0a] px-4 py-10 flex items-start justify-center">
             <div className="w-full max-w-xl md:max-w-3xl">
@@ -220,18 +219,17 @@ function CTAUrlbox() {
                     }
                     {/* Result box */}
                     {result && (
-                        <div className="mt-5 dark:bg-emerald-300/5 bg-zinc-100 border dark:border-emerald-300/25 border-black/22
+                        <div className="relative mt-5 dark:bg-emerald-300/5 bg-zinc-100 border dark:border-emerald-300/25 border-black/22
               rounded-2xl p-5 animate-slide-down">
                             <p className="text-[11px] font-medium dark:text-emerald-300 text-emerald-600 tracking-widest uppercase mb-3">
                                 ✦ Your short link is ready
                             </p>
-                            <p
-                                className="font-extrabold text-[20px] dark:text-white tracking-tight break-all mb-4"
-                                style={{ fontFamily: "'Syne', sans-serif" }}
-                            >
+                            <p className="font-extrabold text-[20px] dark:text-white tracking-tight break-all mb-4" style={{ fontFamily: "'Syne', sans-serif" }}>
                                 {result.short}
                             </p>
-
+                            <div className='h-30 w-30 absolute top-5 right-5 rounded-xl cursor-pointer shadow shadow-white'>
+                                <img src={result.qrCode} className='h-30 w-30 rounded-xl' alt="" />
+                            </div>
                             <div className="flex gap-2 flex-wrap">
                                 <button
                                     onClick={handleCopy}

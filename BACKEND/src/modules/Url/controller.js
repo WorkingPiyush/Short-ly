@@ -88,6 +88,7 @@ export const updateUrl = asyncHandler(async (req, res) => {
         password: req.body.password,
         shortCode: req.params.shortCode,
         liveTime: req.body?.liveTime,
+        tags:req?.body.tags,
     })
     return res.status(204).json({ success: true });
 });

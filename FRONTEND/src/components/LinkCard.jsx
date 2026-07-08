@@ -8,12 +8,60 @@ import { SlCalender } from "react-icons/sl";
 import ActionButton from "./Actionbtns";
 import CopyButton from "./CopyBtn";
 import ShareModal from "./ShareLink";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import StatusCard from "./StatusCard";
+import { Folder, MoreVertical } from "lucide-react";
+import { TagMenu } from "./TagsMenu";
+import { debounce } from "@/Hooks/DebounceApi";
+import { addTags } from "@/Api/Url";
+import { useQueryClient } from "@tanstack/react-query";
+
+
 
 /* eslint-disable react/prop-types */
 function LinkCard({ link }) {
+    const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const [shareSocial, setShareSocial] = useState(false);
+
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [allTags, setAllTags] = useState(link?.tags);
+    const TagsToBackend = useMemo(() => debounce(async (tags, shortCode) => {
+        try {
+            await addTags(tags, shortCode);
+            queryClient.invalidateQueries(["url"])
+        } catch (error) {
+            console.error(error);
+        }
+    }, 800), [])
+
+    function getRandomHexColor() {
+        const randomInt = Math.floor(Math.random() * 0xFFFFFF);
+        const hexString = randomInt.toString(16).padStart(6, '0');
+
+        return `#${hexString.toUpperCase()}`;
+    }
+
+    const createTags = (name) => {
+        setAllTags(prev => {
+            const updated = [
+                ...prev,
+                { id: crypto.randomUUID(), name, color: getRandomHexColor() }
+            ];
+            TagsToBackend(updated.map((tag) => tag.name), link.short_code);
+            return updated;
+        }
+        );
+    };
+
+    const removeTags = (id) => {
+        setAllTags(prev => {
+            const updated = prev.filter(tag => tag.id !== id)
+            TagsToBackend(updated.map((tag) => tag.name), link.short_code);
+            return updated;
+        });
+    }
+
     const formatedDate = (input) => {
         return new Date(input)?.toLocaleString("en-In", {
             year: "numeric",
@@ -21,7 +69,7 @@ function LinkCard({ link }) {
             day: "2-digit"
         })
     };
-    const navigate = useNavigate();
+
 
     return (
         <>
@@ -49,6 +97,19 @@ function LinkCard({ link }) {
                             </Link>
                             <CopyButton text={link.short_url} status={link.isActive} />
                         </div>
+
+                        {allTags?.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-1.5">
+                                {allTags.map((cat) => {
+                                    return (
+                                        <span key={cat.id} className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/4 px-2.5 py-1 text-xs font-medium text-white/70">
+                                            <Folder size={11} style={{ color: cat.color }} />
+                                            {cat.name}
+                                        </span>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
 
                     {/* Action buttons */}
@@ -73,6 +134,26 @@ function LinkCard({ link }) {
                             className={`flex items-center justify-center cursor-pointer w-8 h-8 rounded-full text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 ${link.isActive === "active" ? "hover:text-emerald-600" : "hover:text-zinc-600"} dark:hover:text-white dark:hover:bg-zinc-800 bg-transparent hover:border hover:border-white/10  disabled:cursor-not-allowed  transition-all duration-200`}>
                             <SiSimpleanalytics />
                         </button>
+                        <div className="relative">
+                            <button
+                                aria-label="More options"
+                                aria-haspopup="menu"
+                                aria-expanded={menuOpen}
+                                disabled={link.isActive === "used" ? true : link.isActive === "expired" ? true : false}
+                                onClick={() => setMenuOpen((o) => !o)}
+                                className={`flex items-center justify-center cursor-pointer w-8 h-8 rounded-full text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 ${link.isActive === "active" ? "hover:text-emerald-600" : "hover:text-zinc-600"} dark:hover:text-white dark:hover:bg-zinc-800 bg-transparent hover:border hover:border-white/10  disabled:cursor-not-allowed  transition-all duration-200`}>
+                                <MoreVertical size={16} />
+                            </button>
+
+                            {menuOpen && (
+                                <TagMenu
+                                    onClose={() => setMenuOpen(false)}
+                                    tags={allTags}
+                                    onCreateTags={createTags}
+                                    remove={removeTags}
+                                />
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -108,8 +189,9 @@ function LinkCard({ link }) {
                         {link.isActive === "expired" ? "Expired" : "Expires"}&nbsp;<span className="text-zinc-700 dark:text-zinc-300 font-medium">{formatedDate(link.expiry_date)}</span>
                     </span>
                 </div>
-            </div>
-            {shareSocial && <ShareModal setStatus={setShareSocial} link={link.short_url} />}
+            </div >
+            {shareSocial && <ShareModal setStatus={setShareSocial} link={link.short_url} />
+            }
         </>
     );
 }
