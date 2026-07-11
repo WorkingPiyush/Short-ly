@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react-refresh/only-export-components */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AllAnalytics, deleteUrl, getShortUrl, getUrl, getUrlAnalytics, updateUrl } from "../Api/Url";
+import { AllAnalytics, categoryUrls, deleteUrl, getShortUrl, getUrl, getUrlAnalytics, updateUrl } from "../Api/Url";
 import { useUrlFilter } from "../Context/StatusFilterContext";
 
 
@@ -62,11 +62,19 @@ export const useShortAnalytics = (shortCode, period) => {
         queryFn: () => getUrlAnalytics(shortCode, period),
         enabled: Boolean(shortCode),
     })
-}
+};
+
 export const useAnalytics = (timePeriod) => {
     return useQuery({
         queryKey: ['analytics', timePeriod],
         queryFn: () => AllAnalytics(timePeriod),
         enabled: Boolean(timePeriod),
+    })
+};
+
+export const useCategorizedUrl = () => {
+    return useQuery({
+        queryKey: ['category'],
+        queryFn: categoryUrls,
     })
 }

@@ -236,6 +236,11 @@ export const stats = async (id) => {
     return { linksCount: linksCount[0]?.count ?? 0, linksClickCount: linksClickCount[0]?.clicks ?? 0, activeLinksCount: activeLinksCount[0]?.count ?? 0, monthlyLinks: monthlyLinks[0]?.count ?? 0 }
 };
 
+export const categories = async (id) => {
+    return await client.category.findMany({
+        where: { userId: id },
+    })
+}
 
 
 // user based analytics

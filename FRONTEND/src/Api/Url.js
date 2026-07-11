@@ -59,3 +59,7 @@ export const addTags = async (tags, shortCode) => {
     const res = await api.patch(`/url/${shortCode}`, { tags });
     return res.data
 }
+export const categoryUrls = async () => {
+    const res = await api.get(`/url/category`);
+    return res.data.url;
+}

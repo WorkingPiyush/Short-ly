@@ -12,111 +12,9 @@ import Input from '../../components/Input';
 import Section from '../../components/DestinationSection';
 import ToggleRow from '../../components/ToggleRow';
 import { UseDeleteUrl, useshortUrl, useUpdateUrl } from '../../Hooks/useUrl';
-import { Check, Plus, Tags } from 'lucide-react';
+import CategorySection from '@/components/CategorySection';
 
-function SectionCard({ icon: Icon, title, children }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-[#0a0a0a] p-6">
-      <div className="mb-5 flex items-center gap-2 text-white/50">
-        <Icon size={15} />
-        <span className="text-xs font-semibold uppercase tracking-wider">
-          {title}
-        </span>
-      </div>
-      {children}
-    </div>
-  );
-}
 
-/* ---------- Category section: create + single-select ---------- */
-function CategorySection({ categories, selectedId, onSelect, onCreate }) {
-  const [creating, setCreating] = useState(false);
-  const [newName, setNewName] = useState("");
-
-  const submitNewCategory = () => {
-    const trimmed = newName.trim();
-    if (!trimmed) return;
-    onCreate(trimmed);
-    setNewName("");
-    setCreating(false);
-  };
-
-  return (
-    <SectionCard icon={Tags} title="Category">
-      <p className="mb-3 text-sm font-medium text-white/80 bg-black">Assign category</p>
-
-      <div className="flex flex-wrap gap-2.5">
-        {categories.map((cat) => {
-          const isSelected = selectedId === cat.id;
-          return (
-            <button
-              key={cat.id}
-              type="button"
-              role="radio"
-              aria-checked={isSelected}
-              onClick={() => onSelect(isSelected ? null : cat.id)}
-              className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${isSelected
-                ? "border-[#6ee7b7]/40 bg-linear-to-r from-[#6ee7b7]/15 to-transparent text-[#6ee7b7]"
-                : "border-white/10 bg-transparent text-white/60 hover:border-white/20 hover:text-white/80"
-                }`}
-            >
-              <span
-                className="h-2 w-2 shrink-0 rounded-full"
-                style={{ backgroundColor: cat.color }}
-              />
-              {cat.name}
-              {isSelected && <Check size={14} className="shrink-0" />}
-            </button>
-          );
-        })}
-
-        {/* New category control */}
-        {creating ? (
-          <div className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-2 py-1.5">
-            <input
-              autoFocus
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && submitNewCategory()}
-              placeholder="Category name"
-              className="w-32 bg-transparent px-1 text-sm text-white placeholder-white/30 outline-none"
-            />
-            <button
-              type="button"
-              onClick={submitNewCategory}
-              className="shrink-0 rounded-lg bg-[#6ee7b7] px-2.5 py-1 text-xs font-semibold text-black transition-opacity hover:opacity-90"
-            >
-              Add
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setCreating(false);
-                setNewName("");
-              }}
-              className="shrink-0 px-1.5 text-xs text-white/40 hover:text-white/70"
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setCreating(true)}
-            className="flex items-center gap-1.5 rounded-xl border border-dashed border-white/15 px-4 py-2.5 text-sm font-medium text-white/50 transition-colors hover:border-[#6ee7b7]/40 hover:text-[#6ee7b7]"
-          >
-            <Plus size={14} />
-            New category
-          </button>
-        )}
-      </div>
-
-      <p className="mt-3 text-xs text-white/35">
-        Pick one category to group this link under. Selecting another replaces it.
-      </p>
-    </SectionCard>
-  );
-}
 
 export default function EditLink() {
   const location = useLocation();
@@ -132,26 +30,20 @@ export default function EditLink() {
   const [liveTime, setLiveTime] = useState("");
   const [passwordProtect, setPasswordProtect] = useState(false);
   const [password, setPassword] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState([]);
+
+
   const shortUrl = `${import.meta.env.VITE_BACKEND_URL}/${location?.pathname.split('/')[3]}`;
   const short_Tag = location?.pathname.split('/')[3];
+  
+
   const formatTimeClock = (time) => {
     const date = new Date(time);
     const offSet = date.getTimezoneOffset();
     const localDate = new Date(date.getTime() - offSet * 60000);
     return localDate.toISOString().slice(0, 16);
   };
-
-  const DEFAULT_CATEGORIES = [
-    { id: "cricket", name: "Cricket", color: "#6ee7b7" },
-    { id: "work", name: "Work", color: "#93c5fd" },
-    { id: "personal", name: "Personal", color: "#fca5a5" },
-    { id: "campaigns", name: "Campaigns", color: "#fcd34d" },
-  ];
-
-
-  // 
-  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
-  const [selectedCategoryId, setSelectedCategoryId] = useState("cricket");
 
   const createCategory = (name) => {
     const id = name.toLowerCase().replace(/\s+/g, "-");
@@ -161,14 +53,15 @@ export default function EditLink() {
     setCategories((prev) => [...prev, newCat]);
     setSelectedCategoryId(id);
   };
-  // 
-
+  
   useEffect(() => {
     if (short) {
       setOriginalUrl(short?.original_url ?? "");
       setIsActive(short?.isActive ?? "");
       setLiveTime(formatTimeClock(short?.liveTime) ?? "");
       setPasswordProtect(short?.ispaswordprotected ?? "");
+      setCategories(short?.category ?? []);
+      setSelectedCategoryId(short?.categoryId ?? []);
     }
     if (short?.expiry_date) {
       setExpirationDate(
@@ -176,14 +69,13 @@ export default function EditLink() {
       );
     }
   }, [short])
-
   const handleSave = () => {
     const data = {
       originalUrl: originalUrl !== short?.original_url ? originalUrl : null,
       isActive: isActive !== short?.isActive ? isActive : null,
-      expirationDate: new Date(expirationDate).toISOString() !== short?.expiry_date ? new Date(expirationDate).toISOString() : null,
-      liveTime: liveTime ? new Date(liveTime).toISOString() : null,
-      password, shortCode: short_Tag
+      expirationDate: new Date(expirationDate).toISOString() !== new Date(short?.expiry_date).toISOString() ? new Date(expirationDate).toISOString() : null,
+      liveTime: new Date(liveTime).toISOString() !== new Date(short?.liveTime).toISOString() ? new Date(liveTime).toISOString() : null,
+      password: passwordProtect ? password : null, shortCode: short_Tag, category: categories.find(l => l.id === selectedCategoryId).name
     };
     try {
       urlMutation.mutate(data, {
@@ -274,6 +166,7 @@ export default function EditLink() {
           selectedId={selectedCategoryId}
           onSelect={setSelectedCategoryId}
           onCreate={createCategory}
+          shortCode={short_Tag}
         />
 
         {/* ── Section 2: Status ── */}

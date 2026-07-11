@@ -9,6 +9,7 @@ import { SiGoogleanalytics } from "react-icons/si";
 import { IoSettings } from "react-icons/io5";
 import { NavLink, useNavigate } from 'react-router-dom';
 import Logo from './Logo';
+import { Folder } from 'lucide-react';
 
 
 function SideBar() {
@@ -25,7 +26,7 @@ function SideBar() {
     const sideOptions = [
         { icon: <IoHomeOutline />, head: "Dashboard", to: "/dashboard", },
         { icon: <IoIosLink />, head: "Links", to: "/dashboard/links" },
-        // { icon: <RiPagesLine />, head: "Profile Pages", to: "/dashboard/profile" },
+        { icon: <Folder />, head: "Category", to: "/dashboard/categories" },
         { icon: <FcMultipleInputs />, head: "Bulk Urls", to: "/dashboard/bulk" },
         { icon: <SiGoogleanalytics />, head: "Analytics", to: "/dashboard/analytics" },
     ]

@@ -53,6 +53,14 @@ export const getUrl = asyncHandler(async (req, res) => {
     return res.status(200).json({ success: true, url });
 });
 
+export const getAllCategoryUrls = asyncHandler(async (req, res) => {
+    const url = await urlService.CategoriedUrls({
+        userId: req.user?.id
+    });
+
+    return res.status(200).json({ success: true, url });
+})
+
 export const getUrlAnalytics = asyncHandler(async (req, res) => {
     const url = await urlService.UrlAnalytics({
         userId: req.user?.id,
@@ -88,7 +96,8 @@ export const updateUrl = asyncHandler(async (req, res) => {
         password: req.body.password,
         shortCode: req.params.shortCode,
         liveTime: req.body?.liveTime,
-        tags:req?.body.tags,
+        tags: req?.body.tags,
+        categoryName: req?.body.category,
     })
     return res.status(204).json({ success: true });
 });

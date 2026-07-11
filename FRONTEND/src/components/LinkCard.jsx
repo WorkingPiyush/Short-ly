@@ -33,7 +33,7 @@ function LinkCard({ link }) {
         } catch (error) {
             console.error(error);
         }
-    }, 800), [])
+    }, 800), []);
 
     function getRandomHexColor() {
         const randomInt = Math.floor(Math.random() * 0xFFFFFF);

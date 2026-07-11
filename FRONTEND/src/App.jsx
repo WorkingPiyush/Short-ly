@@ -16,6 +16,7 @@ import ProtectedLinkPage from './Pages/Dashboard/ProtectedLinkPage';
 import LinkAnalytics from './Pages/Dashboard/LinkAnalytics';
 import ProfileForm from './Pages/Dashboard/ProfileForm';
 import ResetPassword from './Pages/Auth/ResetPassword';
+import Category from './Pages/Dashboard/Category';
 
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
             <Route path="/dashboard/links/:shortcode" element={<EditLink />} />
             <Route path="/dashboard/bulk" element={<BulkUrl />} />
             <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
+            <Route path="/dashboard/categories" element={<Category />} />
             <Route path="/:shortCode/analytics" element={<LinkAnalytics />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/edit" element={<ProfileForm />} />

@@ -1,7 +1,7 @@
 import dotenv from "dotenv/config";
 import { client } from '../../../config/db.js';
-import { formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, foromtReferrer, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, urlKey, urlStatus } from '../../helper/Url.helper.js';
-import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics, referrerAnalytics } from "../../helper/Db.query.js";
+import { formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, formatUrl, foromtReferrer, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, randomColor, urlKey, urlStatus } from '../../helper/Url.helper.js';
+import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics, referrerAnalytics, categories } from "../../helper/Db.query.js";
 import { redisClient } from "../../../config/redisClient.js";
 import { AppError } from "../../utils/AppError.js";
 import logger from "../../../config/logger.js";
@@ -342,6 +342,9 @@ export const UrlInfo = async ({ userId, shortCode }) => {
             updatedAt: true,
             liveTime: true,
             lastVisitedAt: true,
+            tags: true,
+            categoryId: true,
+            category: true
         }
     });
     if (!Url) {
@@ -361,8 +364,55 @@ export const UrlInfo = async ({ userId, shortCode }) => {
         creation_date: Url.createdAt,
         last_update_date: Url.updatedAt,
         liveTime: Url.liveTime,
+        tags: Url.tags,
+        categoryId: Url.categoryId,
+        category: await categories(userId),
     }
 };
+
+export const CategoriedUrls = async ({ userId }) => {
+    const data = await client.Category.findMany({
+        where: { userId },
+        select: {
+            id: true,
+            name: true,
+            color: true,
+            urls: {
+                select: {
+                    id: true,
+                    originalUrl: true,
+                    shortCode: true,
+                    expirationDate: true,
+                    password: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    liveTime: true,
+                    singleUse: true,
+                    isActive: true,
+                    userId: true,
+                    lastVisitedAt: true,
+                    used: true,
+                    tags: true,
+                    category: true
+                },
+            },
+        }
+    });
+
+    return Promise.all(
+        data.map(async (u) => {
+            return {
+                categoryId: u.id,
+                categoryName: u.name,
+                color: u.color,
+                urlCount: u.urls.length,
+                url: await formatUrl(u.urls)
+            }
+        })
+    )
+
+}
+
 export const UrlAnalytics = async ({ userId, shortCode, period }) => {
     if (!shortCode) {
         logger.error("shortCode not found !!");
@@ -434,9 +484,8 @@ export const UrlDelete = async ({ userId, shortCode }) => {
     return true;
 };
 
-export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive, shortCode, password, liveTime, tags }) => {
-    // console.log({ userId, originalUrl, expirationDate, isActive, shortCode, password, liveTime })
-    // console.log(!userId, !originalUrl, !expirationDate, !isActive, !shortcode, !password, !liveTime)
+export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive, shortCode, password, liveTime, tags, categoryName }) => {
+    // logger.info(userId, originalUrl, expirationDate, isActive, shortCode, password, liveTime, tags, categoryName)
 
     let updatedData = {};
     if (originalUrl !== null && originalUrl !== undefined) {
@@ -483,17 +532,6 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
         if (!existing) {
             throw new AppError("Invalid Url", 500);
         };
-        const palette = [
-            "#6ee7b7",
-            "#93c5fd",
-            "#fca5a5",
-            "#fcd34d",
-            "#c4b5fd"
-        ];
-
-        const color = palette[Math.floor(Math.random() * palette.length)];
-
-        const link = `${process.env.BACKEND_URL}/${existing.shortCode}`
 
         const tagsCount = await client.url.update({
             where: {
@@ -512,15 +550,46 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
                         create: {
                             userId,
                             name: tag.toLowerCase().trim(),
-                            color
+                            color: randomColor()
                         },
                     })),
                 }
             }
         });
         return tagsCount;
-    }
-
+    };
+    if (categoryName) {
+        const result = client.$transaction(async (tx) => {
+            const existing = await tx.url.findFirst({
+                where: { userId, shortCode, isDeleted: false }
+            });
+            if (!existing) {
+                throw new AppError("URL not found", 404);
+            };
+            const normalizedName = categoryName.trim().replace(/\s+/g, " ").toLowerCase();
+            const category = await tx.category.upsert({
+                where: {
+                    userId_name: {
+                        userId,
+                        name: normalizedName
+                    },
+                },
+                update: {},
+                create: {
+                    userId,
+                    name: normalizedName,
+                    color: randomColor(),
+                }
+            });
+            await tx.url.update({
+                where: { id: existing.id },
+                data: {
+                    categoryId: category.id,
+                }
+            })
+            return category;
+        })
+    };
     if (Object.entries(updatedData).length === 0) {
         throw new Error("No fields to update");
     };
@@ -551,6 +620,7 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
             password: true,
             isActive: true,
             liveTime: true,
+            tags
         }
     });
 
@@ -626,18 +696,22 @@ export const searchUrl = async ({ query, userId }) => {
     let fetchedUrl;
     fetchedUrl = await client.$queryRaw`
         SELECT *,  
-        GREATEST(similarity("originalUrl",${query}),similarity("shortCode",${query})) AS score
+        GREATEST(
+        similarity("originalUrl",${query}),
+        similarity("shortCode",${query})
+        ) AS score
         FROM "Url"
         WHERE "userId" = ${userId}
         AND (
-            "originalUrl" ILIKE ${'%' + query + '%'}
-            OR 
-            "shortCode" ILIKE ${'%' + query + '%'}
+            "originalUrl" ILIKE ${`%${query}%`}
+            OR "shortCode" ILIKE ${`%${query}%`}
+            OR  similarity("originalUrl",${query}) >0.3
+            OR  similarity("shortCode",${query}) >0.3
         )
-        
-        ORDER BY score DESC
+        ORDER BY score DESC,"createdAt" DESC
         LIMIT 10
         `;
+
     if (!fetchedUrl) {
         throw new AppError("No matching url found !!", 404);
     }
