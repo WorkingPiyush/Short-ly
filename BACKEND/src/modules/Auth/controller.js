@@ -1,5 +1,5 @@
 import { success, ZodError } from "zod";
-import { loginSchema, signupSchema } from "../../validator/auth.validator.js";
+import { loginSchema, passwordSchema, profileUpdateSchema, signupSchema } from "../../validator/auth.validator.js";
 import * as authService from "./service.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { AppError } from "../../utils/AppError.js";
@@ -9,6 +9,15 @@ export const user = asyncHandler(async (req, res) => {
     const userInfo = await authService.getUser({
         userId: req.user.id
     })
+    return res.status(200).json({
+        success: true,
+        user: userInfo,
+    });
+})
+export const userDetails = asyncHandler(async (req, res) => {
+    const userInfo = await authService.userInfo({
+        userId: req.user.id
+    });
     return res.status(200).json({
         success: true,
         user: userInfo,
@@ -24,7 +33,7 @@ export const register = asyncHandler(async (req, res) => {
     const user = await authService.registerUser(validatedBody.data);
     req.session.user = {
         id: user.id,
-        username: user.name,
+        name: user.name,
         email: user.email,
     }
 
@@ -40,7 +49,7 @@ export const register = asyncHandler(async (req, res) => {
             message: "Signup successfully",
             user: {
                 id: user.id,
-                username: user.name,
+                name: user.name,
                 email: user.email,
             },
         });
@@ -69,7 +78,7 @@ export const login = asyncHandler(async (req, res) => {
             }
             req.session.user = {
                 id: user.id,
-                username: user.name,
+                name: user.name,
                 email: user.email,
             }
             req.session.save((err) => {
@@ -83,7 +92,7 @@ export const login = asyncHandler(async (req, res) => {
                     success: true,
                     user: {
                         id: user.id,
-                        username: user.name,
+                        name: user.name,
                         email: user.email,
                     }
                 });
@@ -95,6 +104,25 @@ export const login = asyncHandler(async (req, res) => {
         logger.error(err.message);
         res.status(400).json({ message: err.message });
     }
+});
+
+export const updateProfile = asyncHandler(async (req, res) => {
+    const validatedBody = profileUpdateSchema.safeParse(req.body);
+    if (!validatedBody.success) {
+        return res.status(400).json({
+            errors: validatedBody.error.flatten(),
+        });
+    };
+    const user = await authService.update({
+        userId: req.user.id,
+        data: validatedBody.data,
+        file: req.file,
+    });
+
+    return res.status(200).json({
+        success: true,
+        user: user,
+    });
 });
 
 export const logout = asyncHandler(async (req, res) => {
@@ -109,4 +137,24 @@ export const logout = asyncHandler(async (req, res) => {
     res.json({
         success: true,
     })
+});
+
+export const forgetPassword = asyncHandler(async (req, res) => {
+    const userInfo = await authService.resetPassword({
+        email: req.body?.email.toLowerCase()
+    });
+    return res.status(200).json({ success: true, userInfo });
+});
+export const checkPassword = asyncHandler(async (req, res) => {
+    const validPassword = passwordSchema.safeParse(req.body?.password);
+    if (!validPassword.success) {
+        let { message } = JSON.parse(validPassword.error.message)[0];
+        throw new AppError(message, 400);
+    };
+
+    const PasswordUpdate = await authService.paswordSubmit({
+        password: validPassword.data,
+        token: req.body.token
+    });
+    return res.status(200).json({ success: true });
 });

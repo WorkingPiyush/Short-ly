@@ -5,11 +5,11 @@ import { MdOutlineMenu } from "react-icons/md";
 import { RxCross1 } from "react-icons/rx";
 import { FcMultipleInputs } from "react-icons/fc"
 import { IoIosLink } from "react-icons/io";
-import { RiPagesLine } from "react-icons/ri";
 import { SiGoogleanalytics } from "react-icons/si";
 import { IoSettings } from "react-icons/io5";
 import { NavLink, useNavigate } from 'react-router-dom';
 import Logo from './Logo';
+import { Folder } from 'lucide-react';
 
 
 function SideBar() {
@@ -26,7 +26,7 @@ function SideBar() {
     const sideOptions = [
         { icon: <IoHomeOutline />, head: "Dashboard", to: "/dashboard", },
         { icon: <IoIosLink />, head: "Links", to: "/dashboard/links" },
-        { icon: <RiPagesLine />, head: "Profile Pages", to: "/dashboard/profile" },
+        { icon: <Folder />, head: "Category", to: "/dashboard/categories" },
         { icon: <FcMultipleInputs />, head: "Bulk Urls", to: "/dashboard/bulk" },
         { icon: <SiGoogleanalytics />, head: "Analytics", to: "/dashboard/analytics" },
     ]
@@ -34,7 +34,7 @@ function SideBar() {
     return (
         <div>
             {/* Sidebar */}
-            <aside className={`fixed top-0 left-0 z-40 h-dvh w-64 text-black bg-white/10 border-r border-gray-700/20 px-4 py-6 flex flex-col gap-6 transition-transform duration-300
+            <aside className={`fixed top-0 left-0 z-40 h-dvh w-64 text-black dark:bg-white/10 bg-white border-r border-gray-700/20 px-4 py-6 flex flex-col gap-6 transition-transform duration-300
             ${showSideBar ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 `}>
                 <div className='flex justify-center'>
                     <Logo />
@@ -61,9 +61,9 @@ function SideBar() {
 
                 <div className="mt-auto">
                     <div className="h-px bg-gray-400/30 mb-4" />
-                    <button className=" flex items-center justify-center gap-2  w-full py-3 rounded-lg bg-black text-emerald-400 font-semibold hover:bg-gray-900 transition-colors">
+                    <button onClick={() => navigate("/profile")} className="flex items-center justify-center gap-2 cursor-pointer w-full py-3 rounded-lg bg-black text-emerald-400 font-semibold hover:bg-gray-900 transition-colors">
                         <IoSettings size={18} />
-                        <span>Settings</span>
+                        <span>Profile</span>
                     </button>
                 </div>
             </aside>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 // eslint-disable-next-line react/prop-types
-export default function CopyButton({ text }) {
+export default function CopyButton({ text, status }) {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = (e) => {
@@ -17,10 +17,7 @@ export default function CopyButton({ text }) {
             aria-label="Copy short link"
             className={`flex items-center justify-center w-7 h-7 rounded-[7px] border text-xs
         transition-all duration-150 shrink-0
-        ${copied
-                    ? "bg-emerald-300/20 border-emerald-300/40 text-emerald-300"
-                    : "bg-emerald-300/10 border-emerald-300/25 text-emerald-300 hover:bg-emerald-300/20"
-                }`}
+        ${copied ? `bg-emerald-300/20 border-emerald-300/40  text-emerald-300` : `bg-emerald-300/10 border-emerald-300/25 text-emerald-300 hover:bg-emerald-300/20 `}`}
         >
             {copied ? (
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
