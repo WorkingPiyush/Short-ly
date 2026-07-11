@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider } from './Context/ThemeContext.jsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { StatusFilterContext } from './Context/StatusFilterContext.jsx'
+import ScrollToTop from './Context/ScrollToTop'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,8 +25,8 @@ createRoot(document.getElementById('root')).render(
     <StatusFilterContext>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
+          <ScrollToTop />
           <ThemeProvider>
-
             <App />
           </ThemeProvider>
         </BrowserRouter>

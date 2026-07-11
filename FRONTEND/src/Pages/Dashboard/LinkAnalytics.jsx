@@ -50,7 +50,7 @@ function LinkAnalytics() {
 
     const { ref, isVisible } = useInView();
     return (
-        <div className="min-h-screen bg-black text-white p-8">
+        <div className="min-h-screen dark:bg-black bg-white dark:text-white text-black p-8">
             <div className="max-w-4xl mx-auto">
                 {/* HEADER */}
                 <div className="flex justify-between items-start mb-10">
@@ -94,11 +94,9 @@ function LinkAnalytics() {
                 {/* LOCATIONS */}
                 <Card>
                     <div className="flex justify-between mb-8">
-                        <h2 className="text-3xl font-semibold">
-                            Locations
-                        </h2>
-                        <div className="flex bg-[#111827] rounded-xl p-1">
-                            <button className="px-4 py-2 bg-black cursor-pointer rounded-lg active:bg-gray-950/10">
+                        <h2 className="text-3xl font-semibold">Locations</h2>
+                        <div className="flex dark:bg-[#111827] text-black rounded-xl p-1">
+                            <button className="px-4 py-2 dark:bg-black text-black border-2 border-dashed cursor-pointer rounded-lg active:bg-gray-950/10">
                                 Countries
                             </button>
                         </div>

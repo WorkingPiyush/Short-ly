@@ -40,6 +40,8 @@ model User {
   updatedAt      DateTime        @updatedAt
   urls           Url[]
   resetPasswords ResetPassword[]
+  tags           Tags[]
+  categories     Category[]
 
   @@unique([provider, providerId])
 }
@@ -83,6 +85,9 @@ model Url {
   deletedAt      DateTime?
   user           User?       @relation(fields: [userId], references: [id])
   urlRecords     UrlRecord[]
+  categoryId     String?
+  category       Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags           Tags[]
 
   @@index([tempId])
   @@index([shortCode])
@@ -115,4 +120,29 @@ model ResetPassword {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+}
+
+model Tags {
+  id        String   @id @default(uuid())
+  name      String
+  color     String?  @default("#dc5334")
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  urls      Url[]
+  createdAt DateTime @default(now())
+
+  @@unique([userId, name])
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  color     String?  @default("#6366F1")
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  urls      Url[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name])
 }

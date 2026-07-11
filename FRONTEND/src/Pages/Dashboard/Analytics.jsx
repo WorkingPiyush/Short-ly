@@ -76,7 +76,7 @@ function Analytics() {
 
             </div>
           </div>
-          {engagementData?.length ? <div ref={ref} className="w-full h-70">
+          <div ref={ref} className="w-full h-70">
             {isVisible && (
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={engagementData} barGap="0" margin={{ top: 5, right: 5, left: 2, bottom: 0, }}>
@@ -88,22 +88,8 @@ function Analytics() {
                 </BarChart>
               </ResponsiveContainer>
             )}
-          </div> : (
-            <div className="text-center py-20 text-white/20 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                className="lucide lucide-globe-off-icon lucide-globe-off">
-                <path d="M10.114 4.462A14.5 14.5 0 0 1 12 2a10 10 0 0 1 9.313 13.643" />
-                <path d="M15.557 15.556A14.5 14.5 0 0 1 12 22 10 10 0 0 1 4.929 4.929" />
-                <path d="M15.892 10.234A14.5 14.5 0 0 0 12 2a10 10 0 0 0-3.643.687" />
-                <path d="M17.656 12H22" />
-                <path d="M19.071 19.071A10 10 0 0 1 12 22 14.5 14.5 0 0 1 8.44 8.45" />
-                <path d="M2 12h10" /><path d="m2 2 20 20" />
-              </svg>
-            </div>
-          )}
-          {topLinks.length ?
+          </div>
+          {topLinks?.length ?
             (<div className="rounded-2xl border border-gray-800 bg-white/3">
               <table className="w-full">
                 <thead>
@@ -189,7 +175,7 @@ function Analytics() {
         </Card>
 
         {/* REFERRERS */}
-        {referrers.length ? < DonutSection title="Referrers" data={referrers} />
+        {referrers?.length ? < DonutSection title="Referrers" data={referrers} />
           : (
             <div className='flex justify-center items-center'>
               <TableRow>

@@ -1,5 +1,5 @@
 import express from 'express';
-import { shortUrl, getAllUrls, getUrl, deleteUrl, updateUrl, verifyPassword, bulkShortUrl, searchUrl, getUrlAnalytics, Analytics } from './controller.js';
+import { shortUrl, getAllUrls, getUrl, deleteUrl, updateUrl, verifyPassword, bulkShortUrl, searchUrl, getUrlAnalytics, Analytics, getAllCategoryUrls } from './controller.js';
 import { routeProtection } from '../../Middleware/protected.url.Middleware.js';
 import { excelUpload } from '../../Middleware/upload.Middleware.js';
 const router = express();
@@ -9,6 +9,7 @@ router.post('/:shortCode/verify-password', verifyPassword) // password verificat
 router.post("/bulk", routeProtection, excelUpload.single("file"), bulkShortUrl) // bulk file url shortening 
 
 router.get('/', routeProtection, getAllUrls); // getting users all urls
+router.get('/category', routeProtection, getAllCategoryUrls); // getting users all urls
 router.get('/analytics', routeProtection, Analytics); // getting info about a specific short url 
 router.get('/:shortCode/analytics', routeProtection, getUrlAnalytics); // getting analytics about a specific short url 
 router.get('/search/:query', routeProtection, searchUrl); // getting info about a specific short url 

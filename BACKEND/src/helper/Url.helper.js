@@ -3,6 +3,7 @@ import { nanoid } from "nanoid";
 import qrcode from 'qrcode';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
+import { totalClick } from "./Db.query.js";
 
 export const isValidUrl = (url) => {
     try {
@@ -92,9 +93,33 @@ export const formatCountry = (result) => {
         clicks: b.clicks,
     }))
 };
+
+export const formatUrl = (url) => {
+    return Promise.all(
+        url.map(async (l) => {
+            const clicks = await totalClick(l.id);
+            const status = await urlStatus(l);
+            return {
+                id: l.id,
+                short_url: `${process.env.BACKEND_URL}/${l.shortCode}`,
+                short_code: l.shortCode,
+                original_url: l.originalUrl,
+                totalClicks: clicks,
+                expiry_date: l.expirationDate,
+                creation_date: l.createdAt,
+                last_update_date: l.updatedAt,
+                isPswrdProtected: l.password ? true : false,
+                lastVisitedAt: l.lastVisitedAt,
+                isActive: status,
+            }
+        })
+    )
+};
+
 export const passwordHashing = async (password, salt) => {
     return await bcrypt.hash(password, salt);
-}
+};
+
 export const passwordCompare = async (password, userPassword) => {
     return await bcrypt.compare(password, userPassword);
 };
@@ -134,4 +159,16 @@ export const formatedReferrer = (ref) => {
 
 export const hashIP = (ipAdd) => {
     return crypto.createHash("sha256").update(ipAdd).digest("hex");
+};
+
+export const randomColor = () => {
+    const palette = [
+        "#6ee7b7",
+        "#93c5fd",
+        "#fca5a5",
+        "#fcd34d",
+        "#c4b5fd"
+    ];
+    const color = palette[Math.floor(Math.random() * palette.length)];
+    return color;
 }

@@ -11,12 +11,12 @@ function Field({ label, hint, children }) {
     return (
         <div className="mb-4 last:mb-0">
             {label && (
-                <label className="block text-[12px] font-medium text-white/42 mb-1.5">
+                <label className="block text-[12px] font-medium dark:text-white/42 text-zinc-700 mb-1.5">
                     {label}
                 </label>
             )}
             {children}
-            {hint && <p className="text-[11px] text-white/25 mt-1.5">{hint}</p>}
+            {hint && <p className="text-[11px] dark:text-white/25 text-black mt-1.5">{hint}</p>}
         </div>
     );
 }
@@ -31,9 +31,8 @@ function Input({ id, type = "text", value, onChange, placeholder, error, classNa
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
-            className={`w-full bg-white/4 border rounded-[10px]
-        px-3.5 py-2.75 text-[14px] text-white placeholder-white/20
-        outline-none focus:border-emerald-300/40 focus:bg-emerald-300/2
+            className={`w-full dark:bg-white/4 bg-gray-600/10 border rounded-[10px px-3.5 py-2.75 text-[14px] dark:text-white text-zinc-900 dark:placeholder-white/20 placeholder-gray-600
+        outline-none dark:focus:border-emerald-300/40 focus:border-emerald-300/50 border-black/50 dark:focus:bg-emerald-300/2 
         transition-all duration-200
         ${error ? "border-red-400/50" : "border-white/9"}
         ${className}`}
@@ -44,9 +43,8 @@ function Input({ id, type = "text", value, onChange, placeholder, error, classNa
 // ── Section card ──────────────────────────────────────────────────────────────
 function Section({ icon, title, children }) {
     return (
-        <div className="bg-white/3 border border-white/8 rounded-[18px] p-5">
-            <p className="flex items-center gap-2 text-[11px] font-medium text-white/30
-        tracking-[.08em] uppercase mb-4">
+        <div className="dark:bg-white/3 bg-yellow-400/20 border dark:border-white/8 border-black/8 rounded-[18px] p-5">
+            <p className="flex items-center gap-2 text-[11px] font-medium dark:text-white/30 text-black tracking-[.08em] uppercase mb-4">
                 {icon}
                 {title}
             </p>
@@ -188,31 +186,26 @@ export default function ProfileForm() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white px-4 py-8">
+        <div className="min-h-screen bg-linear-to-br from-[#F6F3EE] via-[#FBFAF7] to-[#EEF8F2] dark:from-[#090909] dark:via-[#0b0b0b] dark:to-[#07110d] text-zinc-900 dark:text-white px-4 py-8">
             <div className="max-w-4xl mx-auto flex flex-col gap-3.5">
-
                 {/* Header */}
                 <div>
-                    <h1 className="font-extrabold text-[22px] text-white tracking-tight mb-1"
+                    <h1 className="font-extrabold text-[22px] dark:text-white text-zinc-900 tracking-tight mb-1"
                         style={{ fontFamily: "'Syne', sans-serif" }}>
                         Your Profile
                     </h1>
-                    <p className="text-[13px] text-white/38">
+                    <p className="text-[13px] dark:text-white/38 text-gray-600">
                         Fill in your details and hit save when you&apos;re done.
                     </p>
                 </div>
 
                 {/* ── Avatar upload ── */}
-                <div className="bg-white/3 border border-white/8 rounded-[18px]
-          p-5 flex items-center gap-4">
+                <div className="dark:bg-white/3 bg-yellow-300/10 shadow border dark:border-white/8 border-black/50 rounded-[18px] p-5 flex items-center gap-4">
                     {/* Circle */}
                     <div
                         onClick={() => fileRef.current?.click()}
-                        className="w-17 h-17 rounded-full bg-white/6
-              border-2 border-dashed border-white/15 hover:border-emerald-300/40
-              flex items-center justify-center text-3xl overflow-hidden
-              shrink-0 cursor-pointer transition-colors duration-200"
-                    >
+                        className="w-17 h-17 rounded-full dark:bg-white/6 bg-black/6 border-2 border-dashed darlk:border-white/15 border-black/15 dark:hover:border-emerald-300/40 hover:border-black/40
+              flex items-center justify-center text-3xl overflow-hidden shrink-0 cursor-pointer transition-colors duration-200">
                         {profileImg
                             ? <img src={profileImg} alt="avatar" className="w-full h-full object-cover" />
                             : <span>👤</span>
@@ -222,9 +215,11 @@ export default function ProfileForm() {
 
                     {/* Info */}
                     <div className="flex-1">
-                        <p className="text-[14px] font-medium text-white/70 mb-1">Profile photo</p>
-                        <p className="text-[12px] text-white/28 leading-relaxed mb-2.5">
-                            JPG, PNG or GIF · Max 2MB<br />Click the circle to upload
+                        <p className="text-[14px] font-medium dark:text-white/70 text-black/70 mb-1">Profile photo</p>
+                        <p className="text-[12px] dark:text-white/28 text-black/45 leading-relaxed mb-2.5">
+                            JPG, PNG or GIF · Max 2MB
+                            <br />
+                            Click the circle to upload
                         </p>
                         <div className="flex gap-2">
                             <label className="text-[12px] font-medium text-zinc-900 bg-emerald-300
@@ -236,9 +231,8 @@ export default function ProfileForm() {
                             {profileImg && (
                                 <button
                                     onClick={() => setProfileImg(null)}
-                                    className="text-[12px] font-medium text-white/40 bg-white/5
-                    border border-white/10 px-3.5 py-1.5 rounded-[8px]
-                    hover:text-white hover:bg-white/9 transition-all duration-200"
+                                    className="text-[12px] font-medium cursor-pointer dark:text-white/40 text-black/40 dark:bg-white/5 bg-black/5
+                    border dark:border-white/10 border-black/10 px-3.5 py-1.5 rounded-[8px] dark:hover:text-white hover:text-gray-800 dark:hover:bg-white/9 hover:bg-black/9 transition-all duration-200"
                                 >
                                     Remove
                                 </button>
@@ -276,9 +270,9 @@ export default function ProfileForm() {
                             value={bio}
                             onChange={(e) => setBio(e.target.value)}
                             placeholder="Tell people a little about yourself..."
-                            className="w-full bg-white/4 border border-white/9 rounded-[10px]
-                px-3.5 py-3 text-[14px] text-white placeholder-white/20 outline-none
-                focus:border-emerald-300/40 focus:bg-emerald-300/2
+                            className="w-full dark:bg-white/4 bg-yellow-500/20 border dark:border-white/9 border-gray-800/9 rounded-[10px]
+                px-3.5 py-3 text-[14px] dark:text-white text-black dark:placeholder-white/20 placeholder-black/20 outline-none
+                dark:focus:border-emerald-300/40 focus:border-gray-800/30 dark:focus:bg-emerald-300/2 focus:bg-yellow-300/2
                 transition-all duration-200 resize-none h-20 leading-relaxed"
                         />
                     </Field>
@@ -289,8 +283,7 @@ export default function ProfileForm() {
                 <Section title="Contact Info" icon={<PhoneIcon />}>
                     <Field label="Mobile">
                         <div className="relative">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[13px]
-                text-white/25 pointer-events-none select-none">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[13px] dark:text-white/25 pointer-events-none select-none">
                                 +91
                             </span>
                             <input
@@ -298,9 +291,8 @@ export default function ProfileForm() {
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
                                 placeholder="123456789"
-                                className="w-full bg-white/4 border border-white/9 rounded-[10px]
-                  pl-13 pr-3.5 py-2.75 text-[14px] text-white placeholder-white/20
-                  outline-none focus:border-emerald-300/40 transition-all duration-200"
+                                className="w-full dark:bg-white/4 bg-yellow-700/4 border dark:border-white/9 border-black/12 rounded-[10px]
+                  pl-13 pr-3.5 py-2.75 text-[14px] dark:text-white text-zinc-800 dark:placeholder-white/20 placeholder-black/40 outline-none dark:focus:border-emerald-300/40 focus:border-black/40 transition-all duration-200"
                             />
                         </div>
                     </Field>
@@ -318,18 +310,16 @@ export default function ProfileForm() {
                 <div className="flex gap-2.5 pb-4">
                     <button
                         onClick={() => navigate(-1)}
-                        className="text-[14px] font-medium text-white/50 bg-white/4
-              border border-white/9 px-5 py-3.5 rounded-xl
-              hover:text-white hover:bg-white/8 transition-all duration-200"
-                    >
+                        className="text-[14px] font-medium cursor-pointer dark:text-white/50 text-zinc-600 dark:bg-white/4 bg-yellow-600/4 border dark:border-white/9 border-black/50 px-5 py-3.5 rounded-xl
+              dark:hover:text-white hover:text-zinc-800 dark:hover:bg-white/8 hover:bg-yellow-500/40  transition-all duration-200">
                         Cancel
                     </button>
-                    <button onClick={handleReset} className="text-[14px] font-medium text-white/50 bg-white/4 border border-white/9 px-5 py-3.5 rounded-xl hover:text-white hover:bg-white/8 transition-all duration-200">
+                    <button onClick={handleReset} className="text-[14px] font-medium cursor-pointer dark:text-white/50 text-gray-700 dark:bg-white/4 bg-yellow-500/4 border dark:border-white/9 border-black/40 px-5 py-3.5 rounded-xl dark:hover:text-white hover:text-zinc-950 dark:hover:bg-white/8 hover:bg-yellow-500/40 transition-all duration-200">
                         Reset Data
                     </button>
                     <button
                         onClick={handleSubmit}
-                        className="flex-1 cursor-pointer flex items-center justify-center gap-2
+                        className="flex-1 cursor-pointer flex items-center justify-center gap-2 
               text-[14px] font-medium text-zinc-900 bg-emerald-300
               py-3.5 rounded-xl hover:bg-emerald-200 hover:scale-[1.01]
               transition-all duration-150"
