@@ -1,7 +1,7 @@
 import dotenv from "dotenv/config";
 import { client } from '../../../config/db.js';
 import { formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, formatUrl, foromtReferrer, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, randomColor, urlKey, urlStatus } from '../../helper/Url.helper.js';
-import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics, referrerAnalytics, categories } from "../../helper/Db.query.js";
+import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics, referrerAnalytics, categories, getUrlStatus } from "../../helper/Db.query.js";
 import { redisClient } from "../../../config/redisClient.js";
 import { AppError } from "../../utils/AppError.js";
 import logger from "../../../config/logger.js";
@@ -10,7 +10,6 @@ import DeviceDetector from 'device-detector-js';
 import geoip from 'geoip-lite';
 import XLSX from 'xlsx';
 import fs from 'fs';
-import { connect } from "http2";
 
 const deviceDetector = new DeviceDetector();
 const MAX_TEMP_URLS = 3;
@@ -169,6 +168,15 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
         throw new AppError('Invalid Url', 400);
     }
 
+    const status = await redisClient.get(`url:status:${shortCode}`);
+    if (status && status !== null) {
+        let res = JSON.parse(status);
+        if (!res.status === "UP") {
+            return { pageStatus: "Page not available", shortCode }
+        };
+    };
+
+
     const userInfo = deviceDetector.parse(userAgent);
     const browser = userInfo.client.name || "Unknown";;
     const os = userInfo.os?.name || "Third Client Agent";
@@ -181,6 +189,8 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     const city = ipLocation?.city || "Unknown";
     const now = new Date();
 
+
+
     let result = null;
     const cached = await redisClient.get(urlKey(shortCode));
     if (cached) {
@@ -188,6 +198,27 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     };
     if (result && Object.keys(result).length > 0) {
         // console.log("cache Hit", result);
+        const urlStatus = await getUrlStatus(result.originalUrl)
+        if (!urlStatus.ok) {
+            await redisClient.set(
+                `url:status:${shortCode}`,
+                JSON.stringify({
+                    status: "DOWN",
+                    checkedAt: Date.now(),
+                }), {
+                EX: 60
+            })
+            return { pageStatus: "Page not available", shortCode }
+        }
+        await redisClient.set(
+            `url:status:${shortCode}`,
+            JSON.stringify({
+                status: "UP",
+                statusCode: 200,
+                checkedAt: Date.now(),
+            }), {
+            EX: 300
+        })
         if (result.expirationDate && new Date(result.expirationDate) < new Date()) {
             throw new AppError('Url Expired !!', 404);
         }
@@ -210,6 +241,28 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     if (!url) {
         throw new AppError('Invalid Url', 400);
     }
+    const urlStatus = await getUrlStatus(url.originalUrl)
+    if (!urlStatus.ok) {
+        await redisClient.set(
+            `url:status:${shortCode}`,
+            JSON.stringify({
+                status: "DOWN",
+                checkedAt: Date.now(),
+            }), {
+            EX: 60
+        })
+        return { pageStatus: "Page not available", shortCode }
+    }
+    await redisClient.set(
+        `url:status:${shortCode}`,
+        JSON.stringify({
+            status: "UP",
+            statusCode: 200,
+            checkedAt: Date.now(),
+        }), {
+        EX: 300
+    })
+
     if (url.liveTime && new Date() < url.liveTime) {
         throw new AppError("Link is not live yet", 500);
     }
@@ -237,12 +290,11 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
 
         return url.originalUrl;
     }
-    await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, id: url.id, userId: url.userId, liveTime: url.liveTime, isProtected: url.password ? true : false, expirationDate: url.expirationDate?.toISOString() || "", }), { EX: 3600, });
+    await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, id: url.id, userId: url.userId, liveTime: url.liveTime, isProtected: url.password ? true : false, expirationDate: url.expirationDate?.toISOString() || "", }), { EX: 1800, });
 
     if (!isBot) {
         void analyticsUpdates(url.id, browser, os, device, country, city, referrer, ipAdd).catch(console.error);
     }
-
     return url.originalUrl;
 };
 

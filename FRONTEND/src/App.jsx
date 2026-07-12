@@ -17,6 +17,7 @@ import LinkAnalytics from './Pages/Dashboard/LinkAnalytics';
 import ProfileForm from './Pages/Dashboard/ProfileForm';
 import ResetPassword from './Pages/Auth/ResetPassword';
 import Category from './Pages/Dashboard/Category';
+import DestinationDownPage from './Pages/Dashboard/Destinationdownpage ';
 
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
             <Route path="/profile/edit" element={<ProfileForm />} />
           </Route>
           <Route path="/:shortCode/password-verify" element={<ProtectedLinkPage />} />
+          <Route path="/:shortCode/status" element={<DestinationDownPage />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
         </Routes>
         <Toaster position="top-center" reverseOrder={false} />

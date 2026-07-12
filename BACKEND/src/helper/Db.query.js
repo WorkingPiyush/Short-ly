@@ -242,6 +242,17 @@ export const categories = async (id) => {
     })
 }
 
+export const getUrlStatus = async (url) => {
+    return await fetch(url, {
+        method: "GET",
+        redirect: "follow",
+        signal: AbortSignal.timeout(3000),
+        headers: {
+            "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/138.0.0.0 Safari/537.36"
+        }
+    })
+}
 
 // user based analytics
 export const totalClicksAnalytics = async (userid, period) => {
