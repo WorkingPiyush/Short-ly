@@ -329,7 +329,7 @@ export const getMyUrl = async ({ userId, status = "all" }) => {
             }),
         },
         orderBy: {
-            createdAt: "asc",
+            createdAt: "desc",
         },
         select: {
             id: true,

@@ -7,9 +7,9 @@ import { Link } from 'react-router-dom'
 function ProfilePopUp({ userInfo, logout, showpopup }) {
     const popLinks = [
         { lable: "Support", to: "/support" },
-        { lable: "My Urls", to: "/myUrls" },
+        { lable: "Urls", to: "/dashboard/links" },
         { lable: "Dashboard", to: "/dashboard" },
-        { lable: "Terms and Conditions", to: "/terms" },
+        { lable: "Terms and Conditions", to: "/termsnCondition" },
     ]
 
     return (

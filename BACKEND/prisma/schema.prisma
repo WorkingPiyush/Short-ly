@@ -42,6 +42,7 @@ model User {
   resetPasswords ResetPassword[]
   tags           Tags[]
   categories     Category[]
+  refreshTokens  RefreshToken[]
 
   @@unique([provider, providerId])
 }
@@ -145,4 +146,15 @@ model Category {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, name])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  revokedAt DateTime?
 }

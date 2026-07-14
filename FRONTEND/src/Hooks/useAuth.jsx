@@ -5,12 +5,14 @@ export const useUser = () => {
     return useQuery({
         queryKey: ['user'],
         queryFn: getMe,
+        enabled: !["/login", "/signup"].includes(location.pathname)
     })
 }
 export const useUserInfo = () => {
     return useQuery({
         queryKey: ['userInfo'],
         queryFn: getUserInfo,
+        enabled: !["/login", "/signup"].includes(location.pathname)
     })
 }
 

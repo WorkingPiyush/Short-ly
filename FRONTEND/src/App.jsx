@@ -18,6 +18,12 @@ import ProfileForm from './Pages/Dashboard/ProfileForm';
 import ResetPassword from './Pages/Auth/ResetPassword';
 import Category from './Pages/Dashboard/Category';
 import DestinationDownPage from './Pages/Dashboard/Destinationdownpage ';
+import ApiDocsPage from './Pages/Supporting/ApiDocsPage';
+import FeaturesPage from './Pages/Supporting/FeaturesPage';
+import PricingPage from './Pages/Supporting/PricingPage';
+import PrivacyPage from './Pages/Supporting/PrivacyPage';
+import SupportPage from './Pages/Supporting/SupportPage';
+import TermsAndConditionsPage from './Pages/Supporting/TermsAndConditionsPage';
 
 
 function App() {
@@ -29,6 +35,12 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/features" element={<FeaturesPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/apiDocs" element={<ApiDocsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/termsnCondition" element={<TermsAndConditionsPage />} />
           </Route>
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<UserDashboard />} />
@@ -44,6 +56,8 @@ function App() {
           <Route path="/:shortCode/password-verify" element={<ProtectedLinkPage />} />
           <Route path="/:shortCode/status" element={<DestinationDownPage />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+
         </Routes>
         <Toaster position="top-center" reverseOrder={false} />
       </div>

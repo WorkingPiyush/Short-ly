@@ -2,6 +2,7 @@ import dotenv from "dotenv/config";
 import { nanoid } from "nanoid";
 import qrcode from 'qrcode';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { totalClick } from "./Db.query.js";
 
@@ -171,4 +172,19 @@ export const randomColor = () => {
     ];
     const color = palette[Math.floor(Math.random() * palette.length)];
     return color;
+}
+
+export const tokenRefresh = (id) => {
+    return jwt.sign(
+        { userId: id },
+        process.env.REFRESH_SECRET,
+        { expiresIn: "7d" }
+    );
+}
+export const tokenAccess = (id) => {
+    return jwt.sign(
+        { userId: id },
+        process.env.ACCESS_SECRET,
+        { expiresIn: "15m" }
+    );
 }
