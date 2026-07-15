@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createUrl } from '../../Api/Url';
+import FullScreenLoader from '@/components/FullScreenLoader';
 
 function CreateLink() {
     const inputRef = useRef();
@@ -10,6 +11,7 @@ function CreateLink() {
     const [shortUrl, setShortUrl] = useState();
     const [url, setUrl] = useState("");
     const [singleUse, setSingleUse] = useState(false);
+    const [isLoading, setisLoading] = useState(false);
 
     useEffect(() => {
         if (location.state?.focustInput) {
@@ -41,14 +43,17 @@ function CreateLink() {
             return;
         }
         try {
+            setisLoading(true);
             const response = await createUrl({ originalUrl: url, singleUse });
             setShortUrl(response.shortUrl)
         } catch (error) {
             toast.error(error.response.data.message || "Backend Url Issue");
             console.error(error.response.data.message);
+        } finally {
+            setisLoading(false);
         }
     };
-
+    if (isLoading) return <FullScreenLoader />;
     return (
         <div className='max-w-xl mx-auto my-20'>
             <h1>Link Details: </h1>
@@ -57,7 +62,7 @@ function CreateLink() {
                     <label htmlFor="destination-url" className="block mb-2 font-medium">
                         Destination URL
                     </label>
-        
+
                     <div className="flex flex-col md:flex-row gap-3">
                         <input
                             ref={inputRef}

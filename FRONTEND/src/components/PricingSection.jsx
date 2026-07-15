@@ -1,7 +1,8 @@
+/* eslint-disable react/prop-types */
 import React from 'react'
 import PriceCategory from './PriceCategory'
 
-function PricingSection() {
+function PricingSection({ plan }) {
     return (
         <div>
             <div className='flex flex-col items-center mt-5 p-5'>
@@ -9,7 +10,7 @@ function PricingSection() {
                 <span className='text-4xl md:text-5xl text-center font-bold mb-6 dark:text-white text-black'>Simple, honest pricing</span>
                 <span className='text-sm leading-relaxed dark:text-gray-400 text-black'>No hidden fees. Upgrade or downgrade anytime.</span>
             </div>
-            <PriceCategory />
+            <PriceCategory Currentplan={plan} />
         </div>
     )
 }

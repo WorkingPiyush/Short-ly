@@ -26,6 +26,10 @@ function LinkCard({ link }) {
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [allTags, setAllTags] = useState(link?.tags);
+
+    const hostname = new URL(link.original_url).hostname.replace(/^www\./, "");
+    const favicon = `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
+
     const TagsToBackend = useMemo(() => debounce(async (tags, shortCode) => {
         try {
             await addTags(tags, shortCode);
@@ -70,7 +74,6 @@ function LinkCard({ link }) {
         })
     };
 
-
     return (
         <>
             <div className={`border rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1  hover:shadow-xl hover:shadow-emerald-500/10 border-zinc-200 dark:border-zinc-800
@@ -89,6 +92,16 @@ function LinkCard({ link }) {
                             {link.original_url}
                         </p>
                         <div className="flex items-center gap-2">
+                            <img
+                                className="rounded-full"
+                                src={favicon}
+                                alt={`${hostname} favicon`}
+                                width={20}
+                                height={20}
+                                onError={(e) => {
+                                    e.currentTarget.src = "/browser.png";
+                                }}
+                            />
                             <Link to={link.short_url} target="_blank" className={`text-[13px] font-medium transition-colors
                              ${link.isActive === "expired" ? "text-zinc-500 dark:text-zinc-500"
                                     : link.isActive === "used" ? "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"

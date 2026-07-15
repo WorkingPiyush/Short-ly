@@ -7,6 +7,7 @@ import Card from '@/components/Card';
 import useInView from '@/Hooks/View';
 import DropDownBtn from '@/components/DropDownBtn';
 import { useAnalytics } from '@/Hooks/useUrl';
+import FullScreenLoader from '@/components/FullScreenLoader';
 
 
 const timePeriod = [

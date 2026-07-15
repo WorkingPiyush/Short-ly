@@ -1,6 +1,7 @@
+/* eslint-disable react/prop-types */
 import React from 'react'
 
-function PriceCategory() {
+function PriceCategory({ Currentplan }) {
     const plans = [
         {
             name: 'Starter',
@@ -14,7 +15,6 @@ function PriceCategory() {
                 'QR code generation',
             ],
             cta: 'Get started free',
-            highlighted: false,
         },
         {
             name: 'Pro',
@@ -29,7 +29,6 @@ function PriceCategory() {
                 'API access',
             ],
             cta: 'Start 14-day trial',
-            highlighted: true,
         },
         {
             name: 'Team',
@@ -44,17 +43,15 @@ function PriceCategory() {
                 'Custom domain',
             ],
             cta: 'Contact sales',
-            highlighted: false,
         },
     ]
-
     return (
-        <section className="dark:bg-[#0b0f0e] text-white py-20 px-6">
+        <section className="text-white py-20 px-6">
             <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
                 {plans.map((plan, i) => (
-                    <div key={i} className={`rounded-2xl p-8 border ${plan.highlighted ? 'border-emerald-500 dark:bg-[#0f1a17] bg-gray-900' : 'border-gray-800 bg-[#0b0f0e]'}`}>
-                        {/* Tag */}
-                        <span className={`inline-block px-3 py-1 text-sm rounded-full mb-6 ${plan.highlighted
+                    <div key={i} className={`rounded-2xl p-8 border ${plan.tag.toUpperCase() === Currentplan ? 'border-emerald-500 dark:bg-[#0f1a17] bg-gray-900' : 'border-gray-800 bg-[#0b0f0e]'}`}>
+                       
+                        <span className={`inline-block px-3 py-1 text-sm rounded-full mb-6 ${plan.tag.toUpperCase() === Currentplan
                             ? 'bg-emerald-400 dark:text-black text-white'
                             : 'dark:bg-transparent bg-white border border-gray-700 dark:text-gray-300 text-black'
                             }`}
@@ -75,7 +72,7 @@ function PriceCategory() {
                         <p className="dark:text-gray-400 text-sm mb-6">{plan.desc}</p>
 
                         {/* Features */}
-                        <ul className="space-y-3 mb-8">
+                        <ul className="space-y-3 mb-8 h-40">
                             {plan.features.map((f, idx) => (
                                 <li key={idx} className="flex items-center gap-3 dark:text-gray-300">
                                     <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
@@ -86,12 +83,12 @@ function PriceCategory() {
 
                         {/* Button */}
                         <button
-                            className={`w-full py-3 rounded-lg border ${plan.highlighted
-                                ? 'bg-emerald-400 text-black border-emerald-400'
-                                : 'border-gray-700 text-white'
-                                } hover:scale-105 cursor-pointer transition-all duration-200 ease-in`}
+                            className={`w-full py-3 rounded-lg border ${plan.tag.toUpperCase() === Currentplan 
+                                ? 'bg-emerald-400 text-black border-emerald-400 active:scale-95'
+                                : 'border-gray-700 text-white active:scale-102'
+                                } cursor-pointer transition-all duration-200 ease-in`}
                         >
-                            {plan.cta}
+                            {plan.tag.toUpperCase() === Currentplan ? "Your current paln" : plan.cta}
                         </button>
                     </div>
                 ))}

@@ -13,6 +13,7 @@ import Section from '../../components/DestinationSection';
 import ToggleRow from '../../components/ToggleRow';
 import { UseDeleteUrl, useshortUrl, useUpdateUrl } from '../../Hooks/useUrl';
 import CategorySection from '@/components/CategorySection';
+import FullScreenLoader from '@/components/FullScreenLoader';
 
 
 
@@ -36,7 +37,7 @@ export default function EditLink() {
 
   const shortUrl = `${import.meta.env.VITE_BACKEND_URL}/${location?.pathname.split('/')[3]}`;
   const short_Tag = location?.pathname.split('/')[3];
-  
+
 
   const formatTimeClock = (time) => {
     const date = new Date(time);
@@ -53,7 +54,7 @@ export default function EditLink() {
     setCategories((prev) => [...prev, newCat]);
     setSelectedCategoryId(id);
   };
-  
+
   useEffect(() => {
     if (short) {
       setOriginalUrl(short?.original_url ?? "");
@@ -103,10 +104,8 @@ export default function EditLink() {
     }
   };
 
-  if (isLoading) {
-    return <h1>Loading....</h1>
-  };
-
+  if (isLoading) return <FullScreenLoader />;
+  
   return (
     <div className="min-h-screen bg-[#0a0a0a] px-4 py-10 bg-linear-to-br from-zinc-50 via-white to-emerald-50 dark:from-[#090909] dark:via-[#0b0b0b] dark:to-[#07110d] text-zinc-900 dark:text-white">
       <div className="max-w-4xl mx-auto space-y-2">

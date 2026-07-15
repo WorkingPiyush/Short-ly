@@ -6,7 +6,7 @@ import { client } from '../../../config/db.js';
 import { Prisma } from '@prisma/client';
 import { AppError } from '../../utils/AppError.js';
 import logger from '../../../config/logger.js';
-import { passwordCompare, passwordHashing } from '../../helper/Url.helper.js';
+import { passwordCompare, passwordHashing, tokenAccess, tokenRefresh } from '../../helper/Url.helper.js';
 import { createUser, findUser, stats, userDetails } from '../../helper/Db.query.js';
 import cloudinary from '../../../config/cloudinary.js';
 import uploadImages from '../../helper/fileUpload.js';
@@ -80,10 +80,23 @@ export const update = async ({ userId, data, file }) => {
 
 export const registerUser = async ({ name, email, password }) => {
     try {
-        const hashedPassword = await passwordHashing(password, 10)
-        const user = await createUser(name, email, hashedPassword)
+        const hashedPassword = await passwordHashing(password, 10);
+        const user = await createUser(name, email, hashedPassword);
+
+        const accessToken = tokenAccess(user.id);
+        const refreshToken = tokenRefresh(user.id);
+        const tokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
+        await client.refreshToken.create({
+            data: {
+                tokenHash,
+                userId: user.id,
+                expiresAt: new Date(
+                    Date.now() + 7 * 24 * 60 * 60 * 1000
+                )
+            }
+        });
         logger.info({ id: user.id, name: user.name, email: user.email }, 'User registered');
-        return { id: user.id, name: user.name, email: user.email };
+        return { id: user.id, name: user.name, email: user.email, accessToken, refreshToken };
     } catch (err) {
         if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
             throw new AppError("Email already exists", 400);
@@ -105,22 +118,87 @@ export const loginUser = async ({ email, password }) => {
         if (!isMatch) {
             throw new AppError("Invalid Email or Password", 401);
         }
+        const accessToken = tokenAccess(user.id);
+        const refreshToken = tokenRefresh(user.id);
+        const tokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
+        await prisma.refreshToken.deleteMany({
+            where: {
+                userId: user.id
+            }
+        });
+        await client.refreshToken.create({
+            data: {
+                tokenHash,
+                userId: user.id,
+                expiresAt: new Date(
+                    Date.now() + 7 * 24 * 60 * 60 * 1000
+                )
+            }
+        });
         void client.user.update({
             where: { id: user.id },
             data: { lastLoginAt: new Date() }
         }).catch((err) => {
             console.error("Failed to update last login:", err);
         });
-        return { id: user.id, name: user.name, email: user.email };
         logger.info({ id: user.id, name: user.name, email: user.email }, 'User logged');
+        return { id: user.id, name: user.name, email: user.email, accessToken, refreshToken };
     } catch (err) {
         logger.error(err.message)
         throw new AppError("Login Failure", 500);
     }
 };
 
+export const logoutUser = async ({ refreshToken }) => {
+    const tokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
+    client.refreshToken.deleteMany({
+        where: { tokenHash }
+    });
+}
+export const refreshTkn = async (refreshToken) => {
+    if (!refreshToken) {
+        throw new AppError("Unauthorized", 401);
+    }
+
+    const payload = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+    if (!payload) {
+        throw new AppError("Unauthorized", 401);
+    }
+    const hash = crypto.createHash("sha256").update(refreshToken).digest("hex");
+    const existance = await client.refreshToken.findUnique({
+        where: {
+            tokenHash: hash,
+        }
+    })
+    if (!existance) {
+        throw new AppError("Unauthorized", 401);
+    };
+    await client.refreshToken.deleteMany({
+        where: {
+            tokenHash: hash,
+        }
+    });
+    const newAccessToken = tokenAccess(payload.userId);
+    const newRefreshToken = tokenRefresh(payload.userId);
+    const tokenHash = crypto.createHash("sha256").update(newRefreshToken).digest("hex");
+    await client.refreshToken.create({
+        data: {
+            tokenHash,
+            userId: payload.userId,
+            expiresAt: new Date(
+                Date.now() + 7 * 24 * 60 * 60 * 1000
+            )
+        }
+    });
+    return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+    };
+
+}
+
 export const resetPassword = async ({ email }) => {
-   await checkEmailLimiter(email);
+    await checkEmailLimiter(email);
     try {
         const user = await client.user.findUnique({
             where: { email },

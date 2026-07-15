@@ -31,6 +31,10 @@ export const redirectUrl = asyncHandler(async (req, res) => {
     const response = await urlService.urlRedirect({
         shortCode: req.params.shortCode, userAgent: req.headers["user-agent"], ipAdd: process.env.NODE_ENV === 'production' ? req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress : '45.118.167.50', referrer: req.headers.referer
     });
+    if (response?.pageStatus) {
+       res.redirect(`${process.env.FRONTEND_URL}/${response.shortCode}/status`);
+       return;
+    }
     if (response?.requiresPassword) {
         // res.status(200).json({ success: true, message: "Password Required", response });
         res.redirect(`${process.env.FRONTEND_URL}/${response.shortCode}/password-verify`)

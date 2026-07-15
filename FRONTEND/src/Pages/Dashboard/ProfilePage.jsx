@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom'
 import { forgetPassword } from '@/Api/Auth';
 import InfoCard from '../../components/InfoCard.jsx';
+import FullScreenLoader from '@/components/FullScreenLoader.jsx';
 
 
 
@@ -271,12 +272,12 @@ function SettingsTab({ user }) {
 
 
 function ProfilePage() {
-    const { data: user } = useUserInfo()
+    const { data: user, isLoading } = useUserInfo()
     const { data: url } = useUrl()
     const navigate = useNavigate();
     const TABS = ["Overview", "My Links", "Settings"];
     const [activeTab, setActiveTab] = useState(0);
-
+    if (isLoading) return <FullScreenLoader />;
     return (
         <div className="min-h-screen bg-linear-to-br from-[#F6F3EE] via-[#FBFAF7] to-[#EEF8F2] dark:from-[#090909] dark:via-[#0b0b0b] dark:to-[#07110d] text-zinc-900 dark:text-white">
             <div className="max-w-4xl mx-auto px-4 py-8">

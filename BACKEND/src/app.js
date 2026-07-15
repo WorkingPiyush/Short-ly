@@ -17,7 +17,6 @@ import errorHandler from "./Middleware/errorHandler.js";
 import logger from "../config/logger.js";
 
 
-
 const authRatelimit = rateLimit({
     windowMs: 10 * 60 * 1000,
     max: 5,
@@ -26,29 +25,12 @@ const authRatelimit = rateLimit({
 const app = express();
 app.use(express.json());
 app.use(helmet());
-app.use(cookieParser());
 app.use(cors({
     origin: process.env.FRONTEND_URL,
     credentials: true,
 }))
 
-app.use(session({
-    store: new RedisStore({
-        client: redisClient,
-    }),
-    name: "sid",
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    rolling: true,
-    cookie: {
-        secure: false,
-        httpOnly: true,
-        sameSite: "lax",
-        maxAge: 1000 * 60 * 60 * 24,
-    },
-}))
-
+app.use(cookieParser());
 app.use(guestUserInfo);
 app.use(authMiddleware);
 
@@ -61,9 +43,6 @@ app.get('/', (req, res) => {
     res.send('Server is Working');
     logger.info('Server is Working');
 });
-
-
-
 
 
 
