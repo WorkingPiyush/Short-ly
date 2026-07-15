@@ -24,6 +24,8 @@ import PricingPage from './Pages/Supporting/PricingPage';
 import PrivacyPage from './Pages/Supporting/PrivacyPage';
 import SupportPage from './Pages/Supporting/SupportPage';
 import TermsAndConditionsPage from './Pages/Supporting/TermsAndConditionsPage';
+import ProtectedLayout from './Layout/ProtectedLayout';
+import UnprotectedLayout from './Layout/unProtectedLayout';
 
 
 function App() {
@@ -33,31 +35,40 @@ function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<Login />} />
+            {/* For Guest user only */}
+            <Route element={<UnprotectedLayout />}>
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={<Login />} />
+            </Route>
+            
+            {/* Public routes */}
             <Route path="/features" element={<FeaturesPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/support" element={<SupportPage />} />
-            <Route path="/apiDocs" element={<ApiDocsPage />} />
+            {/* <Route path="/apiDocs" element={<ApiDocsPage />} /> */}
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/termsnCondition" element={<TermsAndConditionsPage />} />
           </Route>
+
+          {/* For only registerd user only */}
           <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<UserDashboard />} />
-            <Route path="/dashboard/links" element={<Links />} />
-            <Route path="/dashboard/links/:shortcode" element={<EditLink />} />
-            <Route path="/dashboard/bulk" element={<BulkUrl />} />
-            <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
-            <Route path="/dashboard/categories" element={<Category />} />
-            <Route path="/:shortCode/analytics" element={<LinkAnalytics />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/profile/edit" element={<ProfileForm />} />
+            <Route element={<ProtectedLayout />}>
+              <Route path="/dashboard" element={<UserDashboard />} />
+              <Route path="/dashboard/links" element={<Links />} />
+              <Route path="/dashboard/links/:shortcode" element={<EditLink />} />
+              <Route path="/dashboard/bulk" element={<BulkUrl />} />
+              <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
+              <Route path="/dashboard/categories" element={<Category />} />
+              <Route path="/:shortCode/analytics" element={<LinkAnalytics />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/profile/edit" element={<ProfileForm />} />
+            </Route>
           </Route>
+
+          {/* Other public routes */}
           <Route path="/:shortCode/password-verify" element={<ProtectedLinkPage />} />
           <Route path="/:shortCode/status" element={<DestinationDownPage />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-
-
         </Routes>
         <Toaster position="top-center" reverseOrder={false} />
       </div>

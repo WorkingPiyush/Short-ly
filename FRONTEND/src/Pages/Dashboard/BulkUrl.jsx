@@ -8,12 +8,14 @@ import {
 import { createBulkUrl } from '@/Api/Url';
 import { Link } from 'react-router-dom';
 import StatusCard from '@/components/StatusCard';
+import FullScreenLoader from '@/components/FullScreenLoader';
 
 
 function BulkUrl() {
   const [file, setFile] = useState(null);
   const [response, setResponse] = useState();
   const [dragActive, setDragActive] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -42,11 +44,14 @@ function BulkUrl() {
     const formData = new FormData();
     formData.append("file", file)
     try {
+      setIsLoading(true);
       const data = await createBulkUrl(formData);
       setResponse(data);
       toast.success("File Uploaded !!");
     } catch (error) {
       console.error('Error uploading file:', error);
+    } finally {
+      setIsLoading(false);
     }
     setFile(null);
   };
@@ -59,7 +64,7 @@ function BulkUrl() {
 
     return `${day}-${month}-${year}`;
   }
-
+  if (isLoading) return <FullScreenLoader />;
   return (
     <div className="min-h-screen darkbg-black bg-linear-to-br from-[#F6F3EE] via-[#FBFAF7] to-[#EEF8F2] dark:from-[#080808] dark:via-[#0b0b0b] dark:to-[#07110d] px-6 py-8">
       <div className="max-w-4xl mx-auto">

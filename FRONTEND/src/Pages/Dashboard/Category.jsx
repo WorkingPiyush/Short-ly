@@ -3,6 +3,7 @@ import React, { useState, useMemo } from "react";
 import { Folder, FolderOpen, ArrowLeft, Link2, ExternalLink, Search, Inbox } from "lucide-react";
 import { useCategorizedUrl } from "@/Hooks/useUrl";
 import { LiaLinkSolid } from "react-icons/lia";
+import FullScreenLoader from "@/components/FullScreenLoader";
 
 
 function CategoryFolder({ category, count, onOpen }) {
@@ -92,9 +93,7 @@ export default function Category() {
         category?.filter((l) => l.categoryId === activeCategory?.categoryId).map((u) => u.url)[0],
         [activeCategory, category]
     )
-    if (isLoading) {
-        return "loading"
-    };
+    if (isLoading) return <FullScreenLoader />;
     return (
         <div
             className="min-h-screen bg-[#0a0a0a] px-6 py-10"

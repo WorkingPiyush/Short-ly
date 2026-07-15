@@ -1,10 +1,12 @@
 /* eslint-disable react/prop-types */
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useRef } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
 
 // eslint-disable-next-line react/prop-types
-function ProfilePopUp({ userInfo, logout, showpopup }) {
+function ProfilePopUp({ userInfo, logout, showpopup, onClose }) {
+    const navigate = useNavigate();
+    const popupRef = useRef(null);
     const popLinks = [
         { lable: "Support", to: "/support" },
         { lable: "Urls", to: "/dashboard/links" },
@@ -12,14 +14,30 @@ function ProfilePopUp({ userInfo, logout, showpopup }) {
         { lable: "Terms and Conditions", to: "/termsnCondition" },
     ]
 
+    useEffect(() => {
+
+        const handleClickOutside = (e) => {
+            if (popupRef.current && !popupRef.current.contains(e.target)) onClose();
+        };
+        const handleEsc = (e) => e.key === "Escape" && onClose();
+        document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener("keydown", handleEsc);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("keydown", handleEsc);
+        };
+    }, [onClose, location.pathname]);
+
     return (
-        <div className='z-100 h-fit w-80 text-black flex flex-col gap-3 bg-white dark:bg-black dark:text-white absolute top-12 right-0 rounded-sm shadow dark:shadow-white shadow-black '>
+        <div ref={popupRef} className='z-100 h-fit w-80 text-black flex flex-col gap-3 bg-white dark:bg-black dark:text-white absolute top-12 right-0 rounded-sm shadow dark:shadow-white shadow-black '>
             <div className='flex w-full px-3 py-3 items-center gap-4'>
                 <div className='h-15 w-15 bg-amber-400 dark:bg-amber-950 text-xl text-black dark:text-white flex justify-center items-center rounded-full'>
-                    {userInfo?.name?.charAt(0)}
+                    {userInfo?.profileImage ?
+                        <img src={userInfo.profileImage} /> : userInfo?.name?.charAt(0)
+                    }
                 </div>
                 <div className='text-black h-15 dark:text-white'>
-                    <p className='text-xl  font-bold'>{userInfo.name}</p>
+                    <p onClick={() => navigate('/profile')} className='text-xl  font-bold cursor-pointer active:scale-103'>{userInfo.name}</p>
                     <p className='text-sm'>{userInfo.email}</p>
                 </div>
             </div>
@@ -30,7 +48,7 @@ function ProfilePopUp({ userInfo, logout, showpopup }) {
                 ))}
             </div>
             <div className='w-full mt-2 bg-gray-400/60 h-0.5'></div>
-            <button onClick={logout} className='cursor-pointer hover:text-red-600 hover:scale-105 transition-all'>Sign out</button>
+            <button onClick={logout} className='cursor-pointer h-10 flex items-center justify-center hover:text-red-600 hover:scale-105 transition-all'>Sign out</button>
         </div>
     )
 }

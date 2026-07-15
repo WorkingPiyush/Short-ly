@@ -1,18 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getMe, getUserInfo, login, logout, signup, updateInfo } from "../Api/Auth";
+import { useLocation } from "react-router-dom";
 
 export const useUser = () => {
+    const location = useLocation();
+
     return useQuery({
         queryKey: ['user'],
         queryFn: getMe,
-        enabled: !["/login", "/signup"].includes(location.pathname)
+        enabled: !["/login", "/signup"].includes(location.pathname),
+        retry: false,
     })
 }
 export const useUserInfo = () => {
     return useQuery({
         queryKey: ['userInfo'],
         queryFn: getUserInfo,
-        enabled: !["/login", "/signup"].includes(location.pathname)
+        // enabled: !["/login", "/signup"].includes(location.pathname)
     })
 }
 

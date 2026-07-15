@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import LinkCard from '../../components/LinkCard.jsx';
 import { useUrlFilter } from '../../Context/StatusFilterContext.jsx';
 import { searchUrl } from '../../Api/Url.js';
+import FullScreenLoader from '@/components/FullScreenLoader.jsx';
 
 
 
@@ -43,10 +44,7 @@ function Links() {
     { key: "SingleUse", label: "Single Use" },
   ];
 
-  if (isLoading) {
-    return <h1>Loading...</h1>
-  };
-
+  if (isLoading) return <FullScreenLoader />;
   return (
 
     <div className="min-h-screen dark:bg-[#0a0a0a] dark:text-white bg-white text-black px-4 py-8 md:px-8">

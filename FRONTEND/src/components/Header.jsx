@@ -9,7 +9,7 @@ import ProfileIcon from './ProfileIcon';
 
 
 function Header() {
-    const { data: user} = useUser()
+    const { data: user } = useUser()
     const logoutMutation = useLogout();
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
@@ -37,7 +37,6 @@ function Header() {
             }
         })
     }
-    
     return (
         <header className='flex bg= justify-center items-center px-4 fixed top-0 left-0 right-0 z-50 pt-4 '>
             <div className={`bg-white text-black dark:bg-zinc-900 dark:text-white ${isScrolled ? "md:w-5xl" : "md:w-6xl"} px-7 py-5 border border-black/65 dark:border-white/65  rounded-2xl backdrop-blur-md transition-all duration-250 ease-in-out`}>
@@ -81,7 +80,7 @@ function Header() {
                         {user &&
                             <ProfileIcon showpopup={setShowProfilePopUp} popup={showProfilePopUp} userInfo={user} />
                         }
-                        {showProfilePopUp && <ProfilePopUp userInfo={user} logout={handleLogout} showpopup={setShowProfilePopUp} />}
+                        {showProfilePopUp && <ProfilePopUp userInfo={user} logout={handleLogout} showpopup={setShowProfilePopUp} onClose={() => setShowProfilePopUp(false)} />}
                     </div>
 
                     {/* cross button */}
@@ -137,10 +136,9 @@ function Header() {
                             >
                                 Sign up free
                             </Link>}
-                            {user && user?.profileImage &&
-                                <div className='h-10 w-10 bg-red-600 rounded-full'>
-                                    <img src={user?.profileImage} alt="user-image" srcSet="user-image" />
-                                </div>}
+                            {user?.profileImage ?
+                                <img src={user.profileImage} /> : user?.name?.charAt(0)
+                            }
                         </div>
                     </div>
                 </div>
