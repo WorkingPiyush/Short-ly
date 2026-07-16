@@ -86,8 +86,9 @@ export const topOs = (id, period) => {
 };
 export const topDevice = (id, period) => {
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - period);
-
+    if (period) {
+        startDate.setDate(startDate.getDate() - period);
+    }
     return client.$queryRaw`
     SELECT COALESCE("device",'Unknown') AS device,
     COUNT(*)::int AS clicks

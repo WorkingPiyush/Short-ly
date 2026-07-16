@@ -143,6 +143,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
             password: hashedPassword,
         }
     });
+    await redisClient.del(`Allurls:${userId}:all`);
     qrCodeImg = await generateQRCode(newUrl);
 
     const responseUrl = {
@@ -300,6 +301,36 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
 
 export const getMyUrl = async ({ userId, status = "all" }) => {
     const now = new Date();
+    const queyKey = `Allurls:${userId}`;
+    const cached = await redisClient.hGet(queyKey, status);
+    if (cached) {
+        let fetchedUrl = JSON.parse(cached);
+        return Promise.all(
+            fetchedUrl.map(async (u) => {
+                const clicks = await totalClick(u.id);
+                return {
+                    id: u.id,
+                    short_url: `${process.env.BACKEND_URL}/${u.shortCode}`,
+                    short_code: u.shortCode,
+                    original_url: u.originalUrl,
+                    totalClicks: clicks,
+                    expiry_date: u.expirationDate,
+                    creation_date: u.createdAt,
+                    last_update_date: u.updatedAt,
+                    isPswrdProtected: u.password ? true : false,
+                    lastVisitedAt: u.lastVisitedAt,
+                    isActive: await urlStatus(u),
+                    liveTime: u.liveTime,
+                    singleUse: u.singleUse,
+                    userId: u.userId,
+                    tags: u.tags,
+                    category: u.category,
+                }
+            })
+        );
+
+    };
+
     let fetchedUrl;
     fetchedUrl = await client.url.findMany({
         where: {
@@ -352,6 +383,9 @@ export const getMyUrl = async ({ userId, status = "all" }) => {
     if (!fetchedUrl) {
         throw new AppError("No Url Found !!");
     }
+    await redisClient.hSet(queyKey, status, JSON.stringify(fetchedUrl));
+    await redisClient.expire(queyKey, 600)
+
     return Promise.all(
         fetchedUrl.map(async (u) => {
             const clicks = await totalClick(u.id);
@@ -382,7 +416,23 @@ export const UrlInfo = async ({ userId, shortCode }) => {
         logger.error("shortCode not found !!");
         throw new AppError("shortCode not found !!", 404);
     };
-
+    const queryKey = `url:${shortCode}`;
+    const cached = await redisClient.get(queryKey);
+    if (cached) {
+        const Url = JSON.parse(cached);
+        return {
+            short_url: `${process.env.BACKEND_URL}/${Url.shortCode}`,
+            original_url: Url.originalUrl,
+            isActive: await urlStatus(Url),
+            expiry_date: Url.expirationDate,
+            creation_date: Url.createdAt,
+            last_update_date: Url.updatedAt,
+            liveTime: Url.liveTime,
+            tags: Url.tags,
+            categoryId: Url.categoryId,
+            category: await categories(userId),
+        }
+    }
     const Url = await client.url.findFirst({
         where: { userId, shortCode, isDeleted: false },
         select: {
@@ -399,14 +449,13 @@ export const UrlInfo = async ({ userId, shortCode }) => {
             category: true
         }
     });
+
     if (!Url) {
         logger.error("Url not found");
         throw new AppError('Url not found', 404);
     }
 
-    if (!Url) {
-        throw new Error("No Url Found");
-    }
+    await redisClient.set(queryKey, JSON.stringify(Url), { EX: 600 });
 
     return {
         short_url: `${process.env.BACKEND_URL}/${Url.shortCode}`,
@@ -450,7 +499,6 @@ export const CategoriedUrls = async ({ userId }) => {
             },
         }
     });
-
     return Promise.all(
         data.map(async (u) => {
             return {
@@ -463,13 +511,19 @@ export const CategoriedUrls = async ({ userId }) => {
         })
     )
 
-}
+};
 
 export const UrlAnalytics = async ({ userId, shortCode, period }) => {
     if (!shortCode) {
         logger.error("shortCode not found !!");
         throw new AppError("shortCode not found !!", 404);
     };
+    const queryKey = `urlanalytics:${shortCode}`;
+
+    const cached = await redisClient.hGet(queryKey, `${period}d`);
+    if (cached) {
+        return JSON.parse(cached);
+    }
 
     const Url = await client.url.findFirst({
         where: { userId, shortCode, isDeleted: false },
@@ -490,7 +544,7 @@ export const UrlAnalytics = async ({ userId, shortCode, period }) => {
     if (!Url) {
         throw new Error("No Url Found");
     }
-    return {
+    const response = {
         short_url: `${process.env.BACKEND_URL}/${Url.shortCode}`,
         original_url: Url.originalUrl,
         totalClicks: totalClicks,
@@ -501,18 +555,23 @@ export const UrlAnalytics = async ({ userId, shortCode, period }) => {
         dailyClicks: formatClicks(dailyClick),
         topReferrer: foromtReferrer(referrer)
     }
+
+    await redisClient.hSet(queryKey, `${period}d`, JSON.stringify(response));
+    await redisClient.expire(queryKey, 600);
+    return response;
 };
 
 export const UserAnalytics = async ({ userId, period }) => {
-    if (!period) {
-        logger.error("Period not defined !!");
-        throw new AppError("Period not defined !!", 404);
-    };
-
+    const queryKey = `userAnalytics:${userId}`;
+    const cached = await redisClient.hGet(queryKey, `${period}d`);
+    if (cached) {
+        return JSON.parse(cached);
+    }
     const [totalClicks, dailyClicks, totalCountries, totalBrowser, totalDevices, totalOs, totalReferrers, mostClickedUrls] = await Promise.all([
         totalClicksAnalytics(userId, period), dailyClicksAnalytics(userId, period), countriesAnalytics(userId, period), browsersAnalytics(userId, period), devicesAnalytics(userId, period),
         osAnalytics(userId, period), referrerAnalytics(userId, period), mostClickedUrlsAnalytics(userId, period)]);
-    return {
+
+    const response = {
         totalClicks: totalClicks,
         totalBrowser: totalBrowser,
         topOperatingSystems: totalOs,
@@ -521,8 +580,13 @@ export const UserAnalytics = async ({ userId, period }) => {
         totalDevices: totalDevices,
         mostClickedUrls: mostClickedUrls,
         totalReferrers: totalReferrers
-    };
-}
+    }
+    await redisClient.hSet(queryKey, `${period}d`, JSON.stringify(response));
+    await redisClient.expire(queryKey, 600)
+
+    return response;
+};
+
 export const UrlDelete = async ({ userId, shortCode }) => {
     const result = await client.url.update({
         where: { userId, shortCode, isDeleted: false },
@@ -533,6 +597,12 @@ export const UrlDelete = async ({ userId, shortCode }) => {
     if (!result) {
         throw new Error("Error happend !!");
     };
+    await redisClient.del(urlKey(shortCode));
+    await redisClient.del(`url:${shortCode}`);
+    await redisClient.del(`Allurls:${userId}`);
+    await redisClient.del(`urlanalytics:${shortCode}`);
+    await redisClient.del(`userAnalytics:${userId}`);
+
     return true;
 };
 
@@ -676,9 +746,11 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
         }
     });
 
-    await redisClient.del(
-        urlKey(updatedUrl.shortCode)
-    );
+    await redisClient.del(urlKey(shortCode));
+    await redisClient.del(`url:${shortCode}`);
+    await redisClient.del(`Allurls:${userId}`);
+    await redisClient.del(`urlanalytics:${shortCode}`);
+    await redisClient.del(`userAnalytics:${userId}`);
 
     return {
         short_url: `${process.env.BACKEND_URL}/${updatedUrl.shortCode}`,
@@ -689,7 +761,8 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
         creation_date: updatedUrl.createdAt,
         last_update_date: updatedUrl.updatedAt,
         liveTime: updatedUrl.liveTime,
-    }
+    };
+
     return true;
 };
 
@@ -719,6 +792,7 @@ export const passwordVerify = async ({ password, shortCode, userAgent, ipAdd }) 
         return { isMatch: true, originalUrl: url.originalUrl };
     }
 };
+
 export const shortUrlBulk = async ({ filePath, userId }) => {
     try {
         const workbook = XLSX.readFile(filePath);
@@ -740,12 +814,40 @@ export const shortUrlBulk = async ({ filePath, userId }) => {
         if (fs.existsSync(filePath)) { fs.unlinkSync(filePath) };
     }
 };
+
 export const searchUrl = async ({ query, userId }) => {
     if (!query) {
         logger.error("Query not Found")
         throw new AppError("Query not Found", 404);
     };
+    const queryKey = `urlQuery:${query}`;
     let fetchedUrl;
+    const cached = await redisClient.hGet(queryKey, query,);
+    if (cached) {
+        fetchedUrl = JSON.parse(cached);
+        return Promise.all(
+            fetchedUrl.map(async (u) => {
+                const clicks = await totalClick(u.id);
+                return {
+                    id: u.id,
+                    short_url: `${process.env.BACKEND_URL}/${u.shortCode}`,
+                    short_code: u.shortCode,
+                    original_url: u.originalUrl,
+                    totalClicks: clicks,
+                    expiry_date: u.expirationDate,
+                    creation_date: u.createdAt,
+                    last_update_date: u.updatedAt,
+                    isPswrdProtected: u.password ? true : false,
+                    lastVisitedAt: u.lastVisitedAt,
+                    isActive: await urlStatus(u),
+                    liveTime: u.liveTime,
+                    singleUse: u.singleUse,
+                    userId: u.userId,
+                }
+            })
+        );
+    }
+
     fetchedUrl = await client.$queryRaw`
         SELECT *,  
         GREATEST(
@@ -767,6 +869,8 @@ export const searchUrl = async ({ query, userId }) => {
     if (!fetchedUrl) {
         throw new AppError("No matching url found !!", 404);
     }
+    await redisClient.hSet(queryKey, query, JSON.stringify(fetchedUrl));
+    await redisClient.expire(queryKey, query, 1800);
     return Promise.all(
         fetchedUrl.map(async (u) => {
             const clicks = await totalClick(u.id);
