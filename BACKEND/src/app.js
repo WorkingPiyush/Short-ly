@@ -6,7 +6,6 @@ import session from 'express-session';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser'
-import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { RedisStore } from 'connect-redis';
 import { redisClient } from "../config/redisClient.js";
@@ -15,22 +14,23 @@ import { authMiddleware } from "./Middleware/user.Middleware.js";
 import { redirectUrl } from "./modules/Url/controller.js";
 import errorHandler from "./Middleware/errorHandler.js";
 import logger from "../config/logger.js";
+import passport from "passport";
 
 
-const authRatelimit = rateLimit({
-    windowMs: 10 * 60 * 1000,
-    max: 5,
-})
+
 
 const app = express();
 app.use(express.json());
 app.use(helmet());
+app.use(cookieParser());
 app.use(cors({
     origin: process.env.FRONTEND_URL,
     credentials: true,
-}))
+}));
+app.use(passport.initialize());
 
-app.use(cookieParser());
+
+
 app.use(guestUserInfo);
 app.use(authMiddleware);
 
@@ -50,7 +50,6 @@ app.get('/', (req, res) => {
 
 
 // Authentication route
-// app.use("/api/auth", authRatelimit, authRoutes);
 app.use("/api/auth", authRoutes);
 // Url route
 app.use("/api/url/", urlRoutes);

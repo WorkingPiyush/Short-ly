@@ -280,3 +280,33 @@ export const paswordSubmit = async ({ password, token }) => {
     ])
 
 };
+
+export const handleOAuthUser = async ({ name, email, profileImage, isVerified, providerId, provider }) => {
+    let existance = await client.user.findUnique({
+        where: { email },
+    });
+    if (existance) {
+        const user = await client.user.update({
+            where: { id: existance.id },
+            data: {
+                email,
+                isVerified,
+                providerId,
+                provider
+            }
+        });
+        return user;
+    } else {
+        const user = await client.user.create({
+            data: {
+                name,
+                email,
+                profileImage,
+                isVerified,
+                providerId,
+                provider
+            }
+        })
+        return user;
+    }
+}

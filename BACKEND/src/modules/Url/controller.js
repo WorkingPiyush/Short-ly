@@ -69,7 +69,7 @@ export const getUrlAnalytics = asyncHandler(async (req, res) => {
     const url = await urlService.UrlAnalytics({
         userId: req.user?.id,
         shortCode: req.params.shortCode,
-        period: req.query.period || 30
+        period: req.query.period || 7
     });
 
     return res.status(200).json({ success: true, url });
@@ -78,7 +78,7 @@ export const getUrlAnalytics = asyncHandler(async (req, res) => {
 export const Analytics = asyncHandler(async (req, res) => {
     const url = await urlService.UserAnalytics({
         userId: req.user?.id,
-        period: req.query.period || 30
+        period: req.query.period || 7
     });
     return res.status(200).json(url);
 })

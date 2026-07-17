@@ -4,6 +4,9 @@ import * as authService from "./service.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { AppError } from "../../utils/AppError.js";
 import logger from "../../../config/logger.js";
+import passport from 'passport';
+import '../../../config/passport.auth.js';
+import { tokenAccess, tokenRefresh } from "../../helper/Url.helper.js";
 const accessTokenOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -129,6 +132,18 @@ export const logout = asyncHandler(async (req, res) => {
         success: true,
     })
 });
+
+export const GoogleOAuth = passport.authenticate("google", { scope: ["profile", "email"], session: false });
+export const GoogleOAuthcCb = (req, res) => {
+    const user = req.user;
+    const accessToken = tokenAccess(user.id);
+    const refreshToken = tokenRefresh(user.id);
+    res.cookie("accessToken", accessToken, accessTokenOptions);
+    res.cookie("refreshToken", refreshToken, refreshTokenOptions);
+    logger.info("User Loggedin using oAuth");
+    res.clearCookie("tempId");
+    res.redirect(process.env.FRONTEND_URL);
+};
 
 export const forgetPassword = asyncHandler(async (req, res) => {
     const userInfo = await authService.resetPassword({

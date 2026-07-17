@@ -141,8 +141,8 @@ function Signup() {
                         </div>
                     </div>
                     <div className='flex flex-col md:flex-row gap-4 items-center justify-center p-4'>
-                        <button className='py-2 px-20 border border-zinc-400 flex gap-2 justify-center items-center text-black dark:text-white shadow rounded-xl cursor-pointer hover:scale-102 transition-all'><img className='h-8 w-8' src={googleIcon} alt="Google" /> Google</button>
-                        <button className='py-2 px-20 border border-zinc-400 flex gap-2 justify-center items-center text-black dark:text-white shadow rounded-xl cursor-pointer hover:scale-102 transition-all'><img className='h-8 w-8 bg-white rounded-full' src={githubIcon} alt="github" />GitHub</button>
+                        <Link  to={`${import.meta.env.VITE_BACKEND_URL}/api/auth/google`} className='py-2 px-40 border border-zinc-400 flex gap-2 justify-center items-center text-black dark:text-white shadow rounded-xl cursor-pointer hover:scale-102 transition-all'><img className='h-8 w-8' src={googleIcon} alt="Google" /> Google</Link>
+                        {/* <Link className='py-2 px-20 border border-zinc-400 flex gap-2 justify-center items-center text-black dark:text-white shadow rounded-xl cursor-pointer hover:scale-102 transition-all'><img className='h-8 w-8 bg-white rounded-full' src={githubIcon} alt="github" />GitHub</Link> */}
                     </div>
                     <div className='text-xs text-center md:flex md:justify-center md:items-center gap-1 p-2 dark:text-zinc-700 text-black'>
                         By creating an account you agree to our

@@ -143,7 +143,12 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
             password: hashedPassword,
         }
     });
-    await redisClient.del(`Allurls:${userId}:all`);
+    await redisClient.del(`Allurls:${userId}`);
+    await redisClient.del(urlKey(shortCode));
+    await redisClient.del(`url:${shortCode}`);
+    await redisClient.del(`Allurls:${userId}`);
+    await redisClient.del(`urlanalytics:${shortCode}`);
+    await redisClient.del(`userAnalytics:${userId}`);
     qrCodeImg = await generateQRCode(newUrl);
 
     const responseUrl = {
@@ -172,7 +177,7 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     const status = await redisClient.get(`url:status:${shortCode}`);
     if (status && status !== null) {
         let res = JSON.parse(status);
-        if (!res.status === "UP") {
+        if (res.status !== "UP") {
             return { pageStatus: "Page not available", shortCode }
         };
     };

@@ -43,7 +43,6 @@ model User {
   tags           Tags[]
   categories     Category[]
   refreshTokens  RefreshToken[]
-
   @@unique([provider, providerId])
 }
 
