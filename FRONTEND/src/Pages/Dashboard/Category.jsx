@@ -3,7 +3,7 @@ import React, { useState, useMemo } from "react";
 import { Folder, FolderOpen, ArrowLeft, Link2, ExternalLink, Search, Inbox } from "lucide-react";
 import { useCategorizedUrl } from "@/Hooks/useUrl";
 import { LiaLinkSolid } from "react-icons/lia";
-import FullScreenLoader from "@/components/FullScreenLoader";
+import CategoryLoader from "@/components/CategoryLoader";
 
 
 function CategoryFolder({ category, count, onOpen }) {
@@ -93,7 +93,6 @@ export default function Category() {
         category?.filter((l) => l.categoryId === activeCategory?.categoryId).map((u) => u.url)[0],
         [activeCategory, category]
     )
-    if (isLoading) return <FullScreenLoader />;
     return (
         <div
             className="min-h-screen bg-[#0a0a0a] px-6 py-10"
@@ -128,28 +127,31 @@ export default function Category() {
                             </div>
                         </div>
                         {/* Folder grid */}
-                        {filteredCategories?.length > 0 ? (
-                            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                                {filteredCategories?.map((cat) => (
-                                    <CategoryFolder
-                                        key={cat?.categoryId}
-                                        category={cat}
-                                        count={countFor(cat?.categoryId)}
-                                        onOpen={setActiveCategory}
-                                    />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 py-16 text-center">
-                                <Inbox size={28} className="mb-3 text-white/20" />
-                                <p className="text-sm font-medium text-white/50">
-                                    No categories found
-                                </p>
-                                <p className="mt-1 text-xs text-white/30">
-                                    Assign a category to a link to see it here.
-                                </p>
-                            </div>
-                        )}
+                        {isLoading ?
+                            <CategoryLoader />
+                            :
+                            filteredCategories?.length ? (
+                                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                                    {filteredCategories?.map((cat) => (
+                                        <CategoryFolder
+                                            key={cat?.categoryId}
+                                            category={cat}
+                                            count={countFor(cat?.categoryId)}
+                                            onOpen={setActiveCategory}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 py-16 text-center">
+                                    <Inbox size={28} className="mb-3 text-white/20" />
+                                    <p className="text-sm font-medium text-white/50">
+                                        No categories found
+                                    </p>
+                                    <p className="mt-1 text-xs text-white/30">
+                                        Assign a category to a link to see it here.
+                                    </p>
+                                </div>
+                            )}
                     </>
                 ) : (
                     <>
