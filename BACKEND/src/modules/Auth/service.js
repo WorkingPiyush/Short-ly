@@ -23,7 +23,8 @@ export const getUser = async ({ userId }) => {
         return res;
     };
     const user = await findUser(userId);
-    await redisClient.set(`user:${userId}`, JSON.stringify(user), { EX: 1200 });
+
+    await redisClient.set(`user:${userId}`, JSON.stringify(user), "EX", 1200);
     if (!user) {
         throw new AppError("User not found", 404);
     }

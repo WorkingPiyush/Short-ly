@@ -5,13 +5,10 @@ import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountr
 import { redisClient } from "../../../config/redisClient.js";
 import { AppError } from "../../utils/AppError.js";
 import logger from "../../../config/logger.js";
-import bcrypt from 'bcrypt';
-import DeviceDetector from 'device-detector-js';
-import geoip from 'geoip-lite';
 import XLSX from 'xlsx';
 import fs from 'fs';
+import { analyticsQueue } from "../../queues/analytics.queue.js";
 
-const deviceDetector = new DeviceDetector();
 const MAX_TEMP_URLS = 3;
 const BATCH_SIZE = 10;
 
@@ -182,21 +179,7 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
         };
     };
 
-
-    const userInfo = deviceDetector.parse(userAgent);
-    const browser = userInfo.client.name || "Unknown";;
-    const os = userInfo.os?.name || "Third Client Agent";
-    const device = userInfo.device?.type || "desktop";
-
-    const ipLocation = geoip.lookup(ipAdd);
-    const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
-    const country = ipLocation?.country ? regionNames.of(ipLocation.country) : "Unknown";
-
-    const city = ipLocation?.city || "Unknown";
     const now = new Date();
-
-
-
     let result = null;
     const cached = await redisClient.get(urlKey(shortCode));
     if (cached) {
@@ -206,25 +189,10 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
         // console.log("cache Hit", result);
         const urlStatus = await getUrlStatus(result.originalUrl)
         if (!urlStatus.ok) {
-            await redisClient.set(
-                `url:status:${shortCode}`,
-                JSON.stringify({
-                    status: "DOWN",
-                    checkedAt: Date.now(),
-                }), {
-                EX: 60
-            })
+            await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: "DOWN", checkedAt: Date.now() }), "EX", 60,)
             return { pageStatus: "Page not available", shortCode }
         }
-        await redisClient.set(
-            `url:status:${shortCode}`,
-            JSON.stringify({
-                status: "UP",
-                statusCode: 200,
-                checkedAt: Date.now(),
-            }), {
-            EX: 300
-        })
+        await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: "UP", statusCode: 200, checkedAt: Date.now() }), "EX", 300,)
         if (result.expirationDate && new Date(result.expirationDate) < new Date()) {
             throw new AppError('Url Expired !!', 404);
         }
@@ -236,7 +204,14 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
         }
         if (result.userId) {
             if (!isBot) {
-                void analyticsUpdates(result.id, browser, os, device, country, city, referrer, ipAdd).catch(console.error);
+                // void analyticsUpdates(result.id, browser, os, device, country, city, referrer, ipAdd).catch(console.error);
+                logger.info(await analyticsQueue.getJobCounts());
+                void analyticsQueue.add("click", {
+                    id: result.id,
+                    userAgent,
+                    ipAdd,
+                    referrer,
+                }).catch(console.error);
             }
         } else {
             void urlCountUpdate(result.id);
@@ -249,25 +224,10 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     }
     const urlStatus = await getUrlStatus(url.originalUrl)
     if (!urlStatus.ok) {
-        await redisClient.set(
-            `url:status:${shortCode}`,
-            JSON.stringify({
-                status: "DOWN",
-                checkedAt: Date.now(),
-            }), {
-            EX: 60
-        })
+        await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: "DOWN", checkedAt: Date.now() }), "EX", 60,)
         return { pageStatus: "Page not available", shortCode }
     }
-    await redisClient.set(
-        `url:status:${shortCode}`,
-        JSON.stringify({
-            status: "UP",
-            statusCode: 200,
-            checkedAt: Date.now(),
-        }), {
-        EX: 300
-    })
+    await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: "UP", statusCode: 200, checkedAt: Date.now() }), "EX", 300,)
 
     if (url.liveTime && new Date() < url.liveTime) {
         throw new AppError("Link is not live yet", 500);
@@ -296,18 +256,25 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
 
         return url.originalUrl;
     }
-    await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, id: url.id, userId: url.userId, liveTime: url.liveTime, isProtected: url.password ? true : false, expirationDate: url.expirationDate?.toISOString() || "", }), { EX: 1800, });
+    await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, id: url.id, userId: url.userId, liveTime: url.liveTime, isProtected: url.password ? true : false, expirationDate: url.expirationDate?.toISOString() || "", }), "EX", 1800);
 
     if (!isBot) {
-        void analyticsUpdates(url.id, browser, os, device, country, city, referrer, ipAdd).catch(console.error);
+        // void analyticsUpdates(url.id, browser, os, device, country, city, referrer, ipAdd).catch(console.error);
+        logger.info(await analyticsQueue.getJobCounts());
+        void analyticsQueue.add("click", {
+            id: url.id,
+            userAgent,
+            ipAdd,
+            referrer,
+        }).catch(console.error);
     }
     return url.originalUrl;
-};
+}
 
 export const getMyUrl = async ({ userId, status = "all" }) => {
     const now = new Date();
     const queyKey = `Allurls:${userId}`;
-    const cached = await redisClient.hGet(queyKey, status);
+    const cached = await redisClient.hget(queyKey, status);
     if (cached) {
         let fetchedUrl = JSON.parse(cached);
         return Promise.all(
@@ -388,8 +355,8 @@ export const getMyUrl = async ({ userId, status = "all" }) => {
     if (!fetchedUrl) {
         throw new AppError("No Url Found !!");
     }
-    await redisClient.hSet(queyKey, status, JSON.stringify(fetchedUrl));
-    await redisClient.expire(queyKey, 600)
+    await redisClient.hset(queyKey, status, JSON.stringify(fetchedUrl));
+    await redisClient.expire(queyKey, 600);
 
     return Promise.all(
         fetchedUrl.map(async (u) => {
@@ -460,7 +427,7 @@ export const UrlInfo = async ({ userId, shortCode }) => {
         throw new AppError('Url not found', 404);
     }
 
-    await redisClient.set(queryKey, JSON.stringify(Url), { EX: 600 });
+    await redisClient.set(queryKey, JSON.stringify(Url), "EX", 600);
 
     return {
         short_url: `${process.env.BACKEND_URL}/${Url.shortCode}`,
@@ -525,7 +492,7 @@ export const UrlAnalytics = async ({ userId, shortCode, period }) => {
     };
     const queryKey = `urlanalytics:${shortCode}`;
 
-    const cached = await redisClient.hGet(queryKey, `${period}d`);
+    const cached = await redisClient.hget(queryKey, `${period}d`);
     if (cached) {
         return JSON.parse(cached);
     }
@@ -561,14 +528,14 @@ export const UrlAnalytics = async ({ userId, shortCode, period }) => {
         topReferrer: foromtReferrer(referrer)
     }
 
-    await redisClient.hSet(queryKey, `${period}d`, JSON.stringify(response));
+    await redisClient.hset(queryKey, `${period}d`, JSON.stringify(response));
     await redisClient.expire(queryKey, 600);
     return response;
 };
 
 export const UserAnalytics = async ({ userId, period }) => {
     const queryKey = `userAnalytics:${userId}`;
-    const cached = await redisClient.hGet(queryKey, `${period}d`);
+    const cached = await redisClient.hget(queryKey, `${period}d`);
     if (cached) {
         return JSON.parse(cached);
     }
@@ -586,7 +553,7 @@ export const UserAnalytics = async ({ userId, period }) => {
         mostClickedUrls: mostClickedUrls,
         totalReferrers: totalReferrers
     }
-    await redisClient.hSet(queryKey, `${period}d`, JSON.stringify(response));
+    await redisClient.hset(queryKey, `${period}d`, JSON.stringify(response));
     await redisClient.expire(queryKey, 600)
 
     return response;
@@ -780,37 +747,63 @@ export const passwordVerify = async ({ password, shortCode, userAgent, ipAdd }) 
             originalUrl: true
         }
     });
-    const userInfo = deviceDetector.parse(userAgent);
-    const browser = userInfo.client.name || "Unknown";;
-    const os = userInfo.os?.name || "Third Client Agent";
-    const device = userInfo.device?.type || "desktop";
-    const ipLocation = geoip.lookup(ipAdd);
-    const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
-    const country = ipLocation?.country ? regionNames.of(ipLocation.country) : "Unknown";
-    const city = ipLocation?.city || "Unknown";
 
     let isMatch = await passwordCompare(password, url.password)
     if (!isMatch) {
         throw new AppError("Invalid password", 500);
     } else {
-        void analyticsUpdates(url.id, browser, os, device, country, city).catch(console.error);
+        void analyticsQueue.add("click", {
+            id: result.id,
+            userAgent,
+            ipAdd,
+            referrer,
+        }).catch(console.error);
         return { isMatch: true, originalUrl: url.originalUrl };
     }
 };
 
 export const shortUrlBulk = async ({ filePath, userId }) => {
     try {
-        const workbook = XLSX.readFile(filePath);
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 }).flat().filter(row => typeof row === 'string');
-        const uniqueBatch = [...new Set(rows)];
-        if (uniqueBatch.length > 50) {
-            throw new AppError("maximum limit exceeded", 400);
+        let workbook;
+        try {
+            workbook = XLSX.readFile(filePath, {
+                cellFormula: false,
+                cellHTML: false,
+                cellText: false,
+                sheetStubs: false,
+            });
+        } catch {
+            throw new AppError("Invalid Excel file");
         }
-        let finalResults = [];
-        for (let i = 0; i < uniqueBatch.length; i += BATCH_SIZE) {
-            const batch = uniqueBatch.slice(i, i + BATCH_SIZE);
+        if (workbook.SheetNames.length > 10) {
+            throw new AppError("Too many sheets");
+        }
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const range = XLSX.utils.decode_range(sheet['!ref'] || "A1");
+        const cells = (range.e.r - range.s.r + 1) * (range.e.c - range.s.c + 1);
+
+        if (cells > 100000) {
+            throw new AppError("Excel contains too many cells");
+        }
+        const urls = [
+            ...new Set(
+                XLSX.utils.sheet_to_json(sheet, { header: 1 })
+                    .flat()
+                    .filter(
+                        row =>
+                            typeof row === "string" &&
+                            isValidUrl(row)
+                    )
+                    .map(url => url.trim())
+            )
+        ];
+        if (urls.length > 50) {
+            throw new AppError("Maximum 50 URLs allowed", 400);
+        }
+        const finalResults = [];
+
+        for (let i = 0; i < urls.length; i += BATCH_SIZE) {
+            const batch = urls.slice(i, i + BATCH_SIZE);
             const result = await Promise.all(batch.map(url => urlShort({ originalUrl: url.trim(), userId })));
             finalResults.push(...result);
         }

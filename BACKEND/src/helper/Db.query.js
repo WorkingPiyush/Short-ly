@@ -1,15 +1,30 @@
+import DeviceDetector from 'device-detector-js';
+import geoip from 'geoip-lite';
 import { client } from '../../config/db.js';
+import logger from '../../config/logger.js';
 import { formatedReferrer, hashIP } from './Url.helper.js';
 import crypto from 'crypto';
+const deviceDetector = new DeviceDetector();
 
 export const findFirstUrl = async (shortCode) => {
     return await client.url.findFirst({
         where: { shortCode, isActive: true, isDeleted: false }
     })
 };
-export const analyticsUpdates = async (id, browser, os, device, country, city, referrer, ipAdd) => {
+
+export const analyticsUpdates = async (id, userAgent, ipAdd, referrer) => {
+    const userInfo = deviceDetector.parse(userAgent);
+    const browser = userInfo.client.name || "Unknown";;
+    const os = userInfo.os?.name || "Third Client Agent";
+    const device = userInfo.device?.type || "desktop";
+
+    const ipLocation = geoip.lookup(ipAdd);
+    const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+    const country = ipLocation?.country ? regionNames.of(ipLocation.country) : "Unknown";
+    const city = ipLocation?.city || "Unknown";
 
     const newReferrer = formatedReferrer(referrer);
+    
     await Promise.all([
         client.url.update({
             where: { id },
@@ -31,6 +46,7 @@ export const analyticsUpdates = async (id, browser, os, device, country, city, r
             }
         }),
     ]);
+    logger.info("Analytics updated");
 };
 export const urlCountUpdate = async (id) => {
     return client.url.update({
