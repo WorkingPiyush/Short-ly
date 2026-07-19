@@ -12,11 +12,19 @@ import cloudinary from '../../../config/cloudinary.js';
 import uploadImages from '../../helper/fileUpload.js';
 import { sendEmail } from '../../service/mail.service.js';
 import { checkEmailLimiter } from '../../Middleware/ip.Middleware.js';
+import { redisClient } from '../../../config/redisClient.js';
 const RESET_TOKEN_EXPIRY_MINUTES = Number(process.env.RESET_TOKEN_EXPIRY_MINUTES);
 
 
 export const getUser = async ({ userId }) => {
+    const data = await redisClient.get(`user:${userId}`);
+    if (data) {
+        let res = JSON.parse(data);
+        return res;
+    };
     const user = await findUser(userId);
+
+    await redisClient.set(`user:${userId}`, JSON.stringify(user), "EX", 1200);
     if (!user) {
         throw new AppError("User not found", 404);
     }
@@ -273,3 +281,33 @@ export const paswordSubmit = async ({ password, token }) => {
     ])
 
 };
+
+export const handleOAuthUser = async ({ name, email, profileImage, isVerified, providerId, provider }) => {
+    let existance = await client.user.findUnique({
+        where: { email },
+    });
+    if (existance) {
+        const user = await client.user.update({
+            where: { id: existance.id },
+            data: {
+                email,
+                isVerified,
+                providerId,
+                provider
+            }
+        });
+        return user;
+    } else {
+        const user = await client.user.create({
+            data: {
+                name,
+                email,
+                profileImage,
+                isVerified,
+                providerId,
+                provider
+            }
+        })
+        return user;
+    }
+}

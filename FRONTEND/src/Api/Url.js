@@ -6,11 +6,15 @@ export const createUrl = async (data) => {
     return res.data.url;
 };
 
-export const getUrl = async (filter) => {
+export const getUrl = async ({ filter, pageParam }) => {
     const res = await api.get("/url/", {
-        params: { status: filter },
+        params: {
+            status: filter,
+            cursor: pageParam,
+            limit: 20
+        },
     });
-    return res.data.url;
+    return res.data.url
 };
 
 export const getShortUrl = async (shortCode) => {

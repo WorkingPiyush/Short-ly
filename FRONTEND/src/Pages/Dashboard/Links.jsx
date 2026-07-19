@@ -1,18 +1,19 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useUrl } from '../../Hooks/useUrl.jsx'
 import { IoIosSearch } from "react-icons/io";
 import { Link } from 'react-router-dom';
 import LinkCard from '../../components/LinkCard.jsx';
 import { useUrlFilter } from '../../Context/StatusFilterContext.jsx';
 import { searchUrl } from '../../Api/Url.js';
-import FullScreenLoader from '@/components/FullScreenLoader.jsx';
+import LinkCardLoader from '@/components/LinkCardLoader.jsx';
 
 
 
 function Links() {
-  const { data: url, isLoading } = useUrl()
-  const [urlRecords, setUrlRecords] = useState()
+  const { data, fetchNextPage, isLoading, hasNextPage, isFetchingNextPage } = useUrl()
+  const loadMoreRef = useRef(null);
+  const urlRecords = data?.pages.flatMap(page => page.urls) ?? [];
   const { filter, setFilter } = useUrlFilter();
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState()
@@ -23,19 +24,37 @@ function Links() {
   const expiredCount = urlRecords?.filter((l) => l.isActive === "expired").length;
 
   useEffect(() => {
-    if (url) {
-      setUrlRecords(url);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // console.log("Intersecting:", entry.isIntersecting);
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          // console.log("Fetching next page...");
+          fetchNextPage();
+        }
+      },
+      {
+        root: null,
+        rootMargin: "200px",
+        threshold: 0,
+      }
+    )
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
     }
-  }, [url]);
+    return () => {
+      observer.disconnect();
+    }
+
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
+
   useEffect(() => {
     if (!search.trim()) return;
-
     const timer = setTimeout(async () => {
       const response = await searchUrl(search);
       setSearchResults(response);
     }, 500);
     return () => clearTimeout(timer);
-  }, [search, url])
+  }, [search])
 
   const filterTabs = [
     { key: "all", label: "All" },
@@ -44,7 +63,6 @@ function Links() {
     { key: "SingleUse", label: "Single Use" },
   ];
 
-  if (isLoading) return <FullScreenLoader />;
   return (
 
     <div className="min-h-screen dark:bg-[#0a0a0a] dark:text-white bg-white text-black px-4 py-8 md:px-8">
@@ -118,32 +136,57 @@ function Links() {
             </button>
           ))}
         </div>
-
         {/* Links list */}
-        {urlResults?.length > 0 ? (
-          <div className="flex flex-col gap-3">
-            {urlResults.map((link) => (
-              <LinkCard key={link.id} link={link} />
+        {isLoading ? (
+          <div className='space-y-4'>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <LinkCardLoader key={i} />
             ))}
-          </div>) :
-          (
-            <div className="text-center py-20 dark:text-white/20 text-black">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-12 h-12 mx-auto mb-4 opacity-40"
-              >
-                <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
-                <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
-                <line x1="2" y1="2" x2="22" y2="22" />
-              </svg>
-              <p className="text-sm">{isSearching ? "No urls found" : "No links found"}</p>
-            </div>
-          )
+          </div>
+        ) :
+          urlResults?.length ? (
+            <div className="flex flex-col gap-3">
+              {urlResults.map((link) => (
+                <LinkCard key={link.id} link={link} />
+              ))}
+              <div ref={loadMoreRef} style={{ height: 20 }}></div>
+              {!hasNextPage && (
+                <div className="text-center dark:text-white/20 text-black">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-12 h-12 mx-auto mb-4 opacity-40"
+                  >
+                    <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
+                    <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
+                    <line x1="2" y1="2" x2="22" y2="22" />
+                  </svg>
+                  <p className="text-sm">No more links</p>
+                </div>
+              )}
+            </div>) :
+            (
+              <div className="text-center py-20 dark:text-white/20 text-black">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-12 h-12 mx-auto mb-4 opacity-40"
+                >
+                  <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
+                  <line x1="2" y1="2" x2="22" y2="22" />
+                </svg>
+                <p className="text-sm">{isSearching ? "No urls found" : "No links found"}</p>
+              </div>
+            )
         }
       </div>
     </div>

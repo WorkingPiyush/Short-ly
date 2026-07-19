@@ -335,8 +335,8 @@ function ProfilePage() {
                 </div>
 
                 {/* ── Content ── */}
-                {activeTab === 0 && <OverviewTab user={user} url={url?.filter((l) => l.isActive = "active")} onGoToLinks={() => setActiveTab(1)} />}
-                {activeTab === 1 && <LinksTab navigate={navigate} url={url?.filter((l) => l.isActive = "active")} />}
+                {activeTab === 0 && <OverviewTab user={user} url={url?.pages[0].urls?.filter((l) => l.isActive = "active")} onGoToLinks={() => setActiveTab(1)} />}
+                {activeTab === 1 && <LinksTab navigate={navigate} url={url?.pages[0].urls?.filter((l) => l.isActive = "active")} />}
                 {activeTab === 2 && <SettingsTab user={user} />}
             </div>
         </div>

@@ -32,8 +32,8 @@ export const redirectUrl = asyncHandler(async (req, res) => {
         shortCode: req.params.shortCode, userAgent: req.headers["user-agent"], ipAdd: process.env.NODE_ENV === 'production' ? req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress : '45.118.167.50', referrer: req.headers.referer
     });
     if (response?.pageStatus) {
-       res.redirect(`${process.env.FRONTEND_URL}/${response.shortCode}/status`);
-       return;
+        res.redirect(`${process.env.FRONTEND_URL}/${response.shortCode}/status`);
+        return;
     }
     if (response?.requiresPassword) {
         // res.status(200).json({ success: true, message: "Password Required", response });
@@ -44,7 +44,9 @@ export const redirectUrl = asyncHandler(async (req, res) => {
 });
 
 export const getAllUrls = asyncHandler(async (req, res) => {
-    const url = await urlService.getMyUrl({ userId: req.user?.id, status: req.query.status });
+    const cursor = req.query.cursor || null;
+    const limit = Number(req.query.limit) || 20
+    const url = await urlService.getMyUrl({ userId: req.user?.id, status: req.query.status, cursor, limit});
     return res.status(200).json({ success: true, url });
 });
 
@@ -69,7 +71,7 @@ export const getUrlAnalytics = asyncHandler(async (req, res) => {
     const url = await urlService.UrlAnalytics({
         userId: req.user?.id,
         shortCode: req.params.shortCode,
-        period: req.query.period
+        period: req.query.period || 7
     });
 
     return res.status(200).json({ success: true, url });
@@ -78,7 +80,7 @@ export const getUrlAnalytics = asyncHandler(async (req, res) => {
 export const Analytics = asyncHandler(async (req, res) => {
     const url = await urlService.UserAnalytics({
         userId: req.user?.id,
-        period: req.query.period
+        period: req.query.period || 7
     });
     return res.status(200).json(url);
 })
