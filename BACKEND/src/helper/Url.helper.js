@@ -112,6 +112,11 @@ export const formatUrl = (url) => {
                 isPswrdProtected: l.password ? true : false,
                 lastVisitedAt: l.lastVisitedAt,
                 isActive: status,
+                liveTime: l.liveTime,
+                singleUse: l.singleUse,
+                userId: l.userId,
+                tags: l.tags,
+                category: l.category,
             }
         })
     )

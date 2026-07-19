@@ -44,7 +44,9 @@ export const redirectUrl = asyncHandler(async (req, res) => {
 });
 
 export const getAllUrls = asyncHandler(async (req, res) => {
-    const url = await urlService.getMyUrl({ userId: req.user?.id, status: req.query.status });
+    const cursor = req.query.cursor || null;
+    const limit = Number(req.query.limit) || 20
+    const url = await urlService.getMyUrl({ userId: req.user?.id, status: req.query.status, cursor, limit});
     return res.status(200).json({ success: true, url });
 });
 

@@ -271,43 +271,15 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     return url.originalUrl;
 }
 
-export const getMyUrl = async ({ userId, status = "all" }) => {
+export const getMyUrl = async ({ userId, cursor, limit, status = "all" }) => {
     const now = new Date();
-    const queyKey = `Allurls:${userId}`;
-    const cached = await redisClient.hget(queyKey, status);
-    if (cached) {
-        let fetchedUrl = JSON.parse(cached);
-        return Promise.all(
-            fetchedUrl.map(async (u) => {
-                const clicks = await totalClick(u.id);
-                return {
-                    id: u.id,
-                    short_url: `${process.env.BACKEND_URL}/${u.shortCode}`,
-                    short_code: u.shortCode,
-                    original_url: u.originalUrl,
-                    totalClicks: clicks,
-                    expiry_date: u.expirationDate,
-                    creation_date: u.createdAt,
-                    last_update_date: u.updatedAt,
-                    isPswrdProtected: u.password ? true : false,
-                    lastVisitedAt: u.lastVisitedAt,
-                    isActive: await urlStatus(u),
-                    liveTime: u.liveTime,
-                    singleUse: u.singleUse,
-                    userId: u.userId,
-                    tags: u.tags,
-                    category: u.category,
-                }
-            })
-        );
-
-    };
 
     let fetchedUrl;
     fetchedUrl = await client.url.findMany({
         where: {
             userId,
             isDeleted: false,
+
             ...(status === "active" && {
                 AND: [
                     {
@@ -334,6 +306,9 @@ export const getMyUrl = async ({ userId, status = "all" }) => {
         orderBy: {
             createdAt: "desc",
         },
+        take: limit + 1,
+        skip: cursor ? 1 : 0,
+        cursor: cursor ? { id: cursor } : undefined,
         select: {
             id: true,
             originalUrl: true,
@@ -352,35 +327,46 @@ export const getMyUrl = async ({ userId, status = "all" }) => {
             category: true
         }
     });
-    if (!fetchedUrl) {
+
+    if (fetchedUrl.length === 0) {
         throw new AppError("No Url Found !!");
     }
-    await redisClient.hset(queyKey, status, JSON.stringify(fetchedUrl));
-    await redisClient.expire(queyKey, 600);
-
-    return Promise.all(
-        fetchedUrl.map(async (u) => {
-            const clicks = await totalClick(u.id);
-            return {
-                id: u.id,
-                short_url: `${process.env.BACKEND_URL}/${u.shortCode}`,
-                short_code: u.shortCode,
-                original_url: u.originalUrl,
-                totalClicks: clicks,
-                expiry_date: u.expirationDate,
-                creation_date: u.createdAt,
-                last_update_date: u.updatedAt,
-                isPswrdProtected: u.password ? true : false,
-                lastVisitedAt: u.lastVisitedAt,
-                isActive: await urlStatus(u),
-                liveTime: u.liveTime,
-                singleUse: u.singleUse,
-                userId: u.userId,
-                tags: u.tags,
-                category: u.category,
-            }
-        })
-    );
+    let nxtCursor = null;
+    if (fetchedUrl.length > limit) {
+        const next = fetchedUrl.pop();
+        nxtCursor = next.id;
+    }
+    let formatedUrl = await formatUrl(fetchedUrl);
+    return {
+        urls: formatedUrl,
+        nxtCursor,
+        hasNextPage: nxtCursor !== null,
+        limit
+    }
+    // return Promise.all(
+    //     fetchedUrl.map(async (u) => {
+    //         const clicks = await totalClick(u.id);
+    //         return {
+    //             id: u.id,
+    //             short_url: `${process.env.BACKEND_URL}/${u.shortCode}`,
+    //             short_code: u.shortCode,
+    //             original_url: u.originalUrl,
+    //             totalClicks: clicks,
+    //             expiry_date: u.expirationDate,
+    //             creation_date: u.createdAt,
+    //             last_update_date: u.updatedAt,
+    //             isPswrdProtected: u.password ? true : false,
+    //             lastVisitedAt: u.lastVisitedAt,
+    //             isActive: await urlStatus(u),
+    //             liveTime: u.liveTime,
+    //             singleUse: u.singleUse,
+    //             userId: u.userId,
+    //             tags: u.tags,
+    //             category: u.category,
+    //             nxtCursor
+    //         }
+    //     })
+    // );
 };
 
 export const UrlInfo = async ({ userId, shortCode }) => {

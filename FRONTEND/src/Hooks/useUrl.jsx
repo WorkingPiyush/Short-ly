@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react-refresh/only-export-components */
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AllAnalytics, categoryUrls, deleteUrl, getShortUrl, getUrl, getUrlAnalytics, updateUrl } from "../Api/Url";
 import { useUrlFilter } from "../Context/StatusFilterContext";
 
@@ -8,9 +8,14 @@ import { useUrlFilter } from "../Context/StatusFilterContext";
 export const useUrl = () => {
     const { filter } = useUrlFilter();
 
-    return useQuery({
+    return useInfiniteQuery({
         queryKey: ['url', filter],
-        queryFn: () => getUrl(filter),
+        queryFn: ({ pageParam }) => getUrl({
+            filter,
+            pageParam
+        }),
+        initialPageParam: null,
+        getNextPageParam: lastPage=> lastPage.nxtCursor
     })
 }
 
