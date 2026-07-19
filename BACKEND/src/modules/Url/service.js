@@ -187,12 +187,30 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     };
     if (result && Object.keys(result).length > 0) {
         // console.log("cache Hit", result);
-        const urlStatus = await getUrlStatus(result.originalUrl)
-        if (!urlStatus.ok) {
-            await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: "DOWN", checkedAt: Date.now() }), "EX", 60,)
-            return { pageStatus: "Page not available", shortCode }
+        const response = await getUrlStatus(result.originalUrl)
+        const httpStatus = response.status;
+        let webStatus;
+
+        if (httpStatus >= 200 && httpStatus < 500) {
+            webStatus = "ONLINE";
         }
-        await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: "UP", statusCode: 200, checkedAt: Date.now() }), "EX", 300,)
+        else if (httpStatus === 999) {
+            webStatus = "ONLINE";
+        }
+        if (httpStatus >= 500 && httpStatus < 600) {
+            webStatus = "SERVER_ERROR";
+        }
+        else {
+            webStatus = "UNKNOWN";
+        }
+        await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: webStatus, httpStatus, checkedAt: Date.now() }), "EX", 300,)
+
+        if (webStatus === "SERVER_ERROR") {
+            return {
+                pageStatus: "Page not available",
+                shortCode,
+            };
+        }
         if (result.expirationDate && new Date(result.expirationDate) < new Date()) {
             throw new AppError('Url Expired !!', 404);
         }
@@ -222,12 +240,30 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     if (!url) {
         throw new AppError('Invalid Url', 400);
     }
-    const urlStatus = await getUrlStatus(url.originalUrl)
-    if (!urlStatus.ok) {
-        await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: "DOWN", checkedAt: Date.now() }), "EX", 60,)
-        return { pageStatus: "Page not available", shortCode }
+    const response = await getUrlStatus(url.originalUrl)
+    const httpStatus = response.status;
+    let webStatus;
+
+    if (httpStatus >= 200 && httpStatus < 500) {
+        webStatus = "ONLINE";
     }
-    await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: "UP", statusCode: 200, checkedAt: Date.now() }), "EX", 300,)
+    else if (httpStatus === 999) {
+        webStatus = "ONLINE";
+    }
+    if (httpStatus >= 500 && httpStatus < 600) {
+        webStatus = "SERVER_ERROR";
+    }
+    else {
+        webStatus = "UNKNOWN";
+    }
+    await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: webStatus, httpStatus, checkedAt: Date.now() }), "EX", 300,)
+
+    if (webStatus === "SERVER_ERROR") {
+        return {
+            pageStatus: "Page not available",
+            shortCode,
+        };
+    }
 
     if (url.liveTime && new Date() < url.liveTime) {
         throw new AppError("Link is not live yet", 500);
@@ -806,7 +842,7 @@ export const searchUrl = async ({ query, userId }) => {
     };
     const queryKey = `urlQuery:${query}`;
     let fetchedUrl;
-    const cached = await redisClient.hGet(queryKey, query,);
+    const cached = await redisClient.hget(queryKey, query,);
     if (cached) {
         fetchedUrl = JSON.parse(cached);
         return Promise.all(
@@ -853,8 +889,8 @@ export const searchUrl = async ({ query, userId }) => {
     if (!fetchedUrl) {
         throw new AppError("No matching url found !!", 404);
     }
-    await redisClient.hSet(queryKey, query, JSON.stringify(fetchedUrl));
-    await redisClient.expire(queryKey, query, 1800);
+    await redisClient.hset(queryKey, query, JSON.stringify(fetchedUrl));
+    await redisClient.expire(queryKey, 1800);
     return Promise.all(
         fetchedUrl.map(async (u) => {
             const clicks = await totalClick(u.id);

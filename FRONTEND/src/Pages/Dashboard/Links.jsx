@@ -69,15 +69,15 @@ function Links() {
       <div className="max-w-4xl mx-auto">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-7 flex-wrap gap-3">
-          <h1 className="font-extrabold text-2xl md:text-[28px] tracking-tight"
+        <div className="flex items-center justify-between md:mb-7 mb-2 flex-wrap gap-3">
+          <h1 className="font-extrabold md:text-2xl text-xl md:text-[28px] tracking-tight"
             style={{ fontFamily: "'Syne', sans-serif" }} >
             My Links
           </h1>
           <Link
             to="/dashboard"
             className="flex items-center gap-2 text-[13px] font-medium text-zinc-900
-              bg-emerald-300 px-4 py-2.5 rounded-xl hover:bg-emerald-200
+              bg-emerald-300 md:px-4 md:py-2.5 px-2 py-2 rounded-xl hover:bg-emerald-200
               transition-all duration-150 hover:scale-[1.02]"
           >
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="w-3.5 h-3.5">
@@ -86,16 +86,16 @@ function Links() {
             Shorten new URL
           </Link>
         </div>
-
+        <div className='h-0.5 w-full bg-gray-400 opacity-20 rounded-xl mt-3 mb-3'></div>
         {/* Stats row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-7 dark:text-white dark:bg-black bg-white">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:mb-7 mb-5 dark:text-white dark:bg-black bg-white">
           {[
             { label: "Total links", value: urlRecords?.length },
             { label: "Total clicks", value: totalClicks },
             { label: "Active links", value: activeCount },
             { label: "Expired", value: expiredCount },
           ].map(({ label, value }) => (
-            <div key={label} className="rounded-2xl border border-[#E7DFD3]   bg-linear-to-br  from-[#FFFDF9]  to-[#F8F4EC]  dark:from-zinc-900 px-5 py-4  shadow-sm  hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 dark:to-zinc-950 dark:border-zinc-800">
+            <div key={label} className="rounded-2xl border border-[#E7DFD3]  bg-linear-to-br  from-[#FFFDF9]  to-[#F8F4EC] dark:from-zinc-900 md:px-5 md:py-4 px-2.5 py-2 shadow-sm  hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 dark:to-zinc-950 dark:border-zinc-800">
               <p className="text-[11px] uppercase tracking-[0.15em] text-zinc-500 dark:text-zinc-500 mb-2">{label}</p>
               <p className="font-extrabold text-[24px] tracking-tight text-zinc-900 dark:text-white" style={{ fontFamily: "'Syne', sans-serif" }}>
                 {value}
@@ -107,7 +107,7 @@ function Links() {
         {/* Controls */}
         <div className="flex gap-2.5 mb-6 flex-wrap dark:bg-[#0a0a0a] dark:text-white bg-white/20 text-black">
           {/* Search */}
-          <div className="relative flex-1 min-w-50 ">
+          <div className="relative md:flex-1 md:min-w-50 w-full">
             <span className='absolute top-2.5 left-3 text-white/20'>
               <IoIosSearch size={22} />
             </span>

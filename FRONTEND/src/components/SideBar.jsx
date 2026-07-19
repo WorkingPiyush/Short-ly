@@ -52,6 +52,7 @@ function SideBar() {
                         <NavLink
                             key={option.to}
                             end to={option.to}
+                            onClick={() => setShowSideBar(false)}
                             className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-lg text-black dark:text-white transition-all duration-200 ${isActive ? "bg-emerald-400 font-semibold dark:text-black" : "hover:bg-gray-500/10"}`}>
                             <span className="text-lg">{option.icon}</span>
                             <span>{option.head}</span>

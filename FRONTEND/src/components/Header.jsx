@@ -20,7 +20,6 @@ function Header() {
         const handelScrollEvent = () => {
             setisScrolled(window.scrollY > 50);
         }
-
         window.addEventListener('scroll', handelScrollEvent)
         return () => { window.removeEventListener('scroll', handelScrollEvent) }
     }, [])
@@ -38,10 +37,11 @@ function Header() {
         })
     }
     return (
-        <header className='flex bg= justify-center items-center px-4 fixed top-0 left-0 right-0 z-50 pt-4 '>
-            <div className={`bg-white text-black dark:bg-zinc-900 dark:text-white ${isScrolled ? "md:w-5xl" : "md:w-6xl"} px-7 py-5 border border-black/65 dark:border-white/65  rounded-2xl backdrop-blur-md transition-all duration-250 ease-in-out`}>
-                <div className="flex items-center md:justify-between sm:justify-between gap-12">
+        // fixed top-0 left-0 right-0 z-50 pt-4
+        <header className={`flex justify-center items-center  fixed top-5 left-0 right-0 z-50`}>
+            <div className={`bg-white text-black dark:bg-zinc-900 dark:text-white px-7 py-5 border ${isScrolled ? "max-w-4xl" : "max-w-5xl"}  border-black/65 dark:border-white/65  rounded-2xl backdrop-blur-md transition-all duration-250 ease-in-out`}>
 
+                <div className="flex items-center md:justify-between sm:justify-between md:gap-12 gap-10">
                     {/* Logo */}
                     <Logo setIsOpen={setIsOpen} />
 
@@ -67,7 +67,6 @@ function Header() {
                         <div onClick={toggleTheme} className='text-black dark:text-white p-1 rounded-xl cursor-pointer transition duration-300 ease-in-out active:scale-95'>
                             {theme === "light" ? <Moon /> : <Sun />}
                         </div>
-
                         {!user && <Link to="/login"
                             className="text-sm font-medium cursor-pointer bg-white/60 text-black dark:bg-zinc-900 dark:text-white border px-4 py-2 rounded-lg
                                      transition-all duration-150">
@@ -77,32 +76,35 @@ function Header() {
           rounded-lg hover:bg-emerald-200 hover:scale-[1.03] transition-all duration-150">
                             Sign up free
                         </Link>}
-                        {user &&
-                            <ProfileIcon showpopup={setShowProfilePopUp} popup={showProfilePopUp} userInfo={user} />
-                        }
-                        {showProfilePopUp && <ProfilePopUp userInfo={user} logout={handleLogout} showpopup={setShowProfilePopUp} onClose={() => setShowProfilePopUp(false)} />}
                     </div>
 
-                    {/* cross button */}
-                    <div onClick={toggleTheme} className='text-black dark:text-white md:hidden relative left-10 p-1 rounded-xl cursor-pointer transition duration-300 ease-in-out active:scale-95'>
+                    <div onClick={toggleTheme} className='text-black  dark:text-white md:hidden relative p-2 rounded-xl cursor-pointer transition duration-300 ease-in-out active:scale-95'>
                         {theme === "light" ? <Moon /> : <Sun />}
                     </div>
-                    <button
-                        onClick={() => setIsOpen(!isOpen)}
-                        aria-label="Toggle menu"
-                        className="md:hidden flex flex-col justify-center gap-1.25 w-7 h-7 cursor-pointer bg-white/80 text-black dark:bg-zinc-900 dark:text-white
+                    {user ?
+                        <ProfileIcon showpopup={setShowProfilePopUp} popup={showProfilePopUp} userInfo={user} />
+                        : (
+                            <button
+                                onClick={() => setIsOpen(!isOpen)}
+                                aria-label="Toggle menu"
+                                className="md:hidden flex flex-col justify-center gap-1.25 w-7 h-7 cursor-pointer bg-white/80 text-black dark:bg-zinc-900 dark:text-white
                         border border-white/15 rounded-lg hover:border-white/35 transition-colors duration-350">
 
-                        <span className={`block w-full text-white bg-zinc-900 dark:text-black dark:bg-white h-px  rounded-full origin-center transition-all duration-250
+                                <span className={`block w-full text-white bg-zinc-900 dark:text-black dark:bg-white h-px  rounded-full origin-center transition-all duration-250
                          ${isOpen ? 'translate-y-[6.5px] rotate-45' : ''}`} />
 
-                        <span className={`block w-full text-white bg-zinc-900 dark:text-black dark:bg-white h-px rounded-full transition-all duration-200
+                                <span className={`block w-full text-white bg-zinc-900 dark:text-black dark:bg-white h-px rounded-full transition-all duration-200
                          ${isOpen ? 'opacity-0 scale-x-0' : ''}`} />
 
-                        <span className={`block w-full text-white bg-zinc-900 dark:text-black dark:bg-white h-px rounded-full origin-center transition-all duration-250
+                                <span className={`block w-full text-white bg-zinc-900 dark:text-black dark:bg-white h-px rounded-full origin-center transition-all duration-250
                         ${isOpen ? 'translate-y-[-6.5px] -rotate-45' : ''}`} />
-                    </button>
+                            </button>
+                        )
+                    }
+                    {showProfilePopUp && <ProfilePopUp userInfo={user} logout={handleLogout} showpopup={setShowProfilePopUp} onClose={() => setShowProfilePopUp(false)} />}
+
                 </div>
+
                 <div className={`md:hidden overflow-hidden transition-all duration-350 ease-in-out
           ${isOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'}`}>
                     <div className="border-t border-white/8 py-3 flex flex-col">
@@ -136,9 +138,6 @@ function Header() {
                             >
                                 Sign up free
                             </Link>}
-                            {user?.profileImage ?
-                                <img src={user.profileImage} /> : user?.name?.charAt(0)
-                            }
                         </div>
                     </div>
                 </div>
