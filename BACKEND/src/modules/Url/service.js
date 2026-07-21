@@ -174,7 +174,7 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     const status = await redisClient.get(`url:status:${shortCode}`);
     if (status && status !== null) {
         let res = JSON.parse(status);
-        if (res.status !== "UP") {
+        if (res.status === "SERVER_ERROR") {
             return { pageStatus: "Page not available", shortCode }
         };
     };
@@ -637,6 +637,10 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
     };
 
     if (liveTime !== null && liveTime !== undefined) {
+        const scheduleTime = new Date(liveTime);
+        if (scheduleTime <= new Date()) {
+            throw new Error("Schedule time must be in the future.");
+        }
         updatedData.liveTime = liveTime;
     };
 

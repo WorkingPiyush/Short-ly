@@ -8,6 +8,7 @@ import { passwordSchema } from "@/Validator/auth.validator";
 export default function ResetPassword() {
     const navigate = useNavigate()
     const params = useParams()
+    const [loading, setLoading] = useState(false);
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false);
@@ -27,6 +28,7 @@ export default function ResetPassword() {
             return;
         };
         try {
+            setLoading(true);
             const data = await updatePassword({ token, password: passwordSafe.data });
             if (data.success) {
                 toast.success(data.message);
@@ -35,6 +37,8 @@ export default function ResetPassword() {
         } catch (error) {
             toast.error("Server Problem")
             console.error(error)
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -57,7 +61,7 @@ export default function ResetPassword() {
                     </p>
                 </div>
                 {/* Form */}
-                <form onSubmit={handlePasswordChange} className="mt-10 space-y-5">
+                <form onSubmit={handlePasswordChange} aria-disabled={loading} className="mt-10 space-y-5">
                     {/* Password */}
                     <div>
                         <label className="block text-white mb-3 font-medium">
@@ -121,7 +125,7 @@ export default function ResetPassword() {
                         </div>
                     </div>
                     {/* Button */}
-                    <button className="w-full h-14 rounded-xl cursor-pointer font-semibold text-lg bg-linear-to-r from-emerald-500/10 to-emerald-400/5 text-white border border-emerald-400/20 active:scale-101 hover:opacity-90 transition">
+                    <button disabled={loading} className="w-full h-14 rounded-xl cursor-pointer font-semibold text-lg bg-linear-to-r from-emerald-500/10 to-emerald-400/5 text-white border border-emerald-400/20 active:scale-101 hover:opacity-90 transition">
                         Reset Password
                     </button>
                 </form>

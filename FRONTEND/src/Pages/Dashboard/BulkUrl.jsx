@@ -50,6 +50,7 @@ function BulkUrl() {
       toast.success("File Uploaded !!");
     } catch (error) {
       console.error('Error uploading file:', error);
+      console.error(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -128,7 +129,7 @@ function BulkUrl() {
                 <Trash2 size={18} />
               </button>
             </div>
-            <button aria-label='upload' onClick={handleUpload} className="flex justify-center items-center gap-4 py-4 px-4 border m-2  dark:border-gray-700 border-black/30 dark:bg-gray-950 bg-emerald-500 rounded-lg cursor-pointer transition-all duration-150 delay-10 hover:border-emerald-400 hover:scale-103">
+            <button aria-label='upload' onClick={handleUpload} disabled={isLoading} className="flex justify-center items-center gap-4 py-4 px-4 border m-2  dark:border-gray-700 border-black/30 dark:bg-gray-950 bg-emerald-500 rounded-lg cursor-pointer transition-all duration-150 delay-10 hover:border-emerald-400 hover:scale-103">
               <Upload
                 size={18}
                 className="dark:text-emerald-400 text-white"
