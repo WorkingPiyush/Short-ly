@@ -13,6 +13,7 @@
     "worker": "node src/worker.js"
   },
   "dependencies": {
+    "@getbrevo/brevo": "^6.0.2",
     "@prisma/client": "^6.19.3",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.80.8",

@@ -1,7 +1,7 @@
 import dotenv from "dotenv/config";
 import { client } from '../../../config/db.js';
 import { formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, formatUrl, foromtReferrer, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, randomColor, urlKey, urlStatus } from '../../helper/Url.helper.js';
-import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics, referrerAnalytics, categories, getUrlStatus } from "../../helper/Db.query.js";
+import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics, referrerAnalytics, categories, getUrlStatus, countTempUrl, findUser, countRegUrl } from "../../helper/Db.query.js";
 import { redisClient } from "../../../config/redisClient.js";
 import { AppError } from "../../utils/AppError.js";
 import logger from "../../../config/logger.js";
@@ -22,17 +22,19 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
     }
 
     const normalizedUrl = normalizeUrl(originalUrl);
-
     const urlHash = hashUrl(normalizedUrl);
-
-    if (!userId) {
+    const user = await findUser(userId);
+    if (user?.urls.length === user.plan === "FREE" ? 50 : 1000) {
+        throw new AppError('Maximum URL Quota Reached', 300);
+    }
+    if (!user) {
         let newtempId = null;
 
         if (!tempId) {
             newtempId = crypto.randomUUID();
             tempId = newtempId;
         }
-        const tempUrlCount = await countUrl(tempId);
+        const tempUrlCount = await countTempUrl(tempId);
         if (tempUrlCount === MAX_TEMP_URLS) {
             throw new AppError('Signup required', 400);
         }
@@ -75,6 +77,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
             tempId,
         };
     }
+
     let qrCodeImg;
     const existing = await client.url.findFirst({
         where: {
@@ -93,6 +96,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
             isActive: true,
         }
     });
+
     if (existing) {
         qrCodeImg = await generateQRCode(existing);
         const clicks = await totalClick(existing.id);
@@ -292,7 +296,7 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
 
         return url.originalUrl;
     }
-    await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, id: url.id, userId: url.userId, liveTime: url.liveTime, isProtected: url.password ? true : false, expirationDate: url.expirationDate?.toISOString() || "", }), "EX", 1800);
+    await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, id: url.id, userId: url.userId, liveTime: url.liveTime, isProtected: url.password ? true : false, expirationDate: url.expirationDate?.toISOString() || "", }), "EX", 3600);
 
     if (!isBot) {
         // void analyticsUpdates(url.id, browser, os, device, country, city, referrer, ipAdd).catch(console.error);

@@ -235,9 +235,7 @@ export const resetPassword = async ({ email }) => {
 
         const link = `${process.env.FRONTEND_URL}/reset-password/${token}`;
 
-        // await sendEmail("mk3554299@gmail.com", "Password Reset", link);
-        console.log(link)
-        // await sendEmail(user.email, "Password Reset", link);
+        await sendEmail(user.email, "Password Reset", user.name, link);
         logger.info({ userId: user.id, email: user.email, event: "PASSWORD_RESET_REQUEST" });
         return;
     } catch (error) {

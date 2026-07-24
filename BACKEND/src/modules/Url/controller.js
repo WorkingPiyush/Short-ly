@@ -20,7 +20,7 @@ export const shortUrl = asyncHandler(async (req, res) => {
         res.cookie("tempId", url.tempId, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             maxAge: 1000 * 60 * 60 * 24 * 30,
         })
     }
@@ -46,7 +46,7 @@ export const redirectUrl = asyncHandler(async (req, res) => {
 export const getAllUrls = asyncHandler(async (req, res) => {
     const cursor = req.query.cursor || null;
     const limit = Number(req.query.limit) || 20
-    const url = await urlService.getMyUrl({ userId: req.user?.id, status: req.query.status, cursor, limit});
+    const url = await urlService.getMyUrl({ userId: req.user?.id, status: req.query.status, cursor, limit });
     return res.status(200).json({ success: true, url });
 });
 
