@@ -8,14 +8,19 @@ function ProtectedLinkPage() {
     const params = useParams();
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    
     const url = `${import.meta.env.VITE_BACKEND_URL}/${params.shortCode}`;
     const handleProtectedUrl = async () => {
         try {
+            setLoading(true);
             const res = await getProtectedUrl(params.shortCode, { password: password });
             window.location.href = res.originalUrl;
         } catch (error) {
             toast.error('Invalid Password');
             console.log(error)
+        } finally {
+            setLoading(false);
         }
     }
     return (
@@ -65,7 +70,7 @@ function ProtectedLinkPage() {
                     </button>
                 </div>
 
-                <button onClick={handleProtectedUrl} className="mt-10 w-full h-15 rounded-xl border border-white/10 hover:bg-white/5 transition flex items-center justify-center gap-3 text-xl font-medium text-gray-300 cursor-pointer active:scale-102">
+                <button onClick={handleProtectedUrl} disabled={loading} className="mt-10 w-full h-15 rounded-xl border border-white/10 hover:bg-white/5 transition flex items-center justify-center gap-3 text-xl font-medium text-gray-300 cursor-pointer active:scale-102">
                     <Lock size={20} /> Unlock Link
                 </button>
             </div>

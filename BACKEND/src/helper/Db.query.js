@@ -24,7 +24,7 @@ export const analyticsUpdates = async (id, userAgent, ipAdd, referrer) => {
     const city = ipLocation?.city || "Unknown";
 
     const newReferrer = formatedReferrer(referrer);
-    
+
     await Promise.all([
         client.url.update({
             where: { id },
@@ -154,9 +154,14 @@ export const totalClick = (id) => {
     })
 
 };
-export const countUrl = async (tempId) => {
+export const countTempUrl = async (id) => {
     return await client.url.count({
-        where: { tempId },
+        where: { tempId: id },
+    })
+};
+export const countRegUrl = async (id) => {
+    return await client.url.count({
+        where: { id },
     })
 };
 
@@ -177,7 +182,7 @@ export const userDetails = async (id) => {
             bio: true,
             address: true,
             name: true,
-        }
+        },
     })
 };
 
@@ -208,6 +213,7 @@ export const findUser = async (id) => {
             createdAt: true,
             isVerified: true,
             address: true,
+            urls: true,
         }
     })
 };

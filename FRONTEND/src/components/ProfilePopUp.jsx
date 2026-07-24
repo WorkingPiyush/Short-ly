@@ -29,7 +29,7 @@ function ProfilePopUp({ userInfo, logout, showpopup, onClose }) {
     }, [onClose, location.pathname]);
 
     return (
-        <div ref={popupRef} className='z-100 h-fit w-80 text-black flex flex-col gap-3 bg-white dark:bg-black dark:text-white absolute top-12 right-0 rounded-sm shadow dark:shadow-white shadow-black '>
+        <div ref={popupRef} className='z-100 h-fit md:w-80  text-black flex flex-col gap-3 bg-white dark:bg-black dark:text-white absolute top-12 right-0 rounded-sm shadow dark:shadow-white shadow-black '>
             <div className='flex w-full px-3 py-3 items-center gap-4'>
                 <div className='h-15 w-15 bg-amber-400 dark:bg-amber-950 text-xl text-black dark:text-white flex justify-center items-center rounded-full'>
                     {userInfo?.profileImage ?

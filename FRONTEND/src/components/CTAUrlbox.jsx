@@ -13,6 +13,7 @@ import '../index.css'
 function CTAUrlbox() {
     const inputRef = useRef();
     const location = useLocation();
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const [url, setUrl] = useState("");
     const [expiry, setExpiry] = useState("");
@@ -39,6 +40,7 @@ function CTAUrlbox() {
             return;
         }
         try {
+            setLoading(true);
             const response = await createUrl({ originalUrl: url, singleUse, password: userPassword, expiry });
             setResult(response.shortUrl)
             setResult({
@@ -51,6 +53,8 @@ function CTAUrlbox() {
         } catch (error) {
             toast.error(error.response.data.message || "Backend Url Issue");
             console.error(error.response.data.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -133,7 +137,7 @@ function CTAUrlbox() {
                         </div>
                         <button
                             onClick={handleShorten}
-                            disabled={Boolean(result) || !url.trim()}
+                            disabled={Boolean(result) || !url.trim() || loading}
                             className="text-sm font-medium text-zinc-900 bg-emerald-300 px-5 py-3.5
                 rounded-xl hover:bg-emerald-400 cursor-pointer hover:scale-[1.02] transition-all duration-150
                 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100

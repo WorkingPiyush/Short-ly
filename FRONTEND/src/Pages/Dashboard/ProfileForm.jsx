@@ -5,6 +5,7 @@ import { profileUpdateSchema } from "@/Validator/auth.validator";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from 'react-hot-toast';
+import { fa } from "zod/v4/locales";
 
 // ── Small reusable field wrapper ──────────────────────────────────────────────
 function Field({ label, hint, children }) {
@@ -67,6 +68,7 @@ function CheckIcon() { return <svg viewBox="0 0 24 24" fill="none" stroke="curre
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function ProfileForm() {
     const profileUpdateMutation = useUpdateProfile();
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const { data: user } = useUserInfo()
     const fileRef = useRef();
@@ -108,6 +110,7 @@ export default function ProfileForm() {
 
     // Submit
     const handleSubmit = () => {
+        setLoading(true);
         if (!name.trim()) {
             setNameError(true);
             setTimeout(() => setNameError(false), 1500);
@@ -175,6 +178,8 @@ export default function ProfileForm() {
         } catch (error) {
             toast.error("Profile update error")
             console.error(error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -319,6 +324,7 @@ export default function ProfileForm() {
                     </button>
                     <button
                         onClick={handleSubmit}
+                        disabled={loading}
                         className="flex-1 cursor-pointer flex items-center justify-center gap-2 
               text-[14px] font-medium text-zinc-900 bg-emerald-300
               py-3.5 rounded-xl hover:bg-emerald-200 hover:scale-[1.01]

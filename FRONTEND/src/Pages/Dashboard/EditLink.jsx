@@ -25,6 +25,7 @@ export default function EditLink() {
 
   const params = useParams();
   const { data: short, isLoading } = useshortUrl(params.shortcode);
+  const [loading, setLoading] = useState(false);
   const [originalUrl, setOriginalUrl] = useState("");
   const [isActive, setIsActive] = useState(false);
   const [expirationDate, setExpirationDate] = useState("");
@@ -59,7 +60,7 @@ export default function EditLink() {
     if (short) {
       setOriginalUrl(short?.original_url ?? "");
       setIsActive(short?.isActive ?? "");
-      setLiveTime(formatTimeClock(short?.liveTime) ?? "");
+      setLiveTime(new Date(short?.liveTime) > new Date() ? formatTimeClock(short?.liveTime) : formatTimeClock(new Date() + 10));
       setPasswordProtect(short?.ispaswordprotected ?? "");
       setCategories(short?.category ?? []);
       setSelectedCategoryId(short?.categoryId ?? []);
@@ -69,29 +70,38 @@ export default function EditLink() {
         new Date(short.expiry_date).toISOString().split("T")[0]
       );
     }
-  }, [short])
+  }, [short]);
+
   const handleSave = () => {
     const data = {
       originalUrl: originalUrl !== short?.original_url ? originalUrl : null,
       isActive: isActive !== short?.isActive ? isActive : null,
       expirationDate: new Date(expirationDate).toISOString() !== new Date(short?.expiry_date).toISOString() ? new Date(expirationDate).toISOString() : null,
       liveTime: new Date(liveTime).toISOString() !== new Date(short?.liveTime).toISOString() ? new Date(liveTime).toISOString() : null,
-      password: passwordProtect ? password : null, shortCode: short_Tag, category: categories.find(l => l.id === selectedCategoryId).name
+      password: passwordProtect ? password : null, shortCode: short_Tag, category: categories.find(l => l.id === selectedCategoryId)?.name
     };
     try {
+      setLoading(true);
       urlMutation.mutate(data, {
         onSuccess: async () => {
           toast.success('Url Update Success !!');
           navigate("/dashboard/links", { replace: true });
+        },
+        onError: (err) => {
+          toast.error("Invalid Data !!");
+          console.error(err.message);
         }
       })
     } catch (error) {
       toast.error("Server issue !!");
       console.error(error.message);
+    } finally {
+      setLoading(false);
     }
   }
   const handleDelete = () => {
     try {
+      setLoading(true);
       deleteMutation.mutate(short_Tag, {
         onSuccess: () => {
           toast.success('Url Deleted Success !!');
@@ -101,11 +111,13 @@ export default function EditLink() {
     } catch (error) {
       toast.error("Server issue !!");
       console.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   if (isLoading) return <FullScreenLoader />;
-  
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] px-4 py-10 bg-linear-to-br from-zinc-50 via-white to-emerald-50 dark:from-[#090909] dark:via-[#0b0b0b] dark:to-[#07110d] text-zinc-900 dark:text-white">
       <div className="max-w-4xl mx-auto space-y-2">

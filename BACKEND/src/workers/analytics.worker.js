@@ -1,13 +1,10 @@
 import { Worker } from 'bullmq';
 import { redisClient } from '../../config/redisClient.js';
 import { analyticsUpdates } from '../helper/Db.query.js';
+import logger from '../../config/logger.js';
 
 const worker = new Worker("analytics",
     async (job) => {
-        console.log("=================================");
-        console.log("Job Received");
-        console.log(job.id);
-        console.log(job.name);
         const {
             id,
             userAgent,
@@ -23,13 +20,34 @@ const worker = new Worker("analytics",
     },
     {
         connection: redisClient,
+        concurrency: 5,
     }
 );
-worker.on("ready", () => {
-    console.log("✅ Worker Ready");
-})
-worker.on("error", (err) => {
-    console.error(err);
-});
 
 console.log("Analytics Worker Started");
+
+worker.on("ready", () => {
+    logger.info("✅ Worker Ready")
+});
+
+worker.on("active", (job) => {
+    logger.info(
+        `▶ Processing Job ${job.id} | Attempt ${job.attemptsMade + 1}`
+    );
+});
+
+worker.on("completed", ({ jobId }) => {
+    logger.info(`Job ${jobId} completed`);
+});
+
+worker.on("failed", (job, err) => {
+    logger.error(`Job ${job.id} failed: | Attempt  ${(job.attemptsMade ?? 0) + 1} | ${err.message}`);
+});
+
+worker.on("stalled", ({ jobId }) => {
+    logger.warn(`Job ${jobId} stalled`);
+});
+
+worker.on("error", (err) => {
+    logger.error("Worker Error:", err);
+});

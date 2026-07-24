@@ -26,6 +26,7 @@ import SupportPage from './Pages/Supporting/SupportPage';
 import TermsAndConditionsPage from './Pages/Supporting/TermsAndConditionsPage';
 import ProtectedLayout from './Layout/ProtectedLayout';
 import UnprotectedLayout from './Layout/unProtectedLayout';
+import NotFoundPage from './Pages/Supporting/NotFoundPage';
 
 
 function App() {
@@ -69,6 +70,7 @@ function App() {
           <Route path="/:shortCode/password-verify" element={<ProtectedLinkPage />} />
           <Route path="/:shortCode/status" element={<DestinationDownPage />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <Toaster position="top-center" reverseOrder={false} />
       </div>

@@ -1,7 +1,7 @@
 import dotenv from "dotenv/config";
 import { client } from '../../../config/db.js';
 import { formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, formatUrl, foromtReferrer, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, randomColor, urlKey, urlStatus } from '../../helper/Url.helper.js';
-import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, countUrl, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics, referrerAnalytics, categories, getUrlStatus } from "../../helper/Db.query.js";
+import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics, referrerAnalytics, categories, getUrlStatus, countTempUrl, findUser, countRegUrl } from "../../helper/Db.query.js";
 import { redisClient } from "../../../config/redisClient.js";
 import { AppError } from "../../utils/AppError.js";
 import logger from "../../../config/logger.js";
@@ -22,17 +22,19 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
     }
 
     const normalizedUrl = normalizeUrl(originalUrl);
-
     const urlHash = hashUrl(normalizedUrl);
-
-    if (!userId) {
+    const user = await findUser(userId);
+    if (user?.urls.length === user.plan === "FREE" ? 50 : 1000) {
+        throw new AppError('Maximum URL Quota Reached', 300);
+    }
+    if (!user) {
         let newtempId = null;
 
         if (!tempId) {
             newtempId = crypto.randomUUID();
             tempId = newtempId;
         }
-        const tempUrlCount = await countUrl(tempId);
+        const tempUrlCount = await countTempUrl(tempId);
         if (tempUrlCount === MAX_TEMP_URLS) {
             throw new AppError('Signup required', 400);
         }
@@ -75,6 +77,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
             tempId,
         };
     }
+
     let qrCodeImg;
     const existing = await client.url.findFirst({
         where: {
@@ -93,6 +96,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
             isActive: true,
         }
     });
+
     if (existing) {
         qrCodeImg = await generateQRCode(existing);
         const clicks = await totalClick(existing.id);
@@ -174,7 +178,7 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     const status = await redisClient.get(`url:status:${shortCode}`);
     if (status && status !== null) {
         let res = JSON.parse(status);
-        if (res.status !== "UP") {
+        if (res.status === "SERVER_ERROR") {
             return { pageStatus: "Page not available", shortCode }
         };
     };
@@ -187,12 +191,30 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     };
     if (result && Object.keys(result).length > 0) {
         // console.log("cache Hit", result);
-        const urlStatus = await getUrlStatus(result.originalUrl)
-        if (!urlStatus.ok) {
-            await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: "DOWN", checkedAt: Date.now() }), "EX", 60,)
-            return { pageStatus: "Page not available", shortCode }
+        const response = await getUrlStatus(result.originalUrl)
+        const httpStatus = response.status;
+        let webStatus;
+
+        if (httpStatus >= 200 && httpStatus < 500) {
+            webStatus = "ONLINE";
         }
-        await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: "UP", statusCode: 200, checkedAt: Date.now() }), "EX", 300,)
+        else if (httpStatus === 999) {
+            webStatus = "ONLINE";
+        }
+        if (httpStatus >= 500 && httpStatus < 600) {
+            webStatus = "SERVER_ERROR";
+        }
+        else {
+            webStatus = "UNKNOWN";
+        }
+        await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: webStatus, httpStatus, checkedAt: Date.now() }), "EX", 300,)
+
+        if (webStatus === "SERVER_ERROR") {
+            return {
+                pageStatus: "Page not available",
+                shortCode,
+            };
+        }
         if (result.expirationDate && new Date(result.expirationDate) < new Date()) {
             throw new AppError('Url Expired !!', 404);
         }
@@ -222,12 +244,30 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     if (!url) {
         throw new AppError('Invalid Url', 400);
     }
-    const urlStatus = await getUrlStatus(url.originalUrl)
-    if (!urlStatus.ok) {
-        await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: "DOWN", checkedAt: Date.now() }), "EX", 60,)
-        return { pageStatus: "Page not available", shortCode }
+    const response = await getUrlStatus(url.originalUrl)
+    const httpStatus = response.status;
+    let webStatus;
+
+    if (httpStatus >= 200 && httpStatus < 500) {
+        webStatus = "ONLINE";
     }
-    await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: "UP", statusCode: 200, checkedAt: Date.now() }), "EX", 300,)
+    else if (httpStatus === 999) {
+        webStatus = "ONLINE";
+    }
+    if (httpStatus >= 500 && httpStatus < 600) {
+        webStatus = "SERVER_ERROR";
+    }
+    else {
+        webStatus = "UNKNOWN";
+    }
+    await redisClient.set(`url:status:${shortCode}`, JSON.stringify({ status: webStatus, httpStatus, checkedAt: Date.now() }), "EX", 300,)
+
+    if (webStatus === "SERVER_ERROR") {
+        return {
+            pageStatus: "Page not available",
+            shortCode,
+        };
+    }
 
     if (url.liveTime && new Date() < url.liveTime) {
         throw new AppError("Link is not live yet", 500);
@@ -256,7 +296,7 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
 
         return url.originalUrl;
     }
-    await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, id: url.id, userId: url.userId, liveTime: url.liveTime, isProtected: url.password ? true : false, expirationDate: url.expirationDate?.toISOString() || "", }), "EX", 1800);
+    await redisClient.set(urlKey(url.shortCode), JSON.stringify({ originalUrl: url.originalUrl, id: url.id, userId: url.userId, liveTime: url.liveTime, isProtected: url.password ? true : false, expirationDate: url.expirationDate?.toISOString() || "", }), "EX", 3600);
 
     if (!isBot) {
         // void analyticsUpdates(url.id, browser, os, device, country, city, referrer, ipAdd).catch(console.error);
@@ -601,6 +641,10 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
     };
 
     if (liveTime !== null && liveTime !== undefined) {
+        const scheduleTime = new Date(liveTime);
+        if (scheduleTime <= new Date()) {
+            throw new Error("Schedule time must be in the future.");
+        }
         updatedData.liveTime = liveTime;
     };
 
@@ -806,7 +850,7 @@ export const searchUrl = async ({ query, userId }) => {
     };
     const queryKey = `urlQuery:${query}`;
     let fetchedUrl;
-    const cached = await redisClient.hGet(queryKey, query,);
+    const cached = await redisClient.hget(queryKey, query,);
     if (cached) {
         fetchedUrl = JSON.parse(cached);
         return Promise.all(
@@ -853,8 +897,8 @@ export const searchUrl = async ({ query, userId }) => {
     if (!fetchedUrl) {
         throw new AppError("No matching url found !!", 404);
     }
-    await redisClient.hSet(queryKey, query, JSON.stringify(fetchedUrl));
-    await redisClient.expire(queryKey, query, 1800);
+    await redisClient.hset(queryKey, query, JSON.stringify(fetchedUrl));
+    await redisClient.expire(queryKey, 1800);
     return Promise.all(
         fetchedUrl.map(async (u) => {
             const clicks = await totalClick(u.id);

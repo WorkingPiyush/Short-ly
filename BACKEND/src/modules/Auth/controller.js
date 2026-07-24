@@ -7,16 +7,17 @@ import logger from "../../../config/logger.js";
 import passport from 'passport';
 import '../../../config/passport.auth.js';
 import { tokenAccess, tokenRefresh } from "../../helper/Url.helper.js";
+
 const accessTokenOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 15 * 60 * 1000
 };
 const refreshTokenOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000
 };
 

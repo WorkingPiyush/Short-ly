@@ -49,37 +49,40 @@ function Analytics() {
   }));
 
   const { ref, isVisible } = useInView();
+
   return (
-    <div className="min-h-screen dark:bg-black dark:text-white bg-white text-black p-8">
+    <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white px-4 py-6 md:p-8">
       <div className="max-w-4xl mx-auto">
         {/* HEADER */}
-        <div className="flex justify-between items-start mb-10">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-8 md:mb-10">
           <div>
-            <h1 style={{ fontFamily: "'Syne', sans-serif" }} className="text-3xl">
+            <h1 style={{ fontFamily: "'Syne', sans-serif" }} className="text-xl md:text-3xl">
               Analytics
             </h1>
-            <p className="dark:text-gray-400 text-black mt-2 text-sm">
+            <p className="mt-2 text-xs md:text-sm dark:text-gray-400">
               Track and analyze your link performance.
             </p>
           </div>
         </div>
         {/* ENGAGEMENT */}
         <Card>
-          <div className="flex justify-between mb-8">
-            <h2 className="text-2xl font-semibold">
+          <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
+            <h2 className="text-xl md:text-2xl font-semibold">
               Engagements over time
             </h2>
 
-            {/* CALENDER */}
-            <div className="flex items-center gap-2 border  border-gray-700 px-4 py-2 rounded-xl">
-              <Calendar size={16} />
-              <DropDownBtn time={timePeriod} state={period} setState={setPeriod} />
-
+            <div className="self-center md:self-auto md:ml-auto flex items-center gap-2 border border-gray-700 rounded-xl px-3 py-2">
+              <Calendar size={20} />
+              <DropDownBtn
+                time={timePeriod}
+                state={period}
+                setState={setPeriod}
+              />
             </div>
           </div>
-          <div ref={ref} className="w-full h-70">
+          <div ref={ref} className="w-full h-56 sm:h-64 md:h-72">
             {isVisible && (
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={engagementData} barGap="0" margin={{ top: 5, right: 5, left: 2, bottom: 0, }}>
                   <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
                   <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
@@ -91,8 +94,8 @@ function Analytics() {
             )}
           </div>
           {topLinks?.length ?
-            (<div className="rounded-2xl border border-gray-800 bg-white/3">
-              <table className="w-full">
+            (<div className="rounded-2xl flex items-center border border-gray-800 bg-white/3">
+              <table className="w-full md:min-w-125">
                 <thead>
                   <tr className="border-b border-gray-900">
                     <th className="p-1 text-center text-sm">#</th>
@@ -103,11 +106,9 @@ function Analytics() {
                 <tbody>
                   {topLinks?.map((url, idx) => (
                     <tr key={url?.shortCode} className="border-b border-gray-900 hover:bg-white/2">
-                      <td className="p-4 text-center">{idx + 1}</td>
-                      <td className="p-4 text-center">{`${import.meta.env.VITE_BACKEND_URL}/${url?.shortCode}`}</td>
-                      <td className="p-4 text-xs text-center">{url?.clicks}</td>
-                      <td className="p-4">
-                      </td>
+                      <td className="p-3 text-center">{idx + 1}</td>
+                      <td className="p-3 text-center text-xs break-all">{`${import.meta.env.VITE_BACKEND_URL}/${url.shortCode}`}</td>
+                      <td className="p-3 text-center">{url?.clicks}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -123,8 +124,8 @@ function Analytics() {
 
         {/* LOCATIONS */}
         <Card>
-          <div className="flex justify-between mb-8">
-            <h2 className="text-3xl font-semibold">
+          <div className="flex justify-between">
+            <h2 className="flex items-center text-xl md:text-3xl font-semibold">
               Locations
             </h2>
             <div className="flex bg-[#111827] rounded-xl p-1">
@@ -145,7 +146,7 @@ function Analytics() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {locations?.length > 0 ? (
+              {locations?.length ? (
                 locations.map((item, index) => (
                   <TableRow key={item.country}>
                     <TableCell>{index + 1}</TableCell>
@@ -161,7 +162,7 @@ function Analytics() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-40">
+                  <TableCell colSpan={5} className="h-28 md:h-40">
                     <div className="flex flex-col items-center justify-center gap-2 text-center">
                       <p className="text-sm font-medium">No Location data available</p>
                       <p className="text-xs text-muted-foreground">
@@ -178,18 +179,16 @@ function Analytics() {
         {/* REFERRERS */}
         {referrers?.length ? < DonutSection title="Referrers" data={referrers} />
           : (
-            <div className='flex justify-center items-center'>
-              <TableRow>
-                <TableCell colSpan={5} className="h-40">
-                  <div className="flex flex-col items-center justify-center gap-2 text-center">
-                    <p className="text-sm font-medium">No Pie charts available</p>
-                    <p className="text-xs text-muted-foreground">
-                      Data will appear once tracking starts
-                    </p>
-                  </div>
-                </TableCell>
-              </TableRow>
-            </div>
+            <TableRow>
+              <TableCell colSpan={5} className="h-28 md:h-40">
+                <div className="flex flex-col items-center justify-center gap-2 text-center">
+                  <p className="text-sm font-medium">No Pie charts available</p>
+                  <p className="text-xs text-muted-foreground">
+                    Data will appear once tracking starts
+                  </p>
+                </div>
+              </TableCell>
+            </TableRow>
           )
         }
 
@@ -204,20 +203,20 @@ function DonutSection({ title, data }) {
   const { ref, isVisible } = useInView();
   return (
     <Card>
-      <div className="flex justify-between mb-8">
-        <h2 className="text-3xl font-semibold">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <h2 className="text-xl md:text-3xl font-semibold">
           {title}
         </h2>
       </div>
-      <div ref={ref} className="grid md:grid-cols-2 gap-10 justify-between items-center">
+      <div ref={ref} className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
         {
           isVisible && (
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
                 <Pie
                   data={data}
-                  innerRadius={70}
-                  outerRadius={110}
+                  innerRadius={window.innerWidth < 640 ? 55 : 70}
+                  outerRadius={window.innerWidth < 640 ? 85 : 110}
                   paddingAngle={3}
                   dataKey="value"
                 >
@@ -239,9 +238,9 @@ function DonutSection({ title, data }) {
             </ResponsiveContainer>
           )
         }
-        <div className="space-y-6">
+        <div className="space-y-4 w-full">
           {data?.map((item, index) => (
-            <div key={item.name} className="flex justify-between items-center" >
+            <div key={item.name} className="flex justify-between items-center text-sm md:text-base">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full" style={{ background: COLORS[index], }} />
                 {item.name}
