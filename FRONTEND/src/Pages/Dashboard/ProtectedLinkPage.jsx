@@ -18,7 +18,7 @@ function ProtectedLinkPage() {
             window.location.href = res.originalUrl;
         } catch (error) {
             toast.error('Invalid Password');
-            console.log(error)
+            console.error(error)
         } finally {
             setLoading(false);
         }

@@ -37,7 +37,7 @@ function Login() {
                 onError: async (error) => {
                     if (axios.isAxiosError(error)) {
                         if (error.response) {
-                            console.log(error.response.data.message)
+                            console.error(error.response.data.message)
                             toast.error("Invalid User id or Password");
                         }
                     }

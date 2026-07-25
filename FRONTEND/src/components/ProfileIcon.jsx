@@ -2,7 +2,6 @@
 import React from 'react'
 import { IoIosArrowDown } from "react-icons/io";
 
-// eslint-disable-next-line react/prop-types
 function ProfileIcon({ showpopup, popup, userInfo }) {
     return (
         <button onClick={() => showpopup(!popup)}

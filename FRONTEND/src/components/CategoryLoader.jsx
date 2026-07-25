@@ -1,4 +1,3 @@
-import { Folder } from "lucide-react";
 
 export default function CategoryPageSkeleton() {
     return (

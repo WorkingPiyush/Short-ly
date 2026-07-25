@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import Hero from '../../components/Hero'
 import Stats from '../../components/Stats'
 import WhyShortly from '../../components/WhyShortly'
@@ -10,7 +10,7 @@ import FadeUp from '../../animation/framer-motion'
 import { useUser } from '@/Hooks/useAuth'
 
 function Home() {
-    const { data: user, isLoding } = useUser()
+    const { data: user } = useUser()
     return (
         <div className='h-full'>
             <Hero />

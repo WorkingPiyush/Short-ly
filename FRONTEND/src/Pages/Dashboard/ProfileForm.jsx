@@ -5,7 +5,6 @@ import { profileUpdateSchema } from "@/Validator/auth.validator";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from 'react-hot-toast';
-import { fa } from "zod/v4/locales";
 
 // ── Small reusable field wrapper ──────────────────────────────────────────────
 function Field({ label, hint, children }) {

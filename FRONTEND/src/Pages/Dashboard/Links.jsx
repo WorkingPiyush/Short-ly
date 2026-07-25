@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useRef, useState } from 'react'
 import { useUrl } from '../../Hooks/useUrl.jsx'
 import { IoIosSearch } from "react-icons/io";

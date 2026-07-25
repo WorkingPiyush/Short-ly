@@ -1,6 +1,6 @@
 import React from "react";
 import { SearchX, Home, ArrowLeft, Link2 } from "lucide-react";
-import { replace, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function NotFoundPage() {
   const navigate = useNavigate();

@@ -3,7 +3,6 @@ import React, { useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 
-// eslint-disable-next-line react/prop-types
 function ProfilePopUp({ userInfo, logout, showpopup, onClose }) {
     const navigate = useNavigate();
     const popupRef = useRef(null);

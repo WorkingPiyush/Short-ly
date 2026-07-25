@@ -7,7 +7,6 @@ import Card from '@/components/Card';
 import useInView from '@/Hooks/View';
 import DropDownBtn from '@/components/DropDownBtn';
 import { useAnalytics } from '@/Hooks/useUrl';
-import FullScreenLoader from '@/components/FullScreenLoader';
 
 
 const timePeriod = [
@@ -24,7 +23,7 @@ const COLORS = [
 
 function Analytics() {
   const [period, setPeriod] = useState(7);
-  const { data, isLoading } = useAnalytics({ period });
+  const { data } = useAnalytics({ period });
 
   const totalClicks = data?.totalClicks;
   const engagementData = data?.dailyClicks;

@@ -28,7 +28,7 @@ function Signup() {
         if (!validFormData.success) {
             const { message } = JSON.parse(validFormData.error.message)[0];
             toast.error("Invalid Email or Password");
-            console.log(message);
+            console.error(message);
             return;
         }
         setLoading(true);
@@ -42,7 +42,7 @@ function Signup() {
                     if (axios.isAxiosError(error)) {
                         if (error.response) {
                             toast.error("Invalid Email or Password");
-                            console.log(error.response.data.message)
+                            console.error(error.response.data.message)
                         }
                     }
                 }

@@ -44,7 +44,7 @@ export default function PrivacyPage() {
         </h1>
         <p className="mt-2 text-sm text-white/30">Last updated: July 13, 2026</p>
 
-        <div className="mt-8 flex flex-col gap-6 rounded-2xl border border-white/10 bg-white/[0.02] p-6 sm:p-8">
+        <div className="mt-8 flex flex-col gap-6 rounded-2xl border border-white/10 bg-white/2 p-6 sm:p-8">
           {SECTIONS.map((s) => (
             <div key={s.title}>
               <h2

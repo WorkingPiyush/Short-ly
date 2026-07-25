@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Lock, Eye, EyeOff, RefreshCcw } from "lucide-react";
 import toast from "react-hot-toast";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { updatePassword } from "@/Api/Auth";
 import { passwordSchema } from "@/Validator/auth.validator";
 

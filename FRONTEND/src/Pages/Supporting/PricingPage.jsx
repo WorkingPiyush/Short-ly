@@ -1,5 +1,5 @@
 import React from "react";
-import { Check, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useUser } from "@/Hooks/useAuth";
 
 const plans = [

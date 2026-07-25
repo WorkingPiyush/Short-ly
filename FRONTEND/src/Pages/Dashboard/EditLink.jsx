@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
