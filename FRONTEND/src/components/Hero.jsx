@@ -4,7 +4,7 @@ import UrlShotenBox from './UrlShotenBox'
 function Hero() {
     // bg-white text-black dark:bg-zinc-900 dark:text-white
     return (
-        <div className='flex flex-col items-center justify-center mt-40'>
+        <div className='flex flex-col items-center justify-center pt-40'>
             <div className='inline-flex items-center gap-2 px-5 py-2 rounded-full bg-linear-to-r from-emerald-500/10 to-emerald-400/5 border border-emerald-400/20 text-emerald-300 text-xs font-medium shadow-[0_0_20px_rgba(16,185,129,0,0.15)] md:text-sm'>
                 <span className="w-2 h-2 rounded-full bg-emerald-300 shadow-[0_0_8px_#6ee7b7aa]" />
                 <span>Trusted by 50,000+ users worldwide</span>

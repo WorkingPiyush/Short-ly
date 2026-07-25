@@ -1,5 +1,6 @@
 import React from 'react'
 
+// eslint-disable-next-line react/prop-types
 function InfoCard({ label, value, footer }) {
     return (
         <div className="rounded-2xl bg-linear-to-br from-[#FFFDF9] to-[#F7F2EA] dark:from-zinc-900 dark:to-zinc-950 border border-[#E7DFD3] dark:border-zinc-800 shadow-sm cursor-pointer px-4 py-4

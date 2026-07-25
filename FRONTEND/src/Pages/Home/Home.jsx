@@ -12,7 +12,7 @@ import { useUser } from '@/Hooks/useAuth'
 function Home() {
     const { data: user } = useUser()
     return (
-        <div className='h-full'>
+        <div className='h-ful'>
             <Hero />
             <Stats />
             <FadeUp>
