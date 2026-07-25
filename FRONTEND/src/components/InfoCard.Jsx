@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function InfoCard({ label, value, footer }) {
+function InfoCard({ label, value, footer }) {
     return (
         <div className="rounded-2xl bg-linear-to-br from-[#FFFDF9] to-[#F7F2EA] dark:from-zinc-900 dark:to-zinc-950 border border-[#E7DFD3] dark:border-zinc-800 shadow-sm cursor-pointer px-4 py-4
                  transition-all duration-200 hover:scale-102 hover:shadow-sm hover:shadow-black hover:-translate-y-0.5 ">
@@ -16,3 +16,4 @@ export default function InfoCard({ label, value, footer }) {
     )
 }
 
+export default InfoCard;
