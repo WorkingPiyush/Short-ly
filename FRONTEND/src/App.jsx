@@ -25,7 +25,7 @@ import PrivacyPage from './Pages/Supporting/PrivacyPage';
 import SupportPage from './Pages/Supporting/SupportPage';
 import TermsAndConditionsPage from './Pages/Supporting/TermsAndConditionsPage';
 import ProtectedLayout from './Layout/ProtectedLayout';
-import UnprotectedLayout from './Layout/UnProtectedLayout';
+import UnprotectedLayout from './Layout/UnprotectedLayout';
 import NotFoundPage from './Pages/Supporting/NotFoundPage';
 
 
