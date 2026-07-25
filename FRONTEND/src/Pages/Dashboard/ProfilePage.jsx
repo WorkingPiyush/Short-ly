@@ -6,7 +6,7 @@ import { CiMail } from "react-icons/ci";
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom'
 import { forgetPassword } from '@/Api/Auth';
-import InfoCard from '@/components/InfoCard';
+import InfoCard from "../../components/InfoCard"
 import FullScreenLoader from '@/components/FullScreenLoader.jsx';
 
 
