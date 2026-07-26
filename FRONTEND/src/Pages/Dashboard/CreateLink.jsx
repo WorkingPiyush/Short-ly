@@ -46,6 +46,7 @@ function CreateLink() {
             setisLoading(true);
             const response = await createUrl({ originalUrl: url, singleUse });
             setShortUrl(response.shortUrl)
+
         } catch (error) {
             toast.error(error.response.data.message || "Backend Url Issue");
             console.error(error.response.data.message);

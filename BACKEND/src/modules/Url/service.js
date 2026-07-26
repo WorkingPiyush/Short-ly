@@ -24,7 +24,8 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
     const normalizedUrl = normalizeUrl(originalUrl);
     const urlHash = hashUrl(normalizedUrl);
     const user = await findUser(userId);
-    if (user?.urls.length === user.plan === "FREE" ? 50 : 1000) {
+    const userPlan = user?.plan
+    if (user.urls.length > (userPlan === "FREE" ? 50 : 1000)) {
         throw new AppError('Maximum URL Quota Reached', 300);
     }
     if (!user) {
@@ -369,8 +370,9 @@ export const getMyUrl = async ({ userId, cursor, limit, status = "all" }) => {
     });
 
     if (fetchedUrl.length === 0) {
-        throw new AppError("No Url Found !!");
-    }
+        throw new AppError("No urls", 404);
+    };
+
     let nxtCursor = null;
     if (fetchedUrl.length > limit) {
         const next = fetchedUrl.pop();
@@ -383,30 +385,6 @@ export const getMyUrl = async ({ userId, cursor, limit, status = "all" }) => {
         hasNextPage: nxtCursor !== null,
         limit
     }
-    // return Promise.all(
-    //     fetchedUrl.map(async (u) => {
-    //         const clicks = await totalClick(u.id);
-    //         return {
-    //             id: u.id,
-    //             short_url: `${process.env.BACKEND_URL}/${u.shortCode}`,
-    //             short_code: u.shortCode,
-    //             original_url: u.originalUrl,
-    //             totalClicks: clicks,
-    //             expiry_date: u.expirationDate,
-    //             creation_date: u.createdAt,
-    //             last_update_date: u.updatedAt,
-    //             isPswrdProtected: u.password ? true : false,
-    //             lastVisitedAt: u.lastVisitedAt,
-    //             isActive: await urlStatus(u),
-    //             liveTime: u.liveTime,
-    //             singleUse: u.singleUse,
-    //             userId: u.userId,
-    //             tags: u.tags,
-    //             category: u.category,
-    //             nxtCursor
-    //         }
-    //     })
-    // );
 };
 
 export const UrlInfo = async ({ userId, shortCode }) => {

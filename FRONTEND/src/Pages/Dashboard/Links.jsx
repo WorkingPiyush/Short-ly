@@ -18,9 +18,9 @@ function Links() {
   const [searchResults, setSearchResults] = useState()
   const isSearching = search.trim().length > 0;
   const urlResults = isSearching ? searchResults : urlRecords
-  const totalClicks = urlRecords?.reduce((s, l) => s + l.totalClicks, 0);
-  const activeCount = urlRecords?.filter((l) => l.isActive === "active").length;
-  const expiredCount = urlRecords?.filter((l) => l.isActive === "expired").length;
+  const totalClicks = urlRecords?.reduce((s, l) => s + l?.totalClicks, 0);
+  const activeCount = urlRecords?.filter((l) => l?.isActive === "active").length;
+  const expiredCount = urlRecords?.filter((l) => l?.isActive === "expired").length;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -61,7 +61,7 @@ function Links() {
     { key: "expired", label: "Expired" },
     { key: "SingleUse", label: "Single Use" },
   ];
-
+  
   return (
 
     <div className="min-h-screen dark:bg-[#0a0a0a] dark:text-white bg-white text-black px-4 py-8 md:px-8">
@@ -143,10 +143,10 @@ function Links() {
             ))}
           </div>
         ) :
-          urlResults?.length ? (
+          urlResults?.length  ? (
             <div className="flex flex-col gap-3">
               {urlResults.map((link) => (
-                <LinkCard key={link.id} link={link} />
+                <LinkCard key={link?.id} link={link} />
               ))}
               <div ref={loadMoreRef} style={{ height: 20 }}></div>
               {!hasNextPage && (

@@ -27,7 +27,7 @@ function LinkCard({ link }) {
     const [menuOpen, setMenuOpen] = useState(false);
     const [allTags, setAllTags] = useState(link?.tags);
 
-    const hostname = new URL(link.original_url).hostname.replace(/^www\./, "");
+    const hostname = new URL(link?.original_url).hostname.replace(/^www\./, "");
     const favicon = `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
 
     const TagsToBackend = useMemo(() => debounce(async (tags, shortCode) => {

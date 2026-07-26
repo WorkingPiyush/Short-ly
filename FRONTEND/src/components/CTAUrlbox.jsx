@@ -7,6 +7,7 @@ import { createUrl } from '../Api/Url';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Toggle from './Toggle';
 import '../index.css'
+import { useQueryClient } from '@tanstack/react-query';
 
 
 
@@ -15,6 +16,7 @@ function CTAUrlbox() {
     const location = useLocation();
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const [url, setUrl] = useState("");
     const [expiry, setExpiry] = useState("");
     const [singleUse, setSingleUse] = useState(false);
@@ -43,6 +45,12 @@ function CTAUrlbox() {
             setLoading(true);
             const response = await createUrl({ originalUrl: url, singleUse, password: userPassword, expiry });
             setResult(response.shortUrl)
+            queryClient.refetchQueries({
+                queryKey: ['url'],
+            })
+            console.log(queryClient.refetchQueries({
+                queryKey: ['url'],
+            }))
             setResult({
                 short: response.shortUrl,
                 expiry: response.expiry_date,

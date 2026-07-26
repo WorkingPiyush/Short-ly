@@ -16,8 +16,8 @@ router.post('/logout', routeProtection, logout);
 router.get("/google", GoogleOAuth);
 router.get("/google/callback", passport.authenticate("google", { session: false, failureRedirect: `${process.env.FRONTEND_URL}/login` }), GoogleOAuthcCb)
 
-router.get('/me', getMeLimiter, routeProtection, user);
-router.get("/getMe", getMeLimiter, routeProtection, userDetails)
+router.get('/me',  routeProtection, user);
+router.get("/getMe", routeProtection, userDetails)
 router.put('/update', updateLimiter, routeProtection, imageUpload.single("image"), updateProfile);
 router.post('/reset-password', forgetPassword);
 router.post('/match-password', checkPassword);
