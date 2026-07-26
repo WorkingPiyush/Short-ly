@@ -27,17 +27,17 @@ const worker = new Worker("analytics",
 console.log("Analytics Worker Started");
 
 worker.on("ready", () => {
-    logger.info("✅ Worker Ready")
+    logger.info("Worker Ready")
 });
 
 worker.on("active", (job) => {
     logger.info(
-        `▶ Processing Job ${job.id} | Attempt ${job.attemptsMade + 1}`
+        `Processing Job ${job.id} | Attempt ${job.attemptsMade + 1}`
     );
 });
 
-worker.on("completed", ({ jobId }) => {
-    logger.info(`Job ${jobId} completed`);
+worker.on("completed", (job ) => {
+    logger.info(`Job ${job.id} completed`);
 });
 
 worker.on("failed", (job, err) => {
