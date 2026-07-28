@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 
 function DestinationDownPage({ onGoBack }) {
     const params = useParams()
-    const shortUrl = `${import.meta.env.VITE_BACKEND_URL}/${params.shortCode}`;
+    const shortUrl = `${import.meta.env.VITE_REDIRECT_URL}/${params.shortCode}`;
 
     const handleRetry = async () => {
         window.location.replace(shortUrl);

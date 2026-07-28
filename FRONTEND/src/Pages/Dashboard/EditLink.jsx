@@ -35,7 +35,7 @@ export default function EditLink() {
   const [selectedCategoryId, setSelectedCategoryId] = useState([]);
 
 
-  const shortUrl = `${import.meta.env.VITE_BACKEND_URL}/${location?.pathname.split('/')[3]}`;
+  const shortUrl = `${import.meta.env.VITE_REDIRECT_URL}/${location?.pathname.split('/')[3]}`;
   const short_Tag = location?.pathname.split('/')[3];
 
 
@@ -55,11 +55,12 @@ export default function EditLink() {
     setSelectedCategoryId(id);
   };
 
+
   useEffect(() => {
     if (short) {
       setOriginalUrl(short?.original_url ?? "");
       setIsActive(short?.isActive ?? "");
-      setLiveTime(new Date(short?.liveTime) > new Date() ? formatTimeClock(short?.liveTime) : formatTimeClock(new Date() + 10));
+      setLiveTime(formatTimeClock(short?.liveTime) ?? "");
       setPasswordProtect(short?.ispaswordprotected ?? "");
       setCategories(short?.category ?? []);
       setSelectedCategoryId(short?.categoryId ?? []);
@@ -72,12 +73,19 @@ export default function EditLink() {
   }, [short]);
 
   const handleSave = () => {
+    if (short?.expiry_date && !expirationDate) {
+      toast.error("Expiry date cannot be removed");
+      return;
+    }
+
     const data = {
       originalUrl: originalUrl !== short?.original_url ? originalUrl : null,
       isActive: isActive !== short?.isActive ? isActive : null,
-      expirationDate: new Date(expirationDate).toISOString() !== new Date(short?.expiry_date).toISOString() ? new Date(expirationDate).toISOString() : null,
-      liveTime: new Date(liveTime).toISOString() !== new Date(short?.liveTime).toISOString() ? new Date(liveTime).toISOString() : null,
-      password: passwordProtect ? password : null, shortCode: short_Tag, category: categories.find(l => l.id === selectedCategoryId)?.name
+      expirationDate: expirationDate && new Date(expirationDate).getTime() !== new Date(short?.expiry_date).getTime() ? new Date(expirationDate).toISOString() : null,
+      liveTime: liveTime && new Date(liveTime).getTime() !== new Date(short?.liveTime).getTime() ? new Date(liveTime).toISOString() : null,
+      password: passwordProtect ? password : null,
+      shortCode: short_Tag,
+      category: categories.find(c => c.id === selectedCategoryId)?.name,
     };
     try {
       setLoading(true);
@@ -97,7 +105,8 @@ export default function EditLink() {
     } finally {
       setLoading(false);
     }
-  }
+  };
+
   const handleDelete = () => {
     try {
       setLoading(true);
@@ -166,6 +175,7 @@ export default function EditLink() {
             <Input
               type="url"
               value={originalUrl}
+              autoComplete="url"
               onChange={(e) => setOriginalUrl(e.target.value)}
               placeholder="https://your-long-url.com" />
           </Field>
@@ -253,6 +263,7 @@ export default function EditLink() {
               <div className="relative">
                 <Input
                   type="password"
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Set a password for this link"

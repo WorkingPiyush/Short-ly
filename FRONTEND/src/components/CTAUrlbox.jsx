@@ -134,6 +134,7 @@ function CTAUrlbox() {
                                 ref={inputRef}
                                 type="url"
                                 value={url}
+                                 autoComplete="url"
                                 onChange={(e) => setUrl(e.target.value)}
                                 onKeyDown={(e) => e.key === "Enter" && handleShorten()}
                                 placeholder="https://your-long-url.com"
@@ -188,6 +189,7 @@ function CTAUrlbox() {
                             <input
                                 type="date"
                                 value={expiry}
+                                 autoComplete="date"
                                 onChange={(e) => setExpiry(e.target.value)}
                                 disabled={Boolean(result)}
                                 className="dark:bg-white/3 border text-black dark:border-white/8 border-black/20 rounded-[10px]
@@ -208,6 +210,7 @@ function CTAUrlbox() {
                                 <input
                                     type={`${showPassword ? "text" : "password"}`}
                                     value={userPassword}
+                                     autoComplete="new-password"
                                     onChange={(e) => setUserPassword(e.target.value)}
                                     onKeyDown={(e) => e.key === "Enter" && handleShorten()}
                                     placeholder="Password for Url Protection"

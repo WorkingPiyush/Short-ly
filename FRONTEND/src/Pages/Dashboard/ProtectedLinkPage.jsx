@@ -10,7 +10,7 @@ function ProtectedLinkPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     
-    const url = `${import.meta.env.VITE_BACKEND_URL}/${params.shortCode}`;
+    const url = `${import.meta.env.VITE_REDIRECT_URL}/${params.shortCode}`;
     const handleProtectedUrl = async () => {
         try {
             setLoading(true);

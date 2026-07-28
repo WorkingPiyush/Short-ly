@@ -63,6 +63,7 @@ export function TagMenu({ onClose, tags, onCreateTags, remove }) {
                         <input
                             autoFocus
                             value={newName}
+                             autoComplete="tags"
                             onChange={(e) => setNewName(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && submitNewTags()}
                             placeholder="Category name"

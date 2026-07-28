@@ -112,6 +112,7 @@ export const verifyPassword = asyncHandler(async (req, res) => {
         password: req.body.password,
         shortCode: req.params.shortCode,
         userAgent: req.headers["user-agent"],
+        referrer: req.headers.referer,
         ipAdd: process.env.NODE_ENV === 'production' ? req.headers["x-forwarded-for"] || req.socket.remoteAddress : '45.118.167.50'
     });
     if (result.isMatch) {

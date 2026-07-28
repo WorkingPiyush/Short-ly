@@ -36,6 +36,7 @@ function UrlShotenBox() {
                 <div className='flex items-center gap-2 bg-[#0f0f0f] rounded-xl p-2'>
                     <input type="text"
                         placeholder='Enter your link'
+                         autoComplete="link"
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
                         className='flex-1 bg-gray-200/20 dark:bg-gray-300/20 text-white placeholder:text-white/60 

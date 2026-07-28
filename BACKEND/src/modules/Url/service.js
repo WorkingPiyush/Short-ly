@@ -581,7 +581,7 @@ export const UrlDelete = async ({ userId, shortCode }) => {
 };
 
 export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive, shortCode, password, liveTime, tags, categoryName }) => {
-    // logger.info(userId, originalUrl, expirationDate, isActive, shortCode, password, liveTime, tags, categoryName)
+    // logger.info({ userId, originalUrl, expirationDate, isActive, shortCode, password, liveTime, tags, categoryName })
 
     let updatedData = {};
     if (originalUrl !== null && originalUrl !== undefined) {
@@ -690,7 +690,7 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
             return category;
         })
     };
-    if (Object.entries(updatedData).length === 0) {
+    if (Object.entries(updatedData).length === 0 && !tags && !categoryName) {
         throw new Error("No fields to update");
     };
 
@@ -744,7 +744,7 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
     return true;
 };
 
-export const passwordVerify = async ({ password, shortCode, userAgent, ipAdd }) => {
+export const passwordVerify = async ({ password, shortCode, userAgent, ipAdd, referrer }) => {
     const url = await client.url.findUnique({
         where: { shortCode },
         select: {
@@ -759,7 +759,7 @@ export const passwordVerify = async ({ password, shortCode, userAgent, ipAdd }) 
         throw new AppError("Invalid password", 500);
     } else {
         void analyticsQueue.add("click", {
-            id: result.id,
+            id: url.id,
             userAgent,
             ipAdd,
             referrer,

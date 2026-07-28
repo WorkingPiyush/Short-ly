@@ -106,7 +106,7 @@ function Analytics() {
                   {topLinks?.map((url, idx) => (
                     <tr key={url?.shortCode} className="border-b border-gray-900 hover:bg-white/2">
                       <td className="p-3 text-center">{idx + 1}</td>
-                      <td className="p-3 text-center text-xs break-all">{`${import.meta.env.VITE_BACKEND_URL}/${url.shortCode}`}</td>
+                      <td className="p-3 text-center text-xs break-all">{`${import.meta.env.VITE_REDIRECT_URL}/${url.shortCode}`}</td>
                       <td className="p-3 text-center">{url?.clicks}</td>
                     </tr>
                   ))}

@@ -56,9 +56,11 @@ function CategorySection({ categories, selectedId, onSelect, onCreate }) {
                 {creating ? (
                     <div className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/3 px-2 py-1.5">
                         <input
+                            name="category_label"
                             type='text'
                             autoFocus
                             value={newName}
+                            autoComplete="off"
                             onChange={(e) => setNewName(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && submitNewCategory()}
                             placeholder="Category name"

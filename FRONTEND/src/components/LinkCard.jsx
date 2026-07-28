@@ -110,7 +110,6 @@ function LinkCard({ link }) {
                             </Link>
                             <CopyButton text={link.short_url} status={link.isActive} />
                         </div>
-
                         {allTags?.length > 0 && (
                             <div className="mt-3 flex flex-wrap gap-1.5">
                                 {allTags.map((cat) => {
