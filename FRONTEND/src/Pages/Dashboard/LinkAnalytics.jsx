@@ -96,7 +96,7 @@ function LinkAnalytics() {
                     <div className="flex justify-between mb-8">
                         <h2 className="text-3xl font-semibold">Locations</h2>
                         <div className="flex dark:bg-[#111827] text-black rounded-xl p-1">
-                            <button className="px-4 py-2 dark:bg-black text-black border-2 border-dashed cursor-pointer rounded-lg active:bg-gray-950/10">
+                            <button className="px-4 py-2 dark:bg-black text-black dark:text-white border-2 border-dashed cursor-pointer rounded-lg active:bg-gray-950/10">
                                 Countries
                             </button>
                         </div>

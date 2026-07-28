@@ -145,12 +145,6 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
             password: hashedPassword,
         }
     });
-    await redisClient.del(`Allurls:${userId}`);
-    await redisClient.del(urlKey(shortCode));
-    await redisClient.del(`url:${shortCode}`);
-    await redisClient.del(`Allurls:${userId}`);
-    await redisClient.del(`urlanalytics:${shortCode}`);
-    await redisClient.del(`userAnalytics:${userId}`);
     qrCodeImg = await generateQRCode(newUrl);
 
     const responseUrl = {
@@ -229,6 +223,8 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
             if (!isBot) {
                 // void analyticsUpdates(result.id, browser, os, device, country, city, referrer, ipAdd).catch(console.error);
                 logger.info(await analyticsQueue.getJobCounts());
+                await redisClient.del(`urlanalytics:${shortCode}`);
+                await redisClient.del(`userAnalytics:${result.userId}`);
                 void analyticsQueue.add("click", {
                     id: result.id,
                     userAgent,
@@ -302,6 +298,8 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     if (!isBot) {
         // void analyticsUpdates(url.id, browser, os, device, country, city, referrer, ipAdd).catch(console.error);
         logger.info(await analyticsQueue.getJobCounts());
+        await redisClient.del(`urlanalytics:${shortCode}`);
+        await redisClient.del(`userAnalytics:${url.id}`);
         void analyticsQueue.add("click", {
             id: url.id,
             userAgent,
