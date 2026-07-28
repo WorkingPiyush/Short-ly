@@ -14,7 +14,7 @@ export const findFirstUrl = async (shortCode) => {
 
 export const analyticsUpdates = async (id, userAgent, ipAdd, referrer) => {
     const userInfo = deviceDetector.parse(userAgent);
-    const browser = userInfo.client.name || "Unknown";;
+    const browser = userInfo.client.name || "Unknown";
     const os = userInfo.os?.name || "Third Client Agent";
     const device = userInfo.device?.type || "desktop";
 
@@ -24,7 +24,15 @@ export const analyticsUpdates = async (id, userAgent, ipAdd, referrer) => {
     const city = ipLocation?.city || "Unknown";
 
     const newReferrer = formatedReferrer(referrer);
-
+    logger.info({
+        urlId: id,
+        browser,
+        os,
+        device,
+        country,
+        city,
+        referrer: newReferrer,
+    })
     await Promise.all([
         client.url.update({
             where: { id },

@@ -24,8 +24,6 @@ const worker = new Worker("analytics",
     }
 );
 
-console.log("Analytics Worker Started");
-
 worker.on("ready", () => {
     logger.info("Worker Ready")
 });
