@@ -33,8 +33,6 @@ export default function EditLink() {
   const [password, setPassword] = useState("");
   const [categories, setCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState([]);
-
-
   const shortUrl = `${import.meta.env.VITE_REDIRECT_URL}/${location?.pathname.split('/')[3]}`;
   const short_Tag = location?.pathname.split('/')[3];
 
@@ -59,7 +57,7 @@ export default function EditLink() {
   useEffect(() => {
     if (short) {
       setOriginalUrl(short?.original_url ?? "");
-      setIsActive(short?.isActive ?? "");
+      setIsActive(short?.isActive === "active" ? true : false);
       setLiveTime(formatTimeClock(short?.liveTime) ?? "");
       setPasswordProtect(short?.ispaswordprotected ?? "");
       setCategories(short?.category ?? []);

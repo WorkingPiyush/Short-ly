@@ -31,7 +31,7 @@ function CategorySection({ categories, selectedId, onSelect, onCreate }) {
         <SectionCard icon={Tags} title="Category">
             <p className="mb-3 text-sm font-medium text-white/80">Assign category</p>
             <div className="flex flex-wrap gap-2.5">
-                {categories.map((cat) => {
+                {categories?.map((cat) => {
                     const isSelected = selectedId === cat.id;
                     return (
                         <button

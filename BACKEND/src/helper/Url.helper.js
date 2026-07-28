@@ -4,7 +4,7 @@ import qrcode from 'qrcode';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { totalClick } from "./Db.query.js";
+import { categories, totalClick } from "./Db.query.js";
 
 export const isValidUrl = (url) => {
     try {
@@ -40,7 +40,7 @@ export const generateShortCode = () => {
 };
 
 export const generateQRCode = async (input) => {
-    return await qrcode.toDataURL(`${process.env.BACKEND_URL}/${input.shortCode}`);
+    return await qrcode.toDataURL(`${process.env.REDIRECT_URL}/${input.shortCode}`);
 }
 export const urlKey = (shortCode) => {
     return `ShortCode:${shortCode}`
@@ -102,7 +102,7 @@ export const formatUrl = (url) => {
             const status = await urlStatus(l);
             return {
                 id: l.id,
-                short_url: `${process.env.BACKEND_URL}/${l.shortCode}`,
+                short_url: `${process.env.REDIRECT_URL}/${l.shortCode}`,
                 short_code: l.shortCode,
                 original_url: l.originalUrl,
                 totalClicks: clicks,
@@ -121,6 +121,23 @@ export const formatUrl = (url) => {
         })
     )
 };
+
+export const formaturlInfo = async (url) => {
+    const status = await urlStatus(url);
+    const category = await categories(url.userId);
+    return {
+        short_url: `${process.env.REDIRECT_URL}/${url.shortCode}`,
+        original_url: url.originalUrl,
+        isActive: status,
+        expiry_date: url.expirationDate,
+        creation_date: url.createdAt,
+        last_update_date: url.updatedAt,
+        liveTime: url.liveTime,
+        tags: url.tags,
+        categoryId: url.categoryId,
+        category: category
+    }
+}
 
 export const passwordHashing = async (password, salt) => {
     return await bcrypt.hash(password, salt);
@@ -145,6 +162,9 @@ export const urlStatus = async (url) => {
     if (expiryDate <= now) {
         return "expired";
     }
+    if (url.isActive === false) {
+        return "inactive"
+    }
     return "active";
 };
 
@@ -162,6 +182,8 @@ export const formatedReferrer = (ref) => {
 
     return "Other";
 };
+
+
 
 export const hashIP = (ipAdd) => {
     return crypto.createHash("sha256").update(ipAdd).digest("hex");

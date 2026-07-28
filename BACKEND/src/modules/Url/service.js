@@ -1,6 +1,6 @@
 import dotenv from "dotenv/config";
 import { client } from '../../../config/db.js';
-import { formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, formatUrl, foromtReferrer, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, randomColor, urlKey, urlStatus } from '../../helper/Url.helper.js';
+import { formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, formatUrl, formaturlInfo, foromtReferrer, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, randomColor, urlKey, urlStatus } from '../../helper/Url.helper.js';
 import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics, referrerAnalytics, categories, getUrlStatus, countTempUrl, findUser, countRegUrl } from "../../helper/Db.query.js";
 import { redisClient } from "../../../config/redisClient.js";
 import { AppError } from "../../utils/AppError.js";
@@ -50,7 +50,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
         if (existingTempUrl) {
             return {
                 originalUrl: existingTempUrl.originalUrl,
-                shortUrl: `${process.env.BACKEND_URL}/${existingTempUrl.shortCode}`,
+                shortUrl: `${process.env.REDIRECT_URL}/${existingTempUrl.shortCode}`,
                 clicks: existingTempUrl.clicks,
                 expirationDate: existingTempUrl.expirationDate,
                 tempId,
@@ -71,7 +71,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
         })
         return {
             originalUrl: tempNewUrl.originalUrl,
-            shortUrl: `${process.env.BACKEND_URL}/${tempNewUrl.shortCode}`,
+            shortUrl: `${process.env.BACREDIRECT_URLKEND_URL}/${tempNewUrl.shortCode}`,
             clicks: tempNewUrl.clicks,
             expirationDate: tempNewUrl.expirationDate,
             userId: tempNewUrl.userId,
@@ -102,7 +102,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
         qrCodeImg = await generateQRCode(existing);
         const clicks = await totalClick(existing.id);
         return {
-            shortUrl: `${process.env.BACKEND_URL}/${existing.shortCode}`,
+            shortUrl: `${process.env.REDIRECT_URL}/${existing.shortCode}`,
             originalUrl: existing.originalUrl,
             shorCode: existing.shortCode,
             expiry_date: existing.expirationDate,
@@ -148,7 +148,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
     qrCodeImg = await generateQRCode(newUrl);
 
     const responseUrl = {
-        shortUrl: `${process.env.BACKEND_URL}/${newUrl.shortCode}`,
+        shortUrl: `${process.env.REDIRECT_URL}/${newUrl.shortCode}`,
         shorCode: newUrl.shortCode,
         originalUrl: newUrl.originalUrl,
         isActive: await urlStatus(newUrl),
@@ -393,25 +393,14 @@ export const UrlInfo = async ({ userId, shortCode }) => {
     const queryKey = `url:${shortCode}`;
     const cached = await redisClient.get(queryKey);
     if (cached) {
-        const Url = JSON.parse(cached);
-        return {
-            short_url: `${process.env.BACKEND_URL}/${Url.shortCode}`,
-            original_url: Url.originalUrl,
-            isActive: await urlStatus(Url),
-            expiry_date: Url.expirationDate,
-            creation_date: Url.createdAt,
-            last_update_date: Url.updatedAt,
-            liveTime: Url.liveTime,
-            tags: Url.tags,
-            categoryId: Url.categoryId,
-            category: await categories(userId),
-        }
+        return JSON.parse(cached);
     }
     const Url = await client.url.findFirst({
         where: { userId, shortCode, isDeleted: false },
         select: {
             id: true,
             originalUrl: true,
+            userId: true,
             shortCode: true,
             expirationDate: true,
             createdAt: true,
@@ -419,8 +408,9 @@ export const UrlInfo = async ({ userId, shortCode }) => {
             liveTime: true,
             lastVisitedAt: true,
             tags: true,
+            isActive: true,
             categoryId: true,
-            category: true
+            category: true,
         }
     });
 
@@ -428,21 +418,10 @@ export const UrlInfo = async ({ userId, shortCode }) => {
         logger.error("Url not found");
         throw new AppError('Url not found', 404);
     }
+    const urlInfo = formaturlInfo(Url);
+    await redisClient.set(queryKey, JSON.stringify(urlInfo), "EX", 600);
+    return urlInfo;
 
-    await redisClient.set(queryKey, JSON.stringify(Url), "EX", 600);
-
-    return {
-        short_url: `${process.env.BACKEND_URL}/${Url.shortCode}`,
-        original_url: Url.originalUrl,
-        isActive: await urlStatus(Url),
-        expiry_date: Url.expirationDate,
-        creation_date: Url.createdAt,
-        last_update_date: Url.updatedAt,
-        liveTime: Url.liveTime,
-        tags: Url.tags,
-        categoryId: Url.categoryId,
-        category: await categories(userId),
-    }
 };
 
 export const CategoriedUrls = async ({ userId }) => {
@@ -519,7 +498,7 @@ export const UrlAnalytics = async ({ userId, shortCode, period }) => {
         throw new Error("No Url Found");
     }
     const response = {
-        short_url: `${process.env.BACKEND_URL}/${Url.shortCode}`,
+        short_url: `${process.env.REDIRECT_URL}/${Url.shortCode}`,
         original_url: Url.originalUrl,
         totalClicks: totalClicks,
         topBrowsers: formatBrowser(topBrowsers),
@@ -731,7 +710,7 @@ export const UrlUpdate = async ({ userId, originalUrl, expirationDate, isActive,
     await redisClient.del(`userAnalytics:${userId}`);
 
     return {
-        short_url: `${process.env.BACKEND_URL}/${updatedUrl.shortCode}`,
+        short_url: `${process.env.REDIRECT_URL}/${updatedUrl.shortCode}`,
         original_url: updatedUrl.originalUrl,
         expiry_date: updatedUrl.expirationDate,
         isPswrdProtected: updatedUrl.password ? true : false,
@@ -834,7 +813,7 @@ export const searchUrl = async ({ query, userId }) => {
                 const clicks = await totalClick(u.id);
                 return {
                     id: u.id,
-                    short_url: `${process.env.BACKEND_URL}/${u.shortCode}`,
+                    short_url: `${process.env.REDIRECT_URL}/${u.shortCode}`,
                     short_code: u.shortCode,
                     original_url: u.originalUrl,
                     totalClicks: clicks,
@@ -880,7 +859,7 @@ export const searchUrl = async ({ query, userId }) => {
             const clicks = await totalClick(u.id);
             return {
                 id: u.id,
-                short_url: `${process.env.BACKEND_URL}/${u.shortCode}`,
+                short_url: `${process.env.REDIRECT_URL}/${u.shortCode}`,
                 short_code: u.shortCode,
                 original_url: u.originalUrl,
                 totalClicks: clicks,
