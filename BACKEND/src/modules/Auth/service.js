@@ -129,7 +129,7 @@ export const loginUser = async ({ email, password }) => {
         const accessToken = tokenAccess(user.id);
         const refreshToken = tokenRefresh(user.id);
         const tokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
-        await prisma.refreshToken.deleteMany({
+        await client.refreshToken.deleteMany({
             where: {
                 userId: user.id
             }
