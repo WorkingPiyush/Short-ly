@@ -418,7 +418,7 @@ export const UrlInfo = async ({ userId, shortCode }) => {
         logger.error("Url not found");
         throw new AppError('Url not found', 404);
     }
-    const urlInfo = formaturlInfo(Url);
+    const urlInfo = await formaturlInfo(Url);
     await redisClient.set(queryKey, JSON.stringify(urlInfo), "EX", 600);
     return urlInfo;
 

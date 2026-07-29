@@ -42,6 +42,10 @@ export const useUpdateUrl = () => {
                 queryKey: ['short'],
                 refetchType: "active",
             })
+            queryClient.refetchQueries({
+                queryKey: ['category'],
+                refetchType: "active",
+            })
         },
     });
 };

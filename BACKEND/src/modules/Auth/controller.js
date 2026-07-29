@@ -127,15 +127,15 @@ export const logout = asyncHandler(async (req, res) => {
 export const GoogleOAuth = passport.authenticate("google", { scope: ["profile", "email"], session: false });
 export const GoogleOAuthcCb = (req, res) => {
     const user = req.user;
-    console.log("user: ", user);
+    // console.log("user: ", user);
     const accessToken = tokenAccess(user.id);
     const refreshToken = tokenRefresh(user.id);
-    console.log({ accessToken, refreshToken })
+    // console.log({ accessToken, refreshToken })
     res.cookie("accessToken", accessToken, accessTokenOptions);
     res.cookie("refreshToken", refreshToken, refreshTokenOptions);
     logger.info("User Loggedin using oAuth");
     res.clearCookie("tempId");
-    res.redirect(process.env.FRONTEND_URL);
+    res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
 };
 
 export const forgetPassword = asyncHandler(async (req, res) => {
