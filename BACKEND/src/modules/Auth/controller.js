@@ -117,18 +117,8 @@ export const logout = asyncHandler(async (req, res) => {
         refreshToken: req.cookies.refreshToken
     });
 
-    res.clearCookie("accessToken", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax"
-    });
-
-    res.clearCookie("refreshToken", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax"
-    });
-
+    res.clearCookie("accessToken", accessTokenOptions);
+    res.clearCookie("refreshToken", refreshTokenOptions);
     res.json({
         success: true,
     })
@@ -137,8 +127,10 @@ export const logout = asyncHandler(async (req, res) => {
 export const GoogleOAuth = passport.authenticate("google", { scope: ["profile", "email"], session: false });
 export const GoogleOAuthcCb = (req, res) => {
     const user = req.user;
+    console.log("user: ", user);
     const accessToken = tokenAccess(user.id);
     const refreshToken = tokenRefresh(user.id);
+    console.log({ accessToken, refreshToken })
     res.cookie("accessToken", accessToken, accessTokenOptions);
     res.cookie("refreshToken", refreshToken, refreshTokenOptions);
     logger.info("User Loggedin using oAuth");
