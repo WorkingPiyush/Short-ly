@@ -11,17 +11,8 @@ const allowedImageMimeTypes = [
 const allowedExcelMimeTypes = ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/csv", "application/csv",];
 const allowedExt = [".xlsx", ".csv"];
 
-export const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "./src/uploads");
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname);
-    }
-});
-
 export const excelUpload = multer({
-    storage,
+    storage: multer.memoryStorage(),
     limits: {
         fileSize: 5 * 1024 * 1024, // 5MB
         files: 1,

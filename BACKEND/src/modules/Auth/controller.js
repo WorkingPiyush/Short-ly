@@ -103,7 +103,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
     const user = await authService.update({
         userId: req.user.id,
         data: validatedBody.data,
-        file: req.file,
+        fileBuffer: req.file?.buffer,
     });
 
     return res.status(200).json({

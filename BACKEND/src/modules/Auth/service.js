@@ -55,12 +55,12 @@ export const userInfo = async ({ userId }) => {
     };
 };
 
-export const update = async ({ userId, data, file }) => {
+export const update = async ({ userId, data, fileBuffer }) => {
     const user = await findUser(userId);
     let inputData = { ...data };
 
-    if (file) {
-        const uploaded = await uploadImages(file);
+    if (fileBuffer) {
+        const uploaded = await uploadImages(fileBuffer);
         inputData.profileImage = uploaded.secure_url;
     }
     const updatedUser = await client.user.update({

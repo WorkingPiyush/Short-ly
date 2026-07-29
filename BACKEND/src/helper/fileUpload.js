@@ -1,21 +1,17 @@
 import cloudinary from '../../config/cloudinary.js';
 import streamifier from 'streamifier';
+import { AppError } from '../utils/AppError.js';
 
-async function uploadImages(file) {
+function uploadImages(fileBuffer) {
     return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream((error, uploadResult) => {
             if (error) {
                 return reject(error);
             }
-            return resolve(uploadResult);
-        }).end(file.buffer);
-    }).then((uploadResult) => {
-        console.log(`Buffer upload_stream wth promise success - ${uploadResult.public_id}`);
-        return uploadResult;
-    }).catch((error) => {
-        console.error(error);
+            resolve(uploadResult);
+        });
+        stream.end(fileBuffer);
     });
-
 }
 
 export default uploadImages;

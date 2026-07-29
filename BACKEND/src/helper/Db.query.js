@@ -24,15 +24,6 @@ export const analyticsUpdates = async (id, userAgent, ipAdd, referrer) => {
     const city = ipLocation?.city || "Unknown";
 
     const newReferrer = formatedReferrer(referrer);
-    logger.info({
-        urlId: id,
-        browser,
-        os,
-        device,
-        country,
-        city,
-        referrer: newReferrer,
-    })
     await Promise.all([
         client.url.update({
             where: { id },
@@ -54,7 +45,6 @@ export const analyticsUpdates = async (id, userAgent, ipAdd, referrer) => {
             }
         }),
     ]);
-    logger.info("Analytics updated");
 };
 export const urlCountUpdate = async (id) => {
     return client.url.update({

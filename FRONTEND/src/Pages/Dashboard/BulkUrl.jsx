@@ -47,7 +47,7 @@ function BulkUrl() {
       setIsLoading(true);
       const data = await createBulkUrl(formData);
       setResponse(data);
-      toast.success("File Uploaded !!");
+      toast.success("File Processed !!");
     } catch (error) {
       console.error('Error uploading file:', error);
       console.error(error.message);
@@ -101,7 +101,7 @@ function BulkUrl() {
             <h3 className={`text-2xl font-medium dark:text-white text-zinc-700 ${dragActive && "scale-110"}`}>Drag & Drop Excel File</h3>
 
             <p className="text-gray-500 text-sm mt-2">
-              Supports .xlsx and .xls • Max 10 MB
+              Supports .xlsx and .xls • Max 5 MB
             </p>
           </label>
         </div>
@@ -117,7 +117,7 @@ function BulkUrl() {
                   className="text-emerald-400"
                 />
                 <div>
-                  <p className="font-medium">
+                  <p className="font-medium dark:text-white">
                     {file.name}
                   </p>
                   <p className="text-sm text-gray-500">
@@ -126,7 +126,7 @@ function BulkUrl() {
                 </div>
               </div>
               <button onClick={removeFile} className="p-2 border border-gray-700 rounded-lg cursor-pointer hover:border-red-500 hover:text-red-500 hover:scale-105 transition-all duration-200 ease-linear">
-                <Trash2 size={18} />
+                <Trash2 size={18} color='white' />
               </button>
             </div>
             <button aria-label='upload' onClick={handleUpload} disabled={isLoading} className="flex justify-center items-center gap-4 py-4 px-4 border m-2  dark:border-gray-700 border-black/30 dark:bg-gray-950 bg-emerald-500 rounded-lg cursor-pointer transition-all duration-150 delay-10 hover:border-emerald-400 hover:scale-103">

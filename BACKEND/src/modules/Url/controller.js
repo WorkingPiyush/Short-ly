@@ -123,7 +123,7 @@ export const verifyPassword = asyncHandler(async (req, res) => {
 
 export const bulkShortUrl = asyncHandler(async (req, res) => {
     const result = await urlService.shortUrlBulk({
-        filePath: req.file.path,
+        fileBuffer: req.file.buffer,
         userId: req.user?.id,
     })
     return res.status(200).json({ success: true, url: result })

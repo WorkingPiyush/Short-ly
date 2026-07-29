@@ -747,11 +747,12 @@ export const passwordVerify = async ({ password, shortCode, userAgent, ipAdd, re
     }
 };
 
-export const shortUrlBulk = async ({ filePath, userId }) => {
+export const shortUrlBulk = async ({ fileBuffer, userId }) => {
+    let workbook;
     try {
-        let workbook;
         try {
-            workbook = XLSX.readFile(filePath, {
+            workbook = XLSX.read(fileBuffer, {
+                type: "buffer",
                 cellFormula: false,
                 cellHTML: false,
                 cellText: false,
@@ -793,8 +794,9 @@ export const shortUrlBulk = async ({ filePath, userId }) => {
             finalResults.push(...result);
         }
         return finalResults;
-    } finally {
-        if (fs.existsSync(filePath)) { fs.unlinkSync(filePath) };
+    } catch (err) {
+        console.log(err)
+        throw new AppError("Invalid Input", 500);
     }
 };
 
