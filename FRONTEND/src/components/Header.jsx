@@ -38,7 +38,7 @@ function Header() {
     }
     return (
         <header className={`flex justify-center items-center fixed top-5 left-0 right-0 z-50 `}>
-            <div className={`bg-white text-black dark:bg-zinc-900 dark:text-white px-7 py-5 border ${isScrolled ? "w-3xl" : "w-4xl"}  border-black/65 dark:border-white/65  rounded-2xl backdrop-blur-md transition-all duration-250 ease-in-out`}>
+            <div className={`bg-white text-black dark:bg-zinc-900 dark:text-white px-7 py-5 border ${isScrolled ? "md:w-4xl" : "md:w-5xl"}  border-black/65 dark:border-white/65  rounded-2xl backdrop-blur-md transition-all duration-250 ease-in-out`}>
 
                 <div className="flex items-center md:justify-between sm:justify-between md:gap-12 gap-10">
                     {/* Logo */}

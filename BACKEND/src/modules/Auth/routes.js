@@ -18,7 +18,8 @@ router.get("/google/callback", passport.authenticate("google", { session: false,
 
 router.get('/me',  routeProtection, user);
 router.get("/getMe", routeProtection, userDetails)
-router.put('/update', updateLimiter, routeProtection, imageUpload.single("image"), updateProfile);
+// router.put('/update', updateLimiter, routeProtection, imageUpload.single("image"), updateProfile);
+router.put('/update', routeProtection, imageUpload.single("image"), updateProfile);
 router.post('/reset-password', forgetPassword);
 router.post('/match-password', checkPassword);
 

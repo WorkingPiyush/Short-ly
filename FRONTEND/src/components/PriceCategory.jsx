@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
+import toast from 'react-hot-toast'
 
 function PriceCategory({ Currentplan }) {
     const plans = [
@@ -83,6 +84,9 @@ function PriceCategory({ Currentplan }) {
 
                         {/* Button */}
                         <button
+                        onClick={()=>{
+                            toast.success("We will soon enable this functionality")
+                        }}
                             className={`w-full py-3 rounded-lg border ${plan.tag.toUpperCase() === Currentplan 
                                 ? 'bg-emerald-400 text-black border-emerald-400 active:scale-95'
                                 : 'border-gray-700 text-white active:scale-102'

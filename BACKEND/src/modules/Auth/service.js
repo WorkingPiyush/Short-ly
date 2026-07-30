@@ -17,14 +17,15 @@ const RESET_TOKEN_EXPIRY_MINUTES = Number(process.env.RESET_TOKEN_EXPIRY_MINUTES
 
 
 export const getUser = async ({ userId }) => {
-    const data = await redisClient.get(`user:${userId}`);
+    const query = `user:${userId}`;
+    const data = await redisClient.get(query);
     if (data) {
         let res = JSON.parse(data);
         return res;
     };
     const user = await findUser(userId);
 
-    await redisClient.set(`user:${userId}`, JSON.stringify(user), "EX", 1200);
+    await redisClient.set(query, JSON.stringify(user), "EX", 1200);
     if (!user) {
         throw new AppError("User not found", 404);
     }
@@ -83,6 +84,7 @@ export const update = async ({ userId, data, fileBuffer }) => {
             address: true,
         }
     })
+    redisClient.del(`user:${userId}`);
     return updatedUser;
 };
 
@@ -149,6 +151,7 @@ export const loginUser = async ({ email, password }) => {
         }).catch((err) => {
             console.error("Failed to update last login:", err);
         });
+        redisClient.del(`user:${user.id}`);
         logger.info({ id: user.id, name: user.name, email: user.email }, 'User logged');
         return { id: user.id, name: user.name, email: user.email, accessToken, refreshToken };
     } catch (err) {

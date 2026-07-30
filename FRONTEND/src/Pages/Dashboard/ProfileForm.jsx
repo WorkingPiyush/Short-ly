@@ -67,7 +67,6 @@ function CheckIcon() { return <svg viewBox="0 0 24 24" fill="none" stroke="curre
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function ProfileForm() {
     const profileUpdateMutation = useUpdateProfile();
-    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const { data: user } = useUserInfo()
     const fileRef = useRef();
@@ -96,7 +95,6 @@ export default function ProfileForm() {
             setAddress(user?.address || "");
         }
     }, [user])
-
     // Avatar
     const handleAvatar = (e) => {
         const file = e.target.files[0];
@@ -109,7 +107,6 @@ export default function ProfileForm() {
 
     // Submit
     const handleSubmit = () => {
-        setLoading(true);
         if (!name.trim()) {
             setNameError(true);
             setTimeout(() => setNameError(false), 1500);
@@ -117,7 +114,7 @@ export default function ProfileForm() {
             return;
         }
 
-        const validFormData = profileUpdateSchema.safeParse({
+        const result = profileUpdateSchema.safeParse({
             name,
             headline: jobTitle,
             location,
@@ -128,38 +125,36 @@ export default function ProfileForm() {
             image,
         });
 
-        if (!validFormData.success) {
-            const { message } = JSON.parse(validFormData.error.message)[0];
+        if (!result.success) {
+            const { message } = JSON.parse(result.error.message)[0];
             console.error(message);
             return;
         }
 
         const formData = new FormData();
 
-        if (name && name !== user.name) {
-            formData.append("name", name);
-        }
-        if (jobTitle && jobTitle !== user.headline) {
-            formData.append("headline", jobTitle);
-        }
-        if (location && location !== user.location) {
-            formData.append("location", location);
-        }
-        if (bio && bio !== user.bio) {
-            formData.append("bio", bio);
-        }
-        if (phone && phone !== user.phone) {
-            formData.append("phone", phone);
-        }
-        if (address && address !== user.address) {
-            formData.append("address", address);
-        }
+        const fileds = [
+            ["name", name, user.name],
+            ["headline", jobTitle, user.headline],
+            ["location", location, user.location],
+            ["bio", bio, user.bio],
+            ["phone", phone, user.phone],
+            ["address", address, user.address],
+        ]
+
+        fileds.forEach(([key, val, orignal]) => {
+            if (val !== orignal) {
+                formData.append(key, val);
+            }
+        });
+
         if (image) {
             formData.append("image", image);
         }
 
-        if (Array.from(formData).length <= 0) {
-            toast.error("No data to save !!")
+        if (!Array.from(formData.keys()).length) {
+            if(profileUpdateMutation.isPending) return;
+            toast.error("No changes to save.");
             setTimeout(() => {
                 navigate("/dashboard", { replace: true });
             }, 800);
@@ -168,20 +163,17 @@ export default function ProfileForm() {
         try {
             profileUpdateMutation.mutate(formData, {
                 onSuccess: async () => {
-                    toast.success("Profile updated Success");
+                    toast.success("Profile updated successfully.");
                     setTimeout(() => {
                         navigate("/dashboard", { replace: true });
                     }, 800);
                 }
             })
         } catch (error) {
-            toast.error("Profile update error")
+            toast.error(error?.response?.data?.message || "Profile update failed.");
             console.error(error.message);
-        } finally {
-            setLoading(false);
         }
     };
-
     // Reset
     const handleReset = () => {
         setProfileImg(null); setImage(null);
@@ -323,7 +315,7 @@ export default function ProfileForm() {
                     </button>
                     <button
                         onClick={handleSubmit}
-                        disabled={loading}
+                        disabled={profileUpdateMutation.isPending}
                         className="flex-1 cursor-pointer flex items-center justify-center gap-2 
               text-[14px] font-medium text-zinc-900 bg-emerald-300
               py-3.5 rounded-xl hover:bg-emerald-200 hover:scale-[1.01]

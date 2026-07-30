@@ -20,14 +20,17 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
     if (!isValidUrl(originalUrl)) {
         throw new AppError('Invalid Url', 400);
     }
-
+    let user;
     const normalizedUrl = normalizeUrl(originalUrl);
     const urlHash = hashUrl(normalizedUrl);
-    const user = await findUser(userId);
-    const userPlan = user?.plan
-    if (user.urls.length > (userPlan === "FREE" ? 50 : 1000)) {
-        throw new AppError('Maximum URL Quota Reached', 300);
+    if (userId) {
+        user = await findUser(userId);
+        const userPlan = user?.plan
+        if (user.urls.length > (userPlan === "FREE" ? 50 : 1000)) {
+            throw new AppError('Maximum URL Quota Reached', 300);
+        }
     }
+
     if (!user) {
         let newtempId = null;
 

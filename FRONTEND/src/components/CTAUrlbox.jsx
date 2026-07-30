@@ -125,7 +125,7 @@ function CTAUrlbox() {
                 {/* Form card */}
                 <div className="bg-black/6 border border-white/8 rounded-2xl p-8 md:p-7">
                     {/* URL input + button */}
-                    <div className="flex gap-2.5 mb-4">
+                    <div className="flex flex-col md:flex-row gap-2.5 mb-4">
                         <div className="relative flex-1">
                             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 dark:text-white/25 text-black pointer-events-none">
                                 <IoIosLink />
@@ -151,7 +151,7 @@ function CTAUrlbox() {
                 rounded-xl hover:bg-emerald-400 cursor-pointer hover:scale-[1.02] transition-all duration-150
                 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100
                 dark:disabled:hover:bg-emerald-300 disabled:hover:bg-emerald-500 disabled:text-zinc-900 shrink-0 whitespace-nowrap">
-                            Shorten UR
+                            Shorten URL
                         </button>
                     </div>
 
@@ -222,7 +222,7 @@ function CTAUrlbox() {
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute left-84 translate-y-0 h-12 w-12 rounded-xl border border-zinc-700
+                                    className="absolute md:left-84 left-60 translate-y-0 h-12 w-12 rounded-xl border border-zinc-700
                            flex items-center justify-center text-zinc-800
                            dark:text-zinc-400 hover:text-black hover:dark:text-white cursor-pointer transition-all delay-150 ease-in"
                                 >
@@ -236,13 +236,13 @@ function CTAUrlbox() {
                     {result && (
                         <div className="relative mt-5 dark:bg-emerald-300/5 bg-zinc-100 border dark:border-emerald-300/25 border-black/22
               rounded-2xl p-5 animate-slide-down">
-                            <p className="text-[11px] font-medium dark:text-emerald-300 text-emerald-600 tracking-widest uppercase mb-3">
+                            <p className="md:text-[11px] text-xs md:font-medium font-medium dark:text-emerald-300 text-emerald-600 tracking-widest uppercase mb-3">
                                 ✦ Your short link is ready
                             </p>
-                            <p className="font-extrabold text-[20px] dark:text-white tracking-tight break-all mb-4" style={{ fontFamily: "'Syne', sans-serif" }}>
+                            <p className="font-extrabold md:text-[20px] text-sm dark:text-white tracking-tight break-all mb-4" style={{ fontFamily: "'Syne', sans-serif" }}>
                                 {result.short}
                             </p>
-                            <div className='h-30 w-30 absolute top-5 right-5 rounded-xl cursor-pointer shadow shadow-white'>
+                            <div className='hidden h-30 w-30 absolute top-5 right-5 rounded-xl cursor-pointer shadow shadow-white'>
                                 <img src={result.qrCode} className='h-30 w-30 rounded-xl' alt="" />
                             </div>
                             <div className="flex gap-2 flex-wrap">
@@ -284,7 +284,7 @@ function CTAUrlbox() {
                             </div>
                             {/* Meta tags */}
                             {(result.expiry || result.singleUse || result.trackClicks || result.passwordProtect) && (
-                                <div className="flex gap-4 flex-wrap mt-4 pt-4 border-t border-white/[0.07]">
+                                <div className="flex  sm:text-xs gap-4 flex-wrap mt-4 pt-4 border-t border-white/[0.07]">
                                     {result.expiry && (
                                         <span className="flex items-center gap-1.5 text-[12px] dark:text-white/30 text-black">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"

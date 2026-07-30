@@ -65,8 +65,8 @@ function LinkAnalytics() {
                 </div>
                 {/* ENGAGEMENT */}
                 <Card>
-                    <div className="flex justify-between mb-8">
-                        <h2 className="text-2xl font-semibold">
+                    <div className="flex justify-between items-center mb-8">
+                        <h2 className="md:text-2xl text-sm font-semibold">
                             Engagements over time
                         </h2>
 
@@ -74,7 +74,6 @@ function LinkAnalytics() {
                         <div className="flex items-center gap-2 border border-gray-700 px-4 py-2 rounded-xl">
                             <Calendar size={16} />
                             <DropDownBtn time={timePeriod} state={selectedTimePeriod} setState={setSelectedTimePeriod} />
-
                         </div>
                     </div>
                     <div ref={ref} className="w-full h-70">
@@ -93,8 +92,8 @@ function LinkAnalytics() {
                 </Card>
                 {/* LOCATIONS */}
                 <Card>
-                    <div className="flex justify-between mb-8">
-                        <h2 className="text-3xl font-semibold">Locations</h2>
+                    <div className="flex justify-between items-center mb-8">
+                        <h2 className="md:text-2xl text-sm font-semibold">Locations</h2>
                         <div className="flex dark:bg-[#111827] text-black rounded-xl p-1">
                             <button className="px-4 py-2 dark:bg-black text-black dark:text-white border-2 border-dashed cursor-pointer rounded-lg active:bg-gray-950/10">
                                 Countries
@@ -158,11 +157,11 @@ function DonutSection({ title, data }) {
     return (
         <Card>
             <div className="flex justify-between mb-8">
-                <h2 className="text-3xl font-semibold">
+                <h2 className="md:text-2xl text-sm font-semibold">
                     {title}
                 </h2>
             </div>
-            <div ref={ref} className="grid md:grid-cols-2 gap-10 justify-between items-center">
+            <div ref={ref} className="grid md:grid-cols-2 md:grid-rows-1 grid-rows-2 md:gap-10 md:justify-between md:items-center">
                 {
                     isVisible && (
                         <ResponsiveContainer width="100%" height={280}>

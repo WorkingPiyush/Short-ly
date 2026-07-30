@@ -98,9 +98,9 @@ function BulkUrl() {
           <label htmlFor="file-upload" className="flex flex-col items-center justify-center cursor-pointer" >
             <Upload size={50} className={`mb-4 ${dragActive ? "text-emerald-400 scale-120 rotate-10 transition-all duration-100" : "text-gray-400"}`} />
 
-            <h3 className={`text-2xl font-medium dark:text-white text-zinc-700 ${dragActive && "scale-110"}`}>Drag & Drop Excel File</h3>
+            <h3 className={`md:text-2xl text-xl font-medium dark:text-white text-zinc-700 ${dragActive && "scale-110"}`}>Drag & Drop Excel File</h3>
 
-            <p className="text-gray-500 text-sm mt-2">
+            <p className="text-gray-500 md:text-sm text-xs mt-2">
               Supports .xlsx and .xls • Max 5 MB
             </p>
           </label>
