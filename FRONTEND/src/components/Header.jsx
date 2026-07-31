@@ -20,7 +20,7 @@ function Header() {
         const handelScrollEvent = () => {
             setisScrolled(window.scrollY > 50);
         }
-        window.addEventListener('scroll', handelScrollEvent)
+        window.addEventListener('scroll', handelScrollEvent, { passive: true })
         return () => { window.removeEventListener('scroll', handelScrollEvent) }
     }, [])
     const navLinks = [
@@ -36,11 +36,11 @@ function Header() {
             }
         })
     }
-    return (
-        <header className={`flex justify-center items-center fixed top-5 left-0 right-0 z-50 `}>
-            <div className={`bg-white text-black dark:bg-zinc-900 dark:text-white px-7 py-5 border ${isScrolled ? "md:w-4xl" : "md:w-5xl"}  border-black/65 dark:border-white/65  rounded-2xl backdrop-blur-md transition-all duration-250 ease-in-out`}>
 
-                <div className="flex items-center md:justify-between sm:justify-between md:gap-12 gap-10">
+    return (
+        <header className={`fixed top-5 inset-x-0 z-999 flex justify-center transition-transform duration-300 ease-out ${isScrolled ? "- translate - y - 3" : "translate - y - 0"}`} >
+            <div className={` bg-white dark:bg-zinc-900 px-7 border rounded-2xl backdrop-blur-md transition-[width,padding,transform] duration-300 ease-out ${isScrolled ? "md:w-4xl w-[20rem] md:py-5 py-3" : "md:w-5xl w-88 md:py-7 py-4"}`}>
+                <div className="flex items-center justify-between sm:justify-between md:gap-12">
                     {/* Logo */}
                     <Logo setIsOpen={setIsOpen} />
 
@@ -62,42 +62,45 @@ function Header() {
                     </nav>
                     {/* Actions */}
 
-                    <div className="hidden md:flex items-center gap-2.5 relative">
-                        <div onClick={toggleTheme} className='text-black dark:text-white p-1 rounded-xl cursor-pointer transition duration-300 ease-in-out active:scale-95'>
-                            {theme === "light" ? <Moon /> : <Sun />}
-                        </div>
-                        {!user && <Link to="/login"
-                            className="text-sm font-medium cursor-pointer bg-white/60 text-black dark:bg-zinc-900 dark:text-white border px-4 py-2 rounded-lg
-                                     transition-all duration-150">
-                            Login
-                        </Link>}
-                        {!user && <Link to="/signup" className="text-sm font-medium cursor-pointer text-zinc-900 bg-emerald-300 px-5 py-2
-          rounded-lg hover:bg-emerald-200 hover:scale-[1.03] transition-all duration-150">
-                            Sign up free
-                        </Link>}
-                    </div>
-
-                    <div onClick={toggleTheme} className='text-black  dark:text-white md:hidden relative p-2 rounded-xl cursor-pointer transition duration-300 ease-in-out active:scale-95'>
-                        {theme === "light" ? <Moon /> : <Sun />}
-                    </div>
                     {user ?
-                        <ProfileIcon showpopup={setShowProfilePopUp} popup={showProfilePopUp} userInfo={user} />
+                        <div className='flex items-center justify-center gap-5'>
+                            <div onClick={toggleTheme} className='text-black dark:text-white p-1 rounded-xl cursor-pointer transition duration-300 ease-in-out active:scale-95'>
+                                {theme === "light" ? <Moon /> : <Sun />}
+                            </div>
+                            <ProfileIcon showpopup={setShowProfilePopUp} popup={showProfilePopUp} userInfo={user} />
+                        </div>
                         : (
-                            <button
-                                onClick={() => setIsOpen(!isOpen)}
-                                aria-label="Toggle menu"
-                                className="md:hidden flex flex-col justify-center gap-1.25 w-7 h-7 cursor-pointer bg-white/80 text-black dark:bg-zinc-900 dark:text-white
+                            <div className='flex items-center justify-center'>
+                                <div onClick={toggleTheme} className='text-black  dark:text-white md:hidden relative p-2 rounded-xl cursor-pointer transition duration-300 ease-in-out active:scale-95'>
+                                    {theme === "light" ? <Moon /> : <Sun />}
+                                </div>
+                                <button
+                                    onClick={() => setIsOpen(!isOpen)}
+                                    aria-label="Toggle menu"
+                                    className="md:hidden flex flex-col justify-center gap-1.25 w-7 h-7 cursor-pointer bg-white/80 text-black dark:bg-zinc-900 dark:text-white
                         border border-white/15 rounded-lg hover:border-white/35 transition-colors duration-350">
 
-                                <span className={`block w-full text-white bg-zinc-900 dark:text-black dark:bg-white h-px  rounded-full origin-center transition-all duration-250
+                                    <span className={`block w-full text-white bg-zinc-900 dark:text-black dark:bg-white h-px  rounded-full origin-center transition-all duration-250
                          ${isOpen ? 'translate-y-[6.5px] rotate-45' : ''}`} />
 
-                                <span className={`block w-full text-white bg-zinc-900 dark:text-black dark:bg-white h-px rounded-full transition-all duration-200
+                                    <span className={`block w-full text-white bg-zinc-900 dark:text-black dark:bg-white h-px rounded-full transition-all duration-200
                          ${isOpen ? 'opacity-0 scale-x-0' : ''}`} />
 
-                                <span className={`block w-full text-white bg-zinc-900 dark:text-black dark:bg-white h-px rounded-full origin-center transition-all duration-250
+                                    <span className={`block w-full text-white bg-zinc-900 dark:text-black dark:bg-white h-px rounded-full origin-center transition-all duration-250
                         ${isOpen ? 'translate-y-[-6.5px] -rotate-45' : ''}`} />
-                            </button>
+                                </button>
+                                <div className='hidden md:flex gap-5'>
+                                    <Link to="/login"
+                                        className="text-sm font-medium cursor-pointer bg-white/60 text-black dark:bg-zinc-900 dark:text-white border px-4 py-2 rounded-lg
+                                     transition-all duration-150">
+                                        Login
+                                    </Link>
+                                    <Link to="/signup" className="text-sm font-medium cursor-pointer text-zinc-900 bg-emerald-300 px-5 py-2
+          rounded-lg hover:bg-emerald-200 hover:scale-[1.03] transition-all duration-150">
+                                        Sign up free
+                                    </Link>
+                                </div>
+                            </div>
                         )
                     }
                     {showProfilePopUp && <ProfilePopUp userInfo={user} logout={handleLogout} showpopup={setShowProfilePopUp} onClose={() => setShowProfilePopUp(false)} />}
@@ -122,21 +125,26 @@ function Header() {
                         ))}
                         <div className="h-px bg-white my-2" />
                         <div className="flex gap-2.5 pt-1 pb-2">
-                            {!user && <Link
-                                to="/login"
-                                onClick={() => setIsOpen(false)}
-                                className="text-sm font-medium cursor-pointer bg-white/60 text-black dark:bg-zinc-900 dark:text-white border px-4 py-2 rounded-lg
-                                     transition-all duration-150">
-                                Login
-                            </Link>}
-                            {!user && <Link
-                                to="/signup"
-                                onClick={() => setIsOpen(false)}
-                                className="flex-1 text-center text-sm font-medium text-zinc-900
+                            {!user &&
+                                <>
+                                    <Link
+                                        to="/signup"
+                                        onClick={() => setIsOpen(false)}
+                                        className="flex-1 text-center text-sm font-medium text-zinc-900
                 bg-emerald-300 py-2.5 rounded-lg hover:bg-emerald-200 transition-all duration-150"
-                            >
-                                Sign up free
-                            </Link>}
+                                    >
+                                        Sign up free
+                                    </Link>
+                                    <Link
+                                        to="/login"
+                                        onClick={() => setIsOpen(false)}
+                                        className="text-sm font-medium cursor-pointer bg-white/60 text-black dark:bg-zinc-900 dark:text-white border px-4 py-2 rounded-lg
+                                     transition-all duration-150">
+                                        Login
+                                    </Link>
+                                </>
+
+                            }
                         </div>
                     </div>
                 </div>

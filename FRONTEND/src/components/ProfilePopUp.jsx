@@ -9,7 +9,7 @@ function ProfilePopUp({ userInfo, logout, showpopup, onClose }) {
     const popLinks = [
         { lable: "Dashboard", to: "/dashboard" },
         { lable: "Support", to: "/support" },
-        { lable: "Url Section", to: "/dashboard/links" },
+        { lable: "Urls", to: "/dashboard/links" },
         { lable: "Terms and Conditions", to: "/termsnCondition" },
         { lable: "Profle", to: "/profile" },
     ]

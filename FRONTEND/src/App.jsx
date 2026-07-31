@@ -27,6 +27,10 @@ import TermsAndConditionsPage from './Pages/Supporting/TermsAndConditionsPage';
 import ProtectedLayout from './Layout/ProtectedLayout';
 import UnprotectedLayout from './Layout/UnprotectedLayout';
 import NotFoundPage from './Pages/Supporting/NotFoundPage';
+import ExpiredPage from './Pages/Supporting/ExpiredPage';
+import LinkNotFoundPage from './Pages/Supporting/LinkNotFoundPage';
+import ScheduledPage from './Pages/Supporting/ScheduledPage';
+import SingleUsedPage from './Pages/Supporting/SingleUsedPage';
 
 
 function App() {
@@ -70,6 +74,11 @@ function App() {
           <Route path="/:shortCode/password-verify" element={<ProtectedLinkPage />} />
           <Route path="/:shortCode/status" element={<DestinationDownPage />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          {/* supporting pages */}
+          <Route path="/:shortCode/expired" element={<ExpiredPage />} />
+          <Route path="/:shortCode/scheduled" element={<ScheduledPage />} />
+          <Route path="/:shortCode/notfound" element={<LinkNotFoundPage />} />
+          <Route path="/:shortCode/singleUsed" element={<SingleUsedPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <Toaster position="top-center" reverseOrder={false} />

@@ -214,13 +214,15 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
             };
         }
         if (result.expirationDate && new Date(result.expirationDate) < new Date()) {
-            throw new AppError('Url Expired !!', 404);
+            // throw new AppError('Url Expired !!', 404);
+            return { expired: true, shortCode: result.shortCode, expTime: result.expirationDate }
         }
         if (result.isProtected) {
-            return { requiresPassword: true, shortCode: url.shortCode };
+            return { requiresPassword: true, shortCode: result.shortCode };
         }
         if (result.liveTime && result.liveTime > now) {
-            throw new AppError("Link is not live yet", 500);
+            // throw new AppError("Link is not live yet", 500);
+            return { scheduled: true, shortCode: result.shortCode, liveTime: result.liveTime };
         }
         if (result.userId) {
             if (!isBot) {
@@ -242,7 +244,8 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     }
     const url = await findFirstUrl(shortCode);
     if (!url) {
-        throw new AppError('Invalid Url', 400);
+        // throw new AppError('Invalid Url', 400);
+        return { notFound: true, shortCode: url.shortCode }
     }
     const response = await getUrlStatus(url.originalUrl)
     const httpStatus = response.status;
@@ -270,10 +273,13 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
     }
 
     if (url.liveTime && new Date() < url.liveTime) {
-        throw new AppError("Link is not live yet", 500);
+        // throw new AppError("Link is not live yet", 500);
+        return { scheduled: true, shortCode: url.shortCode, liveTime: url.liveTime };
     }
     if (url.expirationDate && url.expirationDate < new Date()) {
-        throw new AppError('Url Expired !!', 404);
+        // throw new AppError('Url Expired !!', 404);
+        return { expired: true, shortCode: url.shortCode, expTime: url.expirationDate }
+
     }
     if (url.password) {
         return { requiresPassword: true, shortCode: url.shortCode };
@@ -291,7 +297,8 @@ export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => 
             }
         });
         if (singleUseUrl.count == 0) {
-            throw new AppError("Already used or invalid link", 400);
+            // throw new AppError("Already used or invalid link", 400);
+            return { singleUse: true, shortCode: url.shortCode }
         }
 
         return url.originalUrl;

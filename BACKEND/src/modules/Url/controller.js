@@ -29,14 +29,34 @@ export const shortUrl = asyncHandler(async (req, res) => {
 
 export const redirectUrl = asyncHandler(async (req, res) => {
     const response = await urlService.urlRedirect({
-        shortCode: req.params.shortCode, userAgent: req.headers["user-agent"], ipAdd: process.env.NODE_ENV === 'production' ? req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress : '45.118.167.50', referrer: req.headers.referer
+        shortCode: req.params.shortCode,
+        userAgent: req.headers["user-agent"],
+        ipAdd: process.env.NODE_ENV === 'production' ? req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress : '45.118.167.50',
+        referrer: req.headers.referer
     });
+
     if (response?.pageStatus) {
         res.redirect(`${process.env.FRONTEND_URL}/${response.shortCode}/status`);
         return;
     }
     if (response?.requiresPassword) {
         res.redirect(`${process.env.FRONTEND_URL}/${response.shortCode}/password-verify`)
+        return;
+    }
+    if (response?.expired) {
+        res.redirect(`${process.env.FRONTEND_URL}/${response.shortCode}/expired?expTime=${response.expTime}`)
+        return;
+    }
+    if (response?.scheduled) {
+        res.redirect(`${process.env.FRONTEND_URL}/${response.shortCode}/scheduled?liveAt=${response.liveTime}`)
+        return;
+    }
+    if (response?.notFound) {
+        res.redirect(`${process.env.FRONTEND_URL}/${response.shortCode}/notfound`)
+        return;
+    }
+    if (response?.singleUse) {
+        res.redirect(`${process.env.FRONTEND_URL}/${response.shortCode}/singleUsed`)
         return;
     }
     return res.redirect(response);
