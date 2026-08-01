@@ -1,86 +1,13 @@
-import { Route, Routes } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast';
 import './App.css'
-import Home from './Pages/Home/Home'
-import Layout from './Layout/Layout'
-import Signup from './Pages/Auth/Signup'
-import Login from './Pages/Auth/Login'
-import UserDashboard from './Pages/Dashboard/UserDashboard';
-import DashboardLayout from './Layout/DashboardLayout';
-import Links from './Pages/Dashboard/Links';
-import ProfilePage from './Pages/Dashboard/ProfilePage';
-import BulkUrl from './Pages/Dashboard/BulkUrl';
-import EditLink from './Pages/Dashboard/EditLink';
-import AnalyticsPage from './Pages/Dashboard/Analytics';
-import ProtectedLinkPage from './Pages/Dashboard/ProtectedLinkPage';
-import LinkAnalytics from './Pages/Dashboard/LinkAnalytics';
-import ProfileForm from './Pages/Dashboard/ProfileForm';
-import ResetPassword from './Pages/Auth/ResetPassword';
-import Category from './Pages/Dashboard/Category';
-import DestinationDownPage from './Pages/Dashboard/Destinationdownpage ';
-import ApiDocsPage from './Pages/Supporting/ApiDocsPage';
-import FeaturesPage from './Pages/Supporting/FeaturesPage';
-import PricingPage from './Pages/Supporting/PricingPage';
-import PrivacyPage from './Pages/Supporting/PrivacyPage';
-import SupportPage from './Pages/Supporting/SupportPage';
-import TermsAndConditionsPage from './Pages/Supporting/TermsAndConditionsPage';
-import ProtectedLayout from './Layout/ProtectedLayout';
-import UnprotectedLayout from './Layout/UnprotectedLayout';
-import NotFoundPage from './Pages/Supporting/NotFoundPage';
-import ExpiredPage from './Pages/Supporting/ExpiredPage';
-import LinkNotFoundPage from './Pages/Supporting/LinkNotFoundPage';
-import ScheduledPage from './Pages/Supporting/ScheduledPage';
-import SingleUsedPage from './Pages/Supporting/SingleUsedPage';
+import AppRoutes from './routes/AppRoutes';
 
 
 function App() {
   return (
     <>
       <div className="min-h-screen bg-white text-white dark:bg-black dark:text-white">
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
-            {/* For Guest user only */}
-            <Route element={<UnprotectedLayout />}>
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/login" element={<Login />} />
-            </Route>
-
-            {/* Public routes */}
-            <Route path="/features" element={<FeaturesPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/support" element={<SupportPage />} />
-            {/* <Route path="/apiDocs" element={<ApiDocsPage />} /> */}
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/termsnCondition" element={<TermsAndConditionsPage />} />
-          </Route>
-
-          {/* For only registerd user only */}
-          <Route element={<DashboardLayout />}>
-            <Route element={<ProtectedLayout />}>
-              <Route path="/dashboard" element={<UserDashboard />} />
-              <Route path="/dashboard/links" element={<Links />} />
-              <Route path="/dashboard/links/:shortcode" element={<EditLink />} />
-              <Route path="/dashboard/bulk" element={<BulkUrl />} />
-              <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
-              <Route path="/dashboard/categories" element={<Category />} />
-              <Route path="/:shortCode/analytics" element={<LinkAnalytics />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/profile/edit" element={<ProfileForm />} />
-            </Route>
-          </Route>
-
-          {/* Other public routes */}
-          <Route path="/:shortCode/password-verify" element={<ProtectedLinkPage />} />
-          <Route path="/:shortCode/status" element={<DestinationDownPage />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
-          {/* supporting pages */}
-          <Route path="/:shortCode/expired" element={<ExpiredPage />} />
-          <Route path="/:shortCode/scheduled" element={<ScheduledPage />} />
-          <Route path="/:shortCode/notfound" element={<LinkNotFoundPage />} />
-          <Route path="/:shortCode/singleUsed" element={<SingleUsedPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+        <AppRoutes />
         <Toaster position="top-center" reverseOrder={false} />
       </div>
     </>

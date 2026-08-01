@@ -52,11 +52,11 @@ export const redirectUrl = asyncHandler(async (req, res) => {
         return;
     }
     if (response?.notFound) {
-        res.redirect(`${process.env.FRONTEND_URL}/${response.shortCode}/notfound`)
+        res.redirect(`${process.env.FRONTEND_URL}/${response.shortCode}/not-found`)
         return;
     }
     if (response?.singleUse) {
-        res.redirect(`${process.env.FRONTEND_URL}/${response.shortCode}/singleUsed`)
+        res.redirect(`${process.env.FRONTEND_URL}/${response.shortCode}/single-used`)
         return;
     }
     return res.redirect(response);

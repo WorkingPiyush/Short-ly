@@ -10,7 +10,7 @@ function ProfilePopUp({ userInfo, logout, showpopup, onClose }) {
         { lable: "Dashboard", to: "/dashboard" },
         { lable: "Support", to: "/support" },
         { lable: "Urls", to: "/dashboard/links" },
-        { lable: "Terms and Conditions", to: "/termsnCondition" },
+        { lable: "Terms and Conditions", to: "/terms-and-conditions" },
         { lable: "Profle", to: "/profile" },
     ]
 

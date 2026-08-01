@@ -11,7 +11,7 @@ function Footer() {
                 <Link to="/pricing" className='cursor-pointer text-xs text-zinc-400 hover:text-black hover:dark:text-white hover:shadow-black hover:dark:shadow-white  transition duration-150 ease-in-out'>Pricing</Link>
                 <Link to="/apiDocs" className='cursor-pointer text-xs text-zinc-400 hover:text-black hover:dark:text-white hover:shadow-black hover:dark:shadow-white  transition duration-150 ease-in-out'>API docs</Link>
                 <Link to="/privacy" className='cursor-pointer text-xs text-zinc-400 hover:text-black hover:dark:text-white hover:shadow-black hover:dark:shadow-white  transition duration-150 ease-in-out'>Privacy</Link>
-                <Link to="/termsnCondition" className='cursor-pointer text-xs text-zinc-400 hover:text-black hover:dark:text-white hover:shadow-black hover:dark:shadow-white  transition duration-150 ease-in-out'>Terms</Link>
+                <Link to="/terms-and-conditions" className='cursor-pointer text-xs text-zinc-400 hover:text-black hover:dark:text-white hover:shadow-black hover:dark:shadow-white  transition duration-150 ease-in-out'>Terms</Link>
             </div>
             <span className='text-zinc-400 mt-5'>&copy; 2026 Short-ly. All rights reserved.</span>
         </div>

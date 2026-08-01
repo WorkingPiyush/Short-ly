@@ -9,7 +9,7 @@ import LinkCardLoader from '@/components/LinkCardLoader.jsx';
 
 
 
-function Links() {
+function LinksPage() {
   const { data, fetchNextPage, isLoading, hasNextPage, isFetchingNextPage } = useUrl()
   const loadMoreRef = useRef(null);
   const urlRecords = data?.pages.flatMap(page => page.urls) ?? [];
@@ -192,4 +192,4 @@ function Links() {
   );
 }
 
-export default Links
+export default LinksPage;
