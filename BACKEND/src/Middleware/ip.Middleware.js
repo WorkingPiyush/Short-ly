@@ -1,4 +1,4 @@
-import { allAnalytics, allUrl, bulkUrl, emailpassword, forgetPassword, login, profileUpdate, signup, url, urlAnalytics, urlCreate, urlUpdate, userInfo } from "../lib/rateLimiter.js";
+import { aiSuggestions, allAnalytics, allUrl, bulkUrl, emailpassword, forgetPassword, login, profileUpdate, signup, url, urlAnalytics, urlCreate, urlUpdate, userInfo } from "../lib/rateLimiter.js";
 import crypto from 'crypto';
 import { AppError } from "../utils/AppError.js";
 import logger from "../../config/logger.js";
@@ -201,6 +201,22 @@ export const urlUpdateLimiter = async (req, res, next) => {
         next();
     } catch (error) {
         logger.warn(`Url Update rate limit exceeded: ${key}`);
+        return res.status(429).set({
+            "Retry-After": Math.ceil(error.msBeforeNext / 1000),
+        }).json({
+            success: false,
+            message: "Too many url update requests. Try again later.",
+        });
+    }
+}
+
+export const getAiSuggestionsLimiter = async (req, res, next) => {
+    const key = req.user?.id || req.ip;
+    try {
+        await aiSuggestions.consume(key);
+        next();
+    } catch (error) {
+        logger.warn(`Url short code suggestion rate limit exceeded: ${key}`);
         return res.status(429).set({
             "Retry-After": Math.ceil(error.msBeforeNext / 1000),
         }).json({

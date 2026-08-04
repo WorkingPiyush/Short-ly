@@ -1,13 +1,14 @@
 import express from 'express';
-import { shortUrl, getAllUrls, getUrl, deleteUrl, updateUrl, verifyPassword, bulkShortUrl, searchUrl, getUrlAnalytics, Analytics, getAllCategoryUrls } from './controller.js';
+import { shortUrl, getAllUrls, getUrl, deleteUrl, updateUrl, verifyPassword, bulkShortUrl, searchUrl, getUrlAnalytics, Analytics, getAllCategoryUrls, shortCodeSuggestion } from './controller.js';
 import { routeProtection } from '../../Middleware/protected.url.Middleware.js';
 import { excelUpload } from '../../Middleware/upload.Middleware.js';
-import { allAnalyticsLimiter, allUrlLimiter, bulkUrlLimiter, urlAnalyticsLimiter, urlCreateLimiter, urlLimiter, urlUpdateLimiter } from '../../Middleware/ip.Middleware.js';
+import { allAnalyticsLimiter, allUrlLimiter, bulkUrlLimiter, getAiSuggestionsLimiter, urlAnalyticsLimiter, urlCreateLimiter, urlLimiter, urlUpdateLimiter } from '../../Middleware/ip.Middleware.js';
 const router = express();
 
 router.post('/short', urlCreateLimiter, shortUrl); // short url creation
 router.post('/:shortCode/verify-password', verifyPassword) // password verification
 router.post("/bulk", routeProtection, bulkUrlLimiter, excelUpload.single("file"), bulkShortUrl) // bulk file url shortening 
+router.post("/code/suggestion", routeProtection, getAiSuggestionsLimiter, shortCodeSuggestion) // short code suggestions 
 
 router.get('/', routeProtection, allUrlLimiter, getAllUrls); // getting users all urls
 router.get('/category', routeProtection, getAllCategoryUrls); // getting users all urls

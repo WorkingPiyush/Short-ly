@@ -14,9 +14,11 @@
   },
   "dependencies": {
     "@getbrevo/brevo": "^6.0.2",
+    "@google/genai": "^2.15.0",
     "@prisma/client": "^6.19.3",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.80.8",
+    "cheerio": "^1.2.0",
     "cloudinary": "^2.10.0",
     "connect-redis": "^9.0.0",
     "cookie-parser": "^1.4.7",
@@ -42,6 +44,7 @@
     "qrcode": "^1.5.4",
     "rate-limiter-flexible": "^11.2.0",
     "resend": "^6.16.0",
+    "slugify": "^1.6.9",
     "streamifier": "^0.1.1",
     "xlsx": "^0.18.5",
     "zod": "^4.4.3"

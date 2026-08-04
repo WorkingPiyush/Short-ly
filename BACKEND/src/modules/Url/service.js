@@ -1,13 +1,16 @@
 import dotenv from "dotenv/config";
+import XLSX from 'xlsx';
+import fs from 'fs';
+import slugify from 'slugify';
 import { client } from '../../../config/db.js';
-import { formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, formatUrl, formaturlInfo, foromtReferrer, generateQRCode, generateShortCode, hashUrl, isValidUrl, normalizeUrl, passwordCompare, passwordHashing, randomColor, urlKey, urlStatus } from '../../helper/Url.helper.js';
-import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics, referrerAnalytics, categories, getUrlStatus, countTempUrl, findUser, countRegUrl } from "../../helper/Db.query.js";
+import { formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, formatUrl, formaturlInfo, foromtReferrer, generateQRCode, generateShortCode, generateSuggestions, generateValidSuggestions, gethostname, hashUrl, isReadable, isValidUrl, keyWordExtractor, normalizeUrl, passwordCompare, passwordHashing, randomColor, rankKeyWord, urlKey, urlStatus } from '../../helper/Url.helper.js';
+import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics, referrerAnalytics, categories, getUrlStatus, countTempUrl, findUser, countRegUrl, removeTakenSuggestions } from "../../helper/Db.query.js";
 import { redisClient } from "../../../config/redisClient.js";
 import { AppError } from "../../utils/AppError.js";
 import logger from "../../../config/logger.js";
-import XLSX from 'xlsx';
-import fs from 'fs';
 import { analyticsQueue } from "../../queues/analytics.queue.js";
+import { fetchMetaData } from "../../service/url.metadata.service.js";
+import { generateAiSuggestions } from "../../service/ai.service.js";
 
 const MAX_TEMP_URLS = 3;
 const BATCH_SIZE = 10;
@@ -165,6 +168,92 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
     };
 
     return responseUrl;
+};
+
+export const shortCodeSuggestions = async ({ originalUrl }) => {
+    if (!originalUrl) {
+        throw new AppError('Invalid Url', 400);
+    };
+
+    if (!isValidUrl(originalUrl)) {
+        throw new AppError('Invalid Url', 400);
+    };
+
+    let result;
+    const cached = await redisClient.get(originalUrl);
+    if (cached) {
+        let response = JSON.parse(cached);
+        result = await removeTakenSuggestions(response.localAvailableSuggestions);
+        return result.slice(0, 5);
+    };
+    let urlMetaData = null;
+    try {
+        urlMetaData = await fetchMetaData(originalUrl);
+    } catch (error) {
+        urlMetaData = null;
+        logger.error({
+            url: originalUrl,
+            error: error.message
+        });
+    }
+
+    if (urlMetaData) {
+        console.log("got url metadata")
+        const titleKeyWords = keyWordExtractor(urlMetaData.title);
+        const descriptionKeyWords = keyWordExtractor(urlMetaData.description);
+        const hostname = gethostname(urlMetaData.hostname);
+        const rankedWords = rankKeyWord(titleKeyWords, hostname, descriptionKeyWords);
+        const localSuggestions = generateSuggestions(rankedWords);
+        const localValidSuggestions = generateValidSuggestions(localSuggestions);
+        const localAvailableSuggestions = await removeTakenSuggestions(localValidSuggestions);
+
+        let aiSuggestions = [];
+
+        if (localAvailableSuggestions.length < 5) {
+            console.log("we are going to take ai suggestion", localAvailableSuggestions.length)
+            try {
+                aiSuggestions = await generateAiSuggestions({
+                    title: urlMetaData.title,
+                    hostname,
+                    keywords: rankedWords,
+                    localAvailableSuggestions,
+                })
+
+            } catch (error) {
+                logger.error(error.message)
+                aiSuggestions = [];
+            }
+            if (aiSuggestions.length > 0) {
+                const mergedSuggestions = [
+                    ...new Set([
+                        ...localAvailableSuggestions,
+                        ...aiSuggestions
+                    ])
+                ];
+                const validSuggestions = generateValidSuggestions(mergedSuggestions);
+                const availableSuggestions = await removeTakenSuggestions(validSuggestions);
+                await redisClient.set(originalUrl, JSON.stringify({ availableSuggestions }, "EX", 1800,))
+                return availableSuggestions.slice(0, 5);
+            }
+        }
+        await redisClient.set(originalUrl, JSON.stringify({ localAvailableSuggestions }, "EX", 1800,))
+        return localAvailableSuggestions.slice(0, 5);
+    };
+
+    const url = new URL(originalUrl);
+    const hostname = gethostname(url.hostname);
+    const pathWords = url.pathname.split("/").filter(Boolean).filter(isReadable);
+    const suggestions = new Set();
+    suggestions.add(hostname);
+    if (pathWords[0]) {
+        suggestions.add(`${hostname}-${pathWords[0]}`);
+    }
+    if (pathWords[1]) {
+        suggestions.add(`${pathWords[0]}-${pathWords[1]}`);
+    }
+    const validSuggestions = generateValidSuggestions([...suggestions]);
+    const availableSuggestions = await removeTakenSuggestions(validSuggestions);
+    return availableSuggestions.slice(0, 5);
 };
 
 export const urlRedirect = async ({ shortCode, userAgent, ipAdd, referrer }) => {

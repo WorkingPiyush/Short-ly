@@ -156,3 +156,10 @@ export const searchUrl = asyncHandler(async (req, res) => {
     })
     return res.status(200).json({ success: true, response })
 });
+
+export const shortCodeSuggestion = asyncHandler(async (req, res) => {
+    const response = await urlService.shortCodeSuggestions({
+        originalUrl: req.body.originalUrl,
+    })
+    res.status(200).json(response);
+})

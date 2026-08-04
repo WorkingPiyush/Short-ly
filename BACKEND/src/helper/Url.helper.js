@@ -4,7 +4,35 @@ import qrcode from 'qrcode';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import slugify from "slugify";
 import { categories, totalClick } from "./Db.query.js";
+const AVOID_WORDS = [
+    "the",
+    "a",
+    "an",
+    "of",
+    "for",
+    "to",
+    "in",
+    "and",
+    "on",
+    "with"
+]
+
+const RESERVED_WORDS = new Set([
+    "signup",
+    "login",
+    "features",
+    "pricing",
+    "support",
+    "terms-and-conditions",
+    "dashboard",
+    "analytics",
+    "profile",
+    "shortCode",
+    "reset",
+    "password",
+])
 
 export const isValidUrl = (url) => {
     try {
@@ -214,4 +242,83 @@ export const tokenAccess = (id) => {
         process.env.ACCESS_SECRET,
         { expiresIn: "15m" }
     );
+}
+
+export const keyWordExtractor = (text) => {
+    return slugify(text, {
+        lower: true,
+        strict: true,
+        trim: true,
+    }).split("-").filter(Boolean).filter(word => !AVOID_WORDS.includes(word));
+};
+
+export const rankKeyWord = (title, hostname, description) => {
+    const scores = new Map();
+    // scoring the title words
+    for (const word of title) {
+        scores.set(word, (scores.get(word) || 0) + 10);
+    }
+    // scoring the hostname words
+    scores.set(hostname, (scores.get(hostname) || 0) + 8);
+    if (title.length < 2) {
+        // scoring the description words
+        for (const word of description) {
+            scores.set(word, (scores.get(word) || 0) + 3);
+        }
+    }
+
+    const sortedEntries = [...scores.entries()].sort((a, b) => b[1] - a[1]);
+    return sortedEntries.map(([word, score]) => word);
+}
+
+export const generateSuggestions = (words) => {
+    const suggestions = new Set();
+
+    if (words[0]) {
+        suggestions.add(words[0]);
+    }
+    if (words[0] && words[1]) {
+        suggestions.add(`${words[0]}-${words[1]}`);
+    }
+    if (words[1] && words[0]) {
+        suggestions.add(`${words[1]}-${words[0]}`);
+    }
+    if (words[0] && words[2]) {
+        suggestions.add(`${words[0]}-${words[2]}`);
+    }
+    if (words[2] && words[0]) {
+        suggestions.add(`${words[2]}-${words[0]}`);
+    }
+    if (words[0] && words[3]) {
+        suggestions.add(`${words[0]}-${words[3]}`);
+    }
+    if (words[3] && words[2]) {
+        suggestions.add(`${words[3]}-${words[2]}`);
+    }
+    if (words[1] && words[2] && words[3]) {
+        const slug = `${words[1]}-${words[2]}-${words[3]}`;
+
+        if (slug.length <= 25) {
+            suggestions.add(slug);
+        }
+    }
+    return [...suggestions];
+
+}
+
+export const generateValidSuggestions = (words) => {
+    return words.filter(w => {
+        if (w.length < 4) return false;
+        if (w.length > 25) return false;
+        if (RESERVED_WORDS.has(w)) return false;
+        return true;
+    })
+}
+
+export const isReadable = (word) => {
+    return /^[a-z-]{3,20}$/i.test(word);
+}
+
+export const gethostname = (host) => {
+    return host.replace("www.", "").split('.')[0];
 }

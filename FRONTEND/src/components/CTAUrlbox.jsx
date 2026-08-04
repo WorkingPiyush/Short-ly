@@ -21,6 +21,7 @@ function CTAUrlbox() {
     const [expiry, setExpiry] = useState("");
     const [singleUse, setSingleUse] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [customCode, setCustomCode] = useState();
     const [userPassword, setUserPassword] = useState("");
     const [passwordProtect, setPasswordProtect] = useState(false);
     const [result, setResult] = useState(null);
@@ -43,14 +44,11 @@ function CTAUrlbox() {
         }
         try {
             setLoading(true);
-            const response = await createUrl({ originalUrl: url, singleUse, password: userPassword, expiry });
+            const response = await createUrl({ originalUrl: url, singleUse, password: passwordProtect ? userPassword : null, expiry: showPassword ? expiry : null, customCode });
             setResult(response.shortUrl)
             queryClient.refetchQueries({
                 queryKey: ['url'],
             })
-            console.log(queryClient.refetchQueries({
-                queryKey: ['url'],
-            }))
             setResult({
                 short: response.shortUrl,
                 expiry: response.expiry_date,
@@ -125,30 +123,33 @@ function CTAUrlbox() {
                 {/* Form card */}
                 <div className="bg-black/6 border border-white/8 rounded-2xl p-8 md:p-7">
                     {/* URL input + button */}
-                    <div className="flex flex-col md:flex-row gap-2.5 mb-4">
+                    <div className="flex flex-col md:flex-row gap-2.5 mb-10">
                         <div className="relative flex-1">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 dark:text-white/25 text-black pointer-events-none">
-                                <IoIosLink />
-                            </span>
-                            <input
-                                ref={inputRef}
-                                type="url"
-                                value={url}
-                                 autoComplete="url"
-                                onChange={(e) => setUrl(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && handleShorten()}
-                                placeholder="https://your-long-url.com"
-                                disabled={Boolean(result)}
-                                className="w-full dark:bg-white/4 bg-black/15 border dark:border-white/10 border-black/50 rounded-xl
+                            <div className='flex items-center md:flex-row'>
+                                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 dark:text-white/25 text-black pointer-events-none">
+                                    <IoIosLink />
+                                </span>
+                                <input
+                                    ref={inputRef}
+                                    type="url"
+                                    value={url}
+                                    autoComplete="url"
+                                    onChange={(e) => setUrl(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleShorten()}
+                                    placeholder="https://your-long-url.com"
+                                    disabled={Boolean(result)}
+                                    className="w-full dark:bg-white/4 bg-black/15 border dark:border-white/10 border-black/50 rounded-xl
                   pl-10 pr-4 py-3.5 text-sm dark:text-white text-black dark:placeholder-white/22 placeholder-gray-600
                   outline-none focus:border-emerald-300/40 dark:focus:bg-emerald-300/2 focus:bg-black/5
-                  transition-all duration-200 disabled:opacity-50"/>
+                  transition-all duration-200 disabled:opacity-50"
+                                />
+                            </div>
                         </div>
                         <button
                             onClick={handleShorten}
                             disabled={Boolean(result) || !url.trim() || loading}
                             className="text-sm font-medium text-zinc-900 bg-emerald-300 px-5 py-3.5
-                rounded-xl hover:bg-emerald-400 cursor-pointer hover:scale-[1.02] transition-all duration-150
+                rounded-sm hover:bg-emerald-400 cursor-pointer hover:scale-[1.02] transition-all duration-150
                 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100
                 dark:disabled:hover:bg-emerald-300 disabled:hover:bg-emerald-500 disabled:text-zinc-900 shrink-0 whitespace-nowrap">
                             Shorten URL
@@ -163,25 +164,28 @@ function CTAUrlbox() {
                         Advanced options
                     </p>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-                        {/* 
+                    <div className="grid grid-cols-1 gap-3 mb-5">
+
+                        {/* custom alias */}
                         <div className="flex flex-col gap-1.5">
                             <label className="text-[12px] font-medium text-white/50">
-                                Custom slug <span className="text-white/25">(optional)</span>
+                                Short Code <span className="text-white/25">(Optional)</span>
                             </label>
-                            <input
-                                type="text"
-                                value={slug}
-                                onChange={(e) => setSlug(e.target.value)}
-                                placeholder="e.g. my-link"
-                                disabled={Boolean(result)}
-                                className="bg-white/3 border border-white/8 rounded-[10px]
-                  px-3 py-2.5 text-[13px] text-white placeholder-white/20
-                  outline-none focus:border-emerald-300/35 transition-colors duration-200
-                  disabled:opacity-40"
-                            />
+                            <div className='flex gap-2'>
+                                <input
+                                    type="text"
+                                    value={customCode}
+                                    onChange={(e) => setCustomCode(e.target.value)}
+                                    placeholder="e.g. my-link"
+                                    disabled={Boolean(result)}
+                                    className="bg-white/3 w-[85%] border border-white/8 rounded-[10px] px-3 py-2.5 text-[13px] text-white placeholder-white/20
+                  outline-none focus:border-emerald-300/35 transition-colors duration-200 disabled:opacity-40"/>
+                                <button className='text-white w-[15%] text-sm font-medium px-2 py-1 cursor-pointer rounded-sm border border-emerald-300 hover:bg-emerald-300 hover:text-black hover:scale-105 transition-all duration-100 ease-in'>Generate Suggestions</button>
+                            </div>
+                            <div className='text-white'>short code Suggestions here</div>
                         </div>
-                        */}
+
+                        {/* expiry action */}
                         <div className="flex flex-col gap-1.5">
                             <label className="text-[12px] font-medium dark:text-white/50">
                                 Expiry date <span className="dark:text-white/25">(optional)</span>
@@ -189,7 +193,7 @@ function CTAUrlbox() {
                             <input
                                 type="date"
                                 value={expiry}
-                                 autoComplete="date"
+                                autoComplete="date"
                                 onChange={(e) => setExpiry(e.target.value)}
                                 disabled={Boolean(result)}
                                 className="dark:bg-white/3 border text-black dark:border-white/8 border-black/20 rounded-[10px]
@@ -210,7 +214,7 @@ function CTAUrlbox() {
                                 <input
                                     type={`${showPassword ? "text" : "password"}`}
                                     value={userPassword}
-                                     autoComplete="new-password"
+                                    autoComplete="new-password"
                                     onChange={(e) => setUserPassword(e.target.value)}
                                     onKeyDown={(e) => e.key === "Enter" && handleShorten()}
                                     placeholder="Password for Url Protection"

@@ -216,7 +216,7 @@ export const resetPassword = async ({ email }) => {
         });
 
         if (!user) {
-            return;
+            throw new AppError("Invalid Email Id", 400);
         }
 
         const token = crypto.randomBytes(32).toString("hex");

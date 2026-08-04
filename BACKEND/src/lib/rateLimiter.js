@@ -11,7 +11,7 @@ export const forgetPassword = new RateLimiterRedis({
 export const emailpassword = new RateLimiterRedis({
     storeClient: limiterRedis,
     keyPrefix: "forgot-password-email",
-    points: 3,
+    points: 5,
     duration: 60 * 60,
 });
 
@@ -97,6 +97,13 @@ export const urlUpdate = new RateLimiterRedis({
     storeClient: limiterRedis,
     keyPrefix: "url_update",
     points: 25,
+    duration: 60 * 30,
+    blockDuration: 60 * 27,
+});
+export const aiSuggestions = new RateLimiterRedis({
+    storeClient: limiterRedis,
+    keyPrefix: "url_shortCode_suggestions",
+    points: 20,
     duration: 60 * 30,
     blockDuration: 60 * 27,
 });

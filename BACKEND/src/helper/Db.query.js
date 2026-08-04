@@ -417,3 +417,19 @@ export const mostClickedUrlsAnalytics = (userid, period) => {
     `;
 
 };
+
+export const removeTakenSuggestions = async (suggestions) => {
+    const existing = await client.url.findMany({
+        where: {
+            shortCode: {
+                in: suggestions,
+            }
+        },
+        select: {
+            shortCode: true,
+        }
+    });
+
+    const taken = new Set(existing.map(x => x.shortCode));
+    return suggestions.filter(slug => !taken.has(slug));
+}

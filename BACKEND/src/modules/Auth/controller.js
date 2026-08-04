@@ -142,6 +142,8 @@ export const forgetPassword = asyncHandler(async (req, res) => {
     const userInfo = await authService.resetPassword({
         email: req.body?.email.toLowerCase()
     });
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
     return res.status(200).json({ success: true, userInfo });
 });
 export const checkPassword = asyncHandler(async (req, res) => {
