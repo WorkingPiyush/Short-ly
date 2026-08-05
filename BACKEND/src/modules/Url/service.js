@@ -3,7 +3,7 @@ import XLSX from 'xlsx';
 import fs from 'fs';
 import slugify from 'slugify';
 import { client } from '../../../config/db.js';
-import { formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, formatUrl, formaturlInfo, foromtReferrer, generateQRCode, generateShortCode, generateSuggestions, generateValidSuggestions, gethostname, hashUrl, isReadable, isValidUrl, keyWordExtractor, normalizeUrl, passwordCompare, passwordHashing, randomColor, rankKeyWord, urlKey, urlStatus } from '../../helper/Url.helper.js';
+import { checkShortCode, formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, formatUrl, formaturlInfo, foromtReferrer, generateQRCode, generateShortCode, generateSuggestions, generateValidSuggestions, gethostname, getShortCodeAvailablity, hashUrl, isReadable, isValidUrl, keyWordExtractor, normalizeUrl, passwordCompare, passwordHashing, randomColor, rankKeyWord, urlKey, urlStatus } from '../../helper/Url.helper.js';
 import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics, referrerAnalytics, categories, getUrlStatus, countTempUrl, findUser, countRegUrl, removeTakenSuggestions } from "../../helper/Db.query.js";
 import { redisClient } from "../../../config/redisClient.js";
 import { AppError } from "../../utils/AppError.js";
@@ -15,7 +15,7 @@ import { generateAiSuggestions } from "../../service/ai.service.js";
 const MAX_TEMP_URLS = 3;
 const BATCH_SIZE = 10;
 
-export const urlShort = async ({ originalUrl, userId, tempId, singleUse, password, expiry }) => {
+export const urlShort = async ({ originalUrl, userId, tempId, singleUse, password, expiry, shortCode }) => {
     if (!originalUrl) {
         throw new AppError('Invalid Url', 400);
     }
@@ -23,6 +23,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
     if (!isValidUrl(originalUrl)) {
         throw new AppError('Invalid Url', 400);
     }
+    shortCode = await getShortCodeAvailablity(shortCode);
     let user;
     const normalizedUrl = normalizeUrl(originalUrl);
     const urlHash = hashUrl(normalizedUrl);
@@ -121,15 +122,7 @@ export const urlShort = async ({ originalUrl, userId, tempId, singleUse, passwor
             userId: existing.userId,
         }
     }
-    let shortCode;
-    let shortCodeExists = true;
 
-    while (shortCodeExists) {
-        shortCode = generateShortCode();
-        shortCodeExists = await client.url.findUnique({
-            where: { shortCode },
-        })
-    }
     let expirationDate = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
     if (expiry) {
         expirationDate = new Date(expiry);

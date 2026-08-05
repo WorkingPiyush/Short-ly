@@ -6,6 +6,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import slugify from "slugify";
 import { categories, totalClick } from "./Db.query.js";
+import logger from "../../config/logger.js";
+import { client } from "../../config/db.js";
 const AVOID_WORDS = [
     "the",
     "a",
@@ -244,6 +246,17 @@ export const tokenAccess = (id) => {
     );
 }
 
+export const checkShortCode = (text) => {
+    let words = text.toLowerCase().trim().split(/\s+/);
+    for (const word of words) {
+        if (AVOID_WORDS.includes(word) || RESERVED_WORDS.has(word)) {
+            logger.error("Invalid Short Code");
+            throw new Error("Invalid Short Code");
+        }
+    }
+    return words.join("-");
+}
+
 export const keyWordExtractor = (text) => {
     return slugify(text, {
         lower: true,
@@ -310,7 +323,7 @@ export const generateValidSuggestions = (words) => {
     return words.filter(w => {
         if (w.length < 4) return false;
         if (w.length > 25) return false;
-        if (RESERVED_WORDS.has(w)) return false;
+        if (RESERVED_WORDS.has(w) && AVOID_WORDS.includes(w)) return false;
         return true;
     })
 }
@@ -321,4 +334,33 @@ export const isReadable = (word) => {
 
 export const gethostname = (host) => {
     return host.replace("www.", "").split('.')[0];
+}
+
+export const getShortCodeAvailablity = async (customShortCode) => {
+    if (customShortCode) {
+        const normalized = checkShortCode(customShortCode);
+
+        const exists = await client.url.findUnique({
+            where: { shortCode: normalized },
+            select: { shortCode: true, }
+        });
+        if (exists) {
+            throw new AppError("Short code already exists", 409);
+        };
+        return normalized;
+    }
+
+    let generated;
+    const exists = await client.url.findUnique({
+        where: {
+            shortCode: generated
+        },
+        select: {
+            shortCode: true
+        }
+    });
+    if (!exists) {
+        return generated;
+    }
+
 }

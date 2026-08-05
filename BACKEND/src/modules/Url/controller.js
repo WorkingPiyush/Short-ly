@@ -10,6 +10,7 @@ import { success } from "zod";
 export const shortUrl = asyncHandler(async (req, res) => {
     const url = await urlService.urlShort({
         originalUrl: req.body.originalUrl,
+        shortCode: req.body.shortCode || null,
         singleUse: req.body?.singleUse || false,
         password: req.body?.password || null,
         expiry: req.body?.expiry || null,

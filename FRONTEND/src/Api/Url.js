@@ -5,6 +5,10 @@ export const createUrl = async (data) => {
     const res = await api.post("/url/short", data);
     return res.data.url;
 };
+export const getShortSuggestions = async (data) => {
+    const res = await api.post("/url/code/suggestion", data);
+    return res.data;
+};
 
 export const getUrl = async ({ filter, pageParam }) => {
     const res = await api.get("/url/", {
