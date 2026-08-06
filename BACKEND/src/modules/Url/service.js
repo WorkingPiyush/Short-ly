@@ -3,7 +3,7 @@ import XLSX from 'xlsx';
 import fs from 'fs';
 import slugify from 'slugify';
 import { client } from '../../../config/db.js';
-import { checkShortCode, formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, formatUrl, formaturlInfo, foromtReferrer, generateQRCode, generateShortCode, generateSuggestions, generateValidSuggestions, gethostname, getShortCodeAvailablity, hashUrl, isReadable, isValidUrl, keyWordExtractor, normalizeUrl, passwordCompare, passwordHashing, randomColor, rankKeyWord, urlKey, urlStatus } from '../../helper/Url.helper.js';
+import { formatBrowser, formatClicks, formatCountry, formatDevice, formatOperating, formatUrl, formaturlInfo, foromtReferrer, generateQRCode, generateShortCode, generateSuggestions, generateValidSuggestions, gethostname, getShortCodeAvailablity, hashUrl, isReadable, isValidUrl, keyWordExtractor, normalizeUrl, passwordCompare, passwordHashing, randomColor, rankKeyWord, urlKey, urlStatus } from '../../helper/Url.helper.js';
 import { analyticsUpdates, findFirstUrl, topBrowser, topOs, topDevice, topCountry, totalClick, urlCountUpdate, dailyClicks, topReferrer, totalClicksAnalytics, dailyClicksAnalytics, countriesAnalytics, browsersAnalytics, devicesAnalytics, osAnalytics, mostClickedUrlsAnalytics, referrerAnalytics, categories, getUrlStatus, countTempUrl, findUser, countRegUrl, removeTakenSuggestions } from "../../helper/Db.query.js";
 import { redisClient } from "../../../config/redisClient.js";
 import { AppError } from "../../utils/AppError.js";
@@ -191,7 +191,7 @@ export const shortCodeSuggestions = async ({ originalUrl }) => {
     }
 
     if (urlMetaData) {
-        console.log("got url metadata")
+        logger.info("METADATA RECEIVED")
         const titleKeyWords = keyWordExtractor(urlMetaData.title);
         const descriptionKeyWords = keyWordExtractor(urlMetaData.description);
         const hostname = gethostname(urlMetaData.hostname);
@@ -203,7 +203,7 @@ export const shortCodeSuggestions = async ({ originalUrl }) => {
         let aiSuggestions = [];
 
         if (localAvailableSuggestions.length < 5) {
-            console.log("we are going to take ai suggestion", localAvailableSuggestions.length)
+            logger.info("ASKING AI FOR THE SUGGESTIONS")
             try {
                 aiSuggestions = await generateAiSuggestions({
                     title: urlMetaData.title,

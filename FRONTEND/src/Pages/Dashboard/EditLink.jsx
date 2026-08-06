@@ -23,7 +23,7 @@ export default function EditLink() {
   const deleteMutation = UseDeleteUrl();
 
   const params = useParams();
-  const { data: short, isLoading } = useshortUrl(params.shortcode);
+  const { data: short, isLoading } = useshortUrl(params.shortCode);
   const [loading, setLoading] = useState(false);
   const [originalUrl, setOriginalUrl] = useState("");
   const [isActive, setIsActive] = useState(false);

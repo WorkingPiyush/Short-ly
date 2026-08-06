@@ -88,6 +88,7 @@ function CTAUrlbox() {
             year: "numeric",
         })
     }
+
     useEffect(() => {
         if (location.state?.focustInput) {
             inputRef.current.scrollIntoView({
@@ -105,7 +106,6 @@ function CTAUrlbox() {
     return (
         <div className="min-h-screen  dark:text-black text-black dark:bg-[#0a0a0a] px-4 py-10 flex items-start justify-center">
             <div className="w-full max-w-xl md:max-w-3xl">
-
                 {/* Header */}
                 <div className="mb-7">
                     <div className='inline-flex items-center gap-2 px-5 py-1 mb-2 rounded-full bg-linear-to-r from-emerald-500/10 to-emerald-400/5 border border-emerald-400/20 text-emerald-300 text-xs font-medium shadow-[0_0_20px_rgba(16,185,129,0,0.15)] md:text-sm'>
@@ -188,36 +188,36 @@ function CTAUrlbox() {
                         <Toggle checked={singleUse} onChange={setSingleUse} label="Single-use URL" />
                         <Toggle checked={passwordProtect} onChange={setPasswordProtect} label="Password protect" />
                     </div>
-                </div>
 
-                {passwordProtect && (
-                    <>
-                        <div className='relative flex justify-start items-center py-4'>
-                            <input
-                                type={`${showPassword ? "text" : "password"}`}
-                                value={userPassword}
-                                autoComplete="new-password"
-                                onChange={(e) => setUserPassword(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && handleShorten()}
-                                placeholder="Password for Url Protection"
-                                disabled={Boolean(result)}
-                                className="w-full max-w-sm dark:bg-white/4 bg-black/10 border dark:border-white/10 border-black/10 rounded-xl
+
+                    {passwordProtect && (
+                        <>
+                            <div className='relative flex justify-start items-center py-4'>
+                                <input
+                                    type={`${showPassword ? "text" : "password"}`}
+                                    value={userPassword}
+                                    autoComplete="new-password"
+                                    onChange={(e) => setUserPassword(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleShorten()}
+                                    placeholder="Password for Url Protection"
+                                    disabled={Boolean(result)}
+                                    className="w-full max-w-sm dark:bg-white/4 bg-black/10 border dark:border-white/10 border-black/10 rounded-xl
                    pl-10 py-3.5 text-sm dark:text-white dark:placeholder-white/22 placeholder-black
                   outline-none transition-all duration-200 disabled:opacity-50"/>
 
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute md:left-84 left-60 translate-y-0 h-12 w-12 rounded-xl border border-zinc-700
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute md:left-84 left-60 translate-y-0 h-12 w-12 rounded-xl border border-zinc-700
                            flex items-center justify-center text-zinc-800
                            dark:text-zinc-400 hover:text-black hover:dark:text-white cursor-pointer transition-all delay-150 ease-in"
-                            >
-                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                            </button>
-                        </div>
-                    </>
-                )
-                }
+                                >
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </button>
+                            </div>
+                        </>
+                    )}
+                </div>
                 {/* Result box */}
                 {result && (
                     <div className="relative mt-5 dark:bg-emerald-300/5 bg-zinc-100 border dark:border-emerald-300/25 border-black/22

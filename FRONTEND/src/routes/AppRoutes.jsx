@@ -67,8 +67,8 @@ export default function AppRoutes() {
                             <Route path="bulk" element={<BulkUrl />} />
                             <Route path="analytics" element={<Analytics />} />
                             <Route path="categories" element={<Category />} />
-                            <Route path=":shortCode/analytics" element={<LinkAnalytics />} />
                         </Route>
+                        <Route path=":shortCode/analytics" element={<LinkAnalytics />} />
                         <Route path="/profile" element={<ProfilePage />} />
                         <Route path="/profile/edit" element={<ProfileForm />} />
                     </Route>
@@ -82,7 +82,7 @@ export default function AppRoutes() {
                 <Route path="/:shortCode/scheduled" element={<ScheduledPage />} />
                 <Route path="/:shortCode/not-found" element={<LinkNotFoundPage />} />
                 <Route path="/:shortCode/single-used" element={<SingleUsedPage />} />
-                <Route path="*" element={<NotFoundPage />} />
+                {/* <Route path="*" element={<NotFoundPage />} /> */}
             </Routes>
         </Suspense>
     )
